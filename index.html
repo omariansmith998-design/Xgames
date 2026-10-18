@@ -3,23 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Lobby</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Xgames Lobby</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f0f12;
+            color: #f0f0f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        #lobby-container {
+            background: #18181c;
+            border: 1px solid #2a2a32;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 380px;
+        }
+
+        h1 {
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #6366f1;
+        }
+
+        #setup-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .divider {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin: 4px 0;
+        }
+
+        .join-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #2e2e38;
+            background: #111115;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #6366f1;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        .danger-btn {
+            background: #dc2626;
+            width: auto;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .danger-btn:hover {
+            background: #b91c1c;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a32;
+        }
+
+        #room-header h2 {
+            font-size: 16px;
+        }
+
+        #player-list-container {
+            margin-bottom: 15px;
+            background: #111115;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        #player-list-container h3 {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        #player-list {
+            list-style: none;
+            font-size: 14px;
+        }
+
+        #player-list li {
+            padding: 4px 0;
+            color: #10b981;
+        }
+
+        #chat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #messages {
+            background: #111115;
+            height: 180px;
+            border-radius: 6px;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .chat-message {
+            word-break: break-word;
+        }
+
+        .chat-message .author {
+            font-weight: bold;
+            color: #6366f1;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-group input {
+            flex: 1;
+        }
+
+        .chat-input-group button {
+            width: auto;
+            padding: 0 16px;
+        }
+    </style>
 </head>
 <body>
     <div id="lobby-container">
-        <h1>Game Lobby</h1>
-        <div id="room-selection">
-            <button id="create-room-btn">Create Room</button>
-            <input type="text" id="room-code-input" placeholder="Enter Room Code">
-            <button id="join-room-btn">Join Room</button>
+        <h1>Xgames Lobby</h1>
+        
+        <!-- Setup / Join Section -->
+        <div id="setup-section">
+            <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15">
+            <div class="button-group">
+                <button id="create-room-btn">Create Room</button>
+            </div>
+            <div class="divider">OR</div>
+            <div class="join-group">
+                <input type="text" id="room-code-input" placeholder="Enter Room Code" maxlength="8">
+                <button id="join-room-btn">Join Room</button>
+            </div>
         </div>
-        <div id="chat-box" class="hidden">
-            <div id="messages"></div>
-            <input type="text" id="message-input" placeholder="Type a message...">
-            <button id="send-message-btn">Send</button>
+
+        <!-- Active Room Section (Hidden initially) -->
+        <div id="room-section" class="hidden">
+            <div id="room-header">
+                <h2>Room: <span id="current-room-code">------</span></h2>
+                <button id="leave-room-btn" class="danger-btn">Leave</button>
+            </div>
+            
+            <div id="player-list-container">
+                <h3>Players</h3>
+                <ul id="player-list"></ul>
+            </div>
+
+            <div id="chat-box">
+                <div id="messages"></div>
+                <div class="chat-input-group">
+                    <input type="text" id="message-input" placeholder="Type a message...">
+                    <button id="send-message-btn">Send</button>
+                </div>
+            </div>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const usernameInput = document.getElementById("username-input");
+            const createRoomBtn = document.getElementById("create-room-btn");
+            const roomCodeInput = document.getElementById("room-code-input");
+            const joinRoomBtn = document.getElementById("join-room-btn");
+            
+            const setupSection = document.getElementById("setup-section");
+            const roomSection = document.getElementById("room-section");
+            const currentRoomCode = document.getElementById("current-room-code");
+            const leaveRoomBtn = document.getElementById("leave-room-btn");
+            const playerList = document.getElementById("player-list");
+            
+            const messageInput = document.getElementById("message-input");
+            const sendMessageBtn = document.getElementById("send-message-btn");
+            const messages = document.getElementById("messages");
+
+            let currentUser = "";
+            let activeRoom = null;
+
+            function generateRoomCode() {
+                return "XG-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+            }
+
+            function enterRoom(code) {
+                activeRoom = code;
+                currentRoomCode.textContent = code;
+                setupSection.classList.add("hidden");
+                roomSection.classList.remove("hidden");
+                
+                playerList.innerHTML = `<li>● ${currentUser} (You)</li>`;
+                addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
+            }
+
+            createRoomBtn.addEventListener("click", () => {
+                const name = usernameInput.value.trim();
+                if (!name) {
+                    alert("Please enter a nickname first.");
+                    return;
+                }
+                currentUser = name;
+                const newCode = generateRoomCode();
+                enterRoom(newCode);
+            });
+
+            joinRoomBtn.addEventListener("click", () => {
+                const name = usernameInput.value.trim();
+                const code = roomCodeInput.value.trim().toUpperCase();
+                
+                if (!name) {
+                    alert("Please enter a nickname first.");
+                    return;
+                }
+                if (!code) {
+                    alert("Please enter a valid room code.");
+                    return;
+                }
+                
+                currentUser = name;
+                enterRoom(code);
+            });
+
+            leaveRoomBtn.addEventListener("click", () => {
+                activeRoom = null;
+                messages.innerHTML = "";
+                playerList.innerHTML = "";
+                roomSection.classList.add("hidden");
+                setupSection.classList.remove("hidden");
+            });
+
+            function sendMessage() {
+                const text = messageInput.value.trim();
+                if (text && activeRoom) {
+                    const msgElement = document.createElement("div");
+                    msgElement.classList.add("chat-message");
+                    msgElement.innerHTML = `<span class="author">${currentUser}:</span> ${text}`;
+                    messages.appendChild(msgElement);
+                    messageInput.value = "";
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            }
+
+            sendMessageBtn.addEventListener("click", sendMessage);
+            messageInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") sendMessage();
+            });
+
+            function addSystemMessage(text) {
+                const msgElement = document.createElement("div");
+                msgElement.style.color = "#888";
+                msgElement.style.fontStyle = "italic";
+                msgElement.textContent = text;
+                messages.appendChild(msgElement);
+                messages.scrollTop = messages.scrollHeight;
+            }
+        });
+    </script>
 </body>
 </html>
