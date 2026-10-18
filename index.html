@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xgames Lobby</title>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -201,7 +203,7 @@
             </div>
         </div>
 
-        <!-- Active Room Section (Hidden initially) -->
+        <!-- Active Room Section -->
         <div id="room-section" class="hidden">
             <div id="room-header">
                 <h2>Room: <span id="current-room-code">------</span></h2>
@@ -224,6 +226,12 @@
     </div>
 
     <script>
+        // EMBEDDED SUPABASE CREDENTIALS
+        const SUPABASE_URL = "https://vlrscrzwqjkresgvcygh.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_8p4urYQqT6YqV3YNkS9qyA_z19pF0mH";
+
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         document.addEventListener("DOMContentLoaded", () => {
             const usernameInput = document.getElementById("username-input");
             const createRoomBtn = document.getElementById("create-room-btn");
@@ -242,22 +250,76 @@
 
             let currentUser = "";
             let activeRoom = null;
+            let roomChannel = null;
 
             function generateRoomCode() {
                 return "XG-" + Math.random().toString(36).substring(2, 6).toUpperCase();
             }
 
-            function enterRoom(code) {
+            async function createRoomInSupabase(code) {
+                const { error } = await supabaseClient
+                    .from('rooms')
+                    .insert([{ code: code }]);
+                if (error) {
+                    console.error("Error creating room:", error);
+                }
+                return !error;
+            }
+
+            async function checkRoomExists(code) {
+                const { data, error } = await supabaseClient
+                    .from('rooms')
+                    .select('code')
+                    .eq('code', code)
+                    .single();
+                return !!data;
+            }
+
+            function subscribeToRoom(code) {
+                roomChannel = supabaseClient.channel(`room_${code}`, {
+                    config: { presence: { key: currentUser } }
+                });
+
+                // Listen for live chat broadcast
+                roomChannel.on('broadcast', { event: 'message' }, (payload) => {
+                    displayMessage(payload.payload.user, payload.payload.text);
+                });
+
+                // Track presence (players in room)
+                roomChannel.on('presence', { event: 'sync' }, () => {
+                    const state = roomChannel.presenceState();
+                    updatePlayerList(state);
+                });
+
+                roomChannel.subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await roomChannel.track({ user: currentUser });
+                    }
+                });
+            }
+
+            function updatePlayerList(presenceState) {
+                playerList.innerHTML = "";
+                Object.keys(presenceState).forEach(key => {
+                    const user = presenceState[key][0]?.user;
+                    if (user) {
+                        const li = document.createElement("li");
+                        li.textContent = `● ${user} ${user === currentUser ? '(You)' : ''}`;
+                        playerList.appendChild(li);
+                    }
+                });
+            }
+
+            function enterRoomUI(code) {
                 activeRoom = code;
                 currentRoomCode.textContent = code;
                 setupSection.classList.add("hidden");
                 roomSection.classList.remove("hidden");
-                
-                playerList.innerHTML = `<li>● ${currentUser} (You)</li>`;
+                subscribeToRoom(code);
                 addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
             }
 
-            createRoomBtn.addEventListener("click", () => {
+            createRoomBtn.addEventListener("click", async () => {
                 const name = usernameInput.value.trim();
                 if (!name) {
                     alert("Please enter a nickname first.");
@@ -265,10 +327,16 @@
                 }
                 currentUser = name;
                 const newCode = generateRoomCode();
-                enterRoom(newCode);
+                
+                const created = await createRoomInSupabase(newCode);
+                if (created) {
+                    enterRoomUI(newCode);
+                } else {
+                    alert("Failed to create room. Please ensure the SQL table is created in Supabase.");
+                }
             });
 
-            joinRoomBtn.addEventListener("click", () => {
+            joinRoomBtn.addEventListener("click", async () => {
                 const name = usernameInput.value.trim();
                 const code = roomCodeInput.value.trim().toUpperCase();
                 
@@ -280,12 +348,21 @@
                     alert("Please enter a valid room code.");
                     return;
                 }
+
+                const exists = await checkRoomExists(code);
+                if (!exists) {
+                    alert("Room does not exist! Please check the code.");
+                    return;
+                }
                 
                 currentUser = name;
-                enterRoom(code);
+                enterRoomUI(code);
             });
 
-            leaveRoomBtn.addEventListener("click", () => {
+            leaveRoomBtn.addEventListener("click", async () => {
+                if (roomChannel) {
+                    await roomChannel.unsubscribe();
+                }
                 activeRoom = null;
                 messages.innerHTML = "";
                 playerList.innerHTML = "";
@@ -293,16 +370,27 @@
                 setupSection.classList.remove("hidden");
             });
 
-            function sendMessage() {
+            async function sendMessage() {
                 const text = messageInput.value.trim();
-                if (text && activeRoom) {
-                    const msgElement = document.createElement("div");
-                    msgElement.classList.add("chat-message");
-                    msgElement.innerHTML = `<span class="author">${currentUser}:</span> ${text}`;
-                    messages.appendChild(msgElement);
+                if (text && activeRoom && roomChannel) {
+                    // Send to other players via Supabase broadcast
+                    await roomChannel.send({
+                        type: 'broadcast',
+                        event: 'message',
+                        payload: { user: currentUser, text: text }
+                    });
+                    
+                    displayMessage(currentUser, text);
                     messageInput.value = "";
-                    messages.scrollTop = messages.scrollHeight;
                 }
+            }
+
+            function displayMessage(author, text) {
+                const msgElement = document.createElement("div");
+                msgElement.classList.add("chat-message");
+                msgElement.innerHTML = `<span class="author">${author}:</span> ${text}`;
+                messages.appendChild(msgElement);
+                messages.scrollTop = messages.scrollHeight;
             }
 
             sendMessageBtn.addEventListener("click", sendMessage);
