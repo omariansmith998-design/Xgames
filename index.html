@@ -71,9 +71,10 @@ canvas#board{display:block;width:100%;height:auto}
       <div class="lbl">Room code</div>
       <div class="codeBig" id="codeBig">XG-XXXXX</div>
       <div class="two" style="margin:8px 0">
-        <button class="blue" id="copyBtn">Copy code</button>
-        <button id="leaveBtn">Leave room</button>
+        <button class="blue" id="shareBtn">🔗 Share / Invite</button>
+        <button class="purple" id="copyBtn">Copy code</button>
       </div>
+      <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave room</button>
       <div class="row between" style="margin-bottom:4px"><b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b><button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add bot</button></div>
       <div id="plist"></div>
       <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
@@ -87,7 +88,7 @@ canvas#board{display:block;width:100%;height:auto}
         <div id="micDot" class="mic-dot"></div>
         <span>🎙️ Yard Voice</span>
       </div>
-      <button id="micBtn" class="green" style="padding:4px 10px;font-size:11px">Unmute Mic</button>
+      <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px">Enable Mic</button>
     </div>
     <div class="score">
       <div>N/S<span class="pill" id="sNS">0</span></div>
@@ -174,7 +175,7 @@ function listenToRoom() {
     }).subscribe();
 }
 
-/* ---------- LOBBY & VOICE ---------- */
+/* ---------- LOBBY & SHARE ---------- */
 $('createBtn').onclick = async () => {
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   isHost = true; mySeatPos = 'S';
@@ -182,12 +183,16 @@ $('createBtn').onclick = async () => {
   lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (You)', isBot: false, pos: 'S' }];
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
   renderLobby(); toast('Room ' + roomCode + ' created!');
-  listenToRoom(); await syncRoomState(); initVoice();
+  listenToRoom(); await syncRoomState();
 };
 
 $('joinBtn').onclick = async () => {
   const code = $('codeIn').value.trim().toUpperCase();
   if (!code) return toast('Enter a room code');
+  joinRoomByCode(code);
+};
+
+async function joinRoomByCode(code) {
   const { data } = await sb.from('game_rooms').select('state').eq('room_code', code).single();
   if (!data) return toast('Room not found');
   roomCode = code; isHost = false;
@@ -200,7 +205,32 @@ $('joinBtn').onclick = async () => {
   lobby = currentLobby;
   lobby.push({ name: ($('nameIn').value.trim() || 'Player') + ' (You)', isBot: false, pos: freePos });
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby(); listenToRoom(); await syncRoomState(); initVoice();
+  renderLobby(); listenToRoom(); await syncRoomState();
+}
+
+$('copyBtn').onclick = () => {
+  if (navigator.clipboard) navigator.clipboard.writeText(roomCode).then(() => toast('Code copied!'));
+  else toast('Code: ' + roomCode);
+};
+
+$('shareBtn').onclick = () => {
+  const joinUrl = window.location.origin + window.location.pathname + '?room=' + roomCode;
+  if (navigator.share) {
+    navigator.share({
+      title: 'Xgames Yard Dominoes',
+      text: 'Join my dominoes table! Room Code: ' + roomCode,
+      url: joinUrl
+    }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(joinUrl).then(() => toast('Invite link copied!'));
+  } else {
+    toast(joinUrl);
+  }
+};
+
+$('leaveBtn').onclick = () => {
+  lobby = []; roomCode = ''; $('roomBadge').textContent = 'No room yet';
+  $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
 };
 
 $('botBtn').onclick = () => {
@@ -233,22 +263,32 @@ $('startBtn').onclick = () => {
   newMatch();
 };
 
-async function initVoice() {
-  try {
-    if (!window.LivekitClient) return;
-    livekitRoom = new LivekitClient.Room();
-    await livekitRoom.connect(LIVEKIT_URL, 'demo-token');
-  } catch (e) { console.log('Voice preview mode'); }
-}
-
-$('micBtn').onclick = async () => {
+/* ---------- INSTANT MIC TOGGLE ---------- */
+$('micBtn').onclick = () => {
+  if (AC.state === 'suspended') AC.resume();
   micActive = !micActive;
-  if (livekitRoom && livekitRoom.localParticipant) {
-    try {
-      await livekitRoom.localParticipant.setMicrophoneEnabled(micActive);
-    } catch (e) { console.log('Mic hardware access offline'); }
-  }
+  
+  // Instant UI update
   updateMicUI(micActive);
+
+  // Background async LiveKit toggle
+  setTimeout(async () => {
+    try {
+      if (micActive) {
+        if (window.LivekitClient && !livekitRoom) {
+          livekitRoom = new LivekitClient.Room();
+          await livekitRoom.connect(LIVEKIT_URL, 'demo-token');
+        }
+        if (livekitRoom && livekitRoom.localParticipant) {
+          await livekitRoom.localParticipant.setMicrophoneEnabled(true);
+        }
+      } else {
+        if (livekitRoom && livekitRoom.localParticipant) {
+          await livekitRoom.localParticipant.setMicrophoneEnabled(false);
+        }
+      }
+    } catch (e) { console.log('Voice background sync'); }
+  }, 10);
 };
 
 function updateMicUI(active) {
@@ -259,12 +299,22 @@ function updateMicUI(active) {
     dot.classList.add('active');
     toast('Microphone ON');
   } else {
-    btn.textContent = 'Unmute Mic';
-    btn.className = 'green';
+    btn.textContent = 'Enable Mic';
+    btn.className = 'blue';
     dot.classList.remove('active');
-    toast('Microphone MUTED');
+    toast('Microphone OFF');
   }
 }
+
+/* Auto-check URL query for direct room links */
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  const roomParam = params.get('room');
+  if (roomParam) {
+    $('codeIn').value = roomParam;
+    joinRoomByCode(roomParam.toUpperCase());
+  }
+});
 
 /* ---------- GAME CORE ---------- */
 function fullSet() {
