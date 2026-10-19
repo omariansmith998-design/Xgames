@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xgames Lobby & Yard Dominoes</title>
+    <title>Xgames Arcade & Yard Dominoes</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -20,87 +19,105 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
-            padding: 6px;
+            padding: 8px;
+            user-select: none;
         }
 
-        #diagnostic-bar {
+        /* Top Xgames Universal Navigation Bar */
+        #xgames-nav {
             width: 100%;
-            max-width: 440px;
-            background: #12131a;
-            border: 1px solid #222530;
-            padding: 6px 12px;
-            border-radius: 8px;
-            margin-bottom: 6px;
+            max-width: 460px;
+            background: #12131c;
+            border: 1px solid #232736;
+            border-radius: 10px;
+            padding: 8px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
-        .status-indicator {
+        .xgames-logo {
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #6366f1;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #eab308;
+        .xgames-logo span {
+            color: #f43f5e;
         }
 
-        .dot.online { background: #10b981; }
-        .dot.offline { background: #ef4444; }
-
-        #retry-btn {
-            background: #374151;
+        .hub-btn {
+            background: #2563eb;
             color: #fff;
             border: none;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
             cursor: pointer;
-            font-size: 10px;
+            transition: background 0.2s;
         }
 
-        #lobby-container {
+        .hub-btn:hover { background: #1d4ed8; }
+
+        #app-container {
             background: #14161f;
             border: 1px solid #232736;
             padding: 12px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
         }
 
-        h1 {
-            font-size: 18px;
+        /* Arcade Game Selector Cards */
+        .arcade-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .game-card {
+            background: #1e2230;
+            border: 1px solid #2e3448;
+            border-radius: 8px;
+            padding: 12px;
             text-align: center;
-            margin-bottom: 8px;
-            color: #6366f1;
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
         }
 
-        #setup-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .game-card:hover {
+            transform: translateY(-2px);
+            border-color: #6366f1;
         }
 
-        .divider {
-            text-align: center;
-            font-size: 11px;
-            color: #666;
-            margin: 2px 0;
+        .game-card.active {
+            border-color: #10b981;
+            background: #132720;
         }
 
-        .join-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .game-card h3 {
+            font-size: 13px;
+            color: #fff;
+            margin-bottom: 4px;
         }
 
+        .game-card p {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* Buttons & Forms */
         input {
             width: 100%;
             padding: 10px;
@@ -110,6 +127,7 @@
             border-radius: 6px;
             font-size: 14px;
             outline: none;
+            margin-bottom: 8px;
         }
 
         input:focus { border-color: #6366f1; }
@@ -128,120 +146,42 @@
         }
 
         button:hover { background: #4338ca; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-
         .secondary-btn { background: #2d3345; }
         .secondary-btn:hover { background: #3b4259; }
         .success-btn { background: #059669; }
         .success-btn:hover { background: #047857; }
 
-        .danger-btn {
-            background: #dc2626;
-            width: auto;
-            padding: 4px 8px;
-            font-size: 11px;
-        }
-
         .hidden { display: none !important; }
 
-        #room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid #232736;
-        }
-
-        #room-header h2 { font-size: 13px; }
-
-        .badge {
-            font-size: 9px;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-left: 3px;
-        }
-
-        .badge-host { background: #f59e0b; color: #000; }
-        .badge-ready { background: #10b981; color: #fff; }
-        .badge-notready { background: #6b7280; color: #fff; }
-        .badge-bot { background: #8b5cf6; color: #fff; }
-
-        /* Voice Controls */
-        #voice-controls {
+        /* Six Love Scoreboard Header */
+        #match-scoreboard {
             background: #0d0e14;
             border: 1px solid #232736;
-            padding: 6px 8px;
-            border-radius: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
             margin-bottom: 6px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .voice-status {
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .voice-btn {
-            width: auto;
-            padding: 3px 8px;
-            font-size: 10px;
-            background: #059669;
-        }
-
-        .voice-btn.muted { background: #dc2626; }
-
-        #player-list-container {
-            margin-bottom: 6px;
-            background: #0d0e14;
-            padding: 6px;
-            border-radius: 6px;
-        }
-
-        .player-header {
-            display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: bold;
         }
 
-        #player-list-container h3 {
-            font-size: 10px;
-            color: #888;
-            text-transform: uppercase;
-        }
-
-        #player-list { list-style: none; font-size: 11px; }
-
-        #player-list li {
-            padding: 3px 0;
+        .team-score {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #1a1d29;
+            gap: 6px;
         }
 
-        #player-list li:last-child { border-bottom: none; }
-
-        .kick-btn {
-            background: #991b1b;
-            color: #fff;
-            padding: 1px 4px;
-            font-size: 9px;
-            border-radius: 3px;
-            cursor: pointer;
-            width: auto;
-            margin-left: 3px;
+        .score-pill {
+            background: #312e81;
+            color: #c7d2fe;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 13px;
         }
 
-        /* ---------------------------------------------------- */
-        /* SQUARE DOMINO TABLE BOARD WITH 2D CORNER ENGINE       */
-        /* ---------------------------------------------------- */
+        /* 4-SIDE SQUARE DOMINO TABLE */
         #dominoes-game-area {
             background: radial-gradient(circle, #2b170c 0%, #1a0d06 70%, #0c0502 100%);
             border: 6px solid #4a2813;
@@ -266,7 +206,6 @@
             border: 1px solid rgba(253, 224, 71, 0.2);
         }
 
-        /* 4-Side Seating Grid */
         .square-table-layout {
             display: grid;
             grid-template-columns: 75px 1fr 75px;
@@ -274,7 +213,7 @@
             gap: 4px;
             align-items: center;
             justify-items: center;
-            min-height: 280px;
+            min-height: 270px;
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
             padding: 6px;
@@ -282,12 +221,12 @@
         }
 
         .seat-top { grid-column: 2; grid-row: 1; }
-        .seat-left { grid-column: 1; grid-row: 2; }
-        .seat-right { grid-column: 3; grid-row: 2; }
+        .seat-left { grid-column: 1; grid-row: 2; z-index: 10; }
+        .seat-right { grid-column: 3; grid-row: 2; z-index: 10; }
         .seat-bottom { grid-column: 2; grid-row: 3; }
 
         .player-seat {
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 3px 6px;
             border-radius: 5px;
@@ -308,12 +247,11 @@
             color: #fde047;
         }
 
-        /* Absolute 2D Canvas Engine Container */
         #table-board-center {
             grid-column: 1 / span 3;
             grid-row: 2;
             width: 100%;
-            height: 180px;
+            height: 200px;
             position: relative;
             overflow: hidden;
         }
@@ -330,19 +268,18 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            user-select: none;
             transition: all 0.2s ease-in-out;
         }
 
         .real-tile.horiz {
-            width: 30px;
-            height: 16px;
+            width: 28px;
+            height: 15px;
             flex-direction: row;
         }
 
         .real-tile.vert {
-            width: 16px;
-            height: 30px;
+            width: 15px;
+            height: 28px;
             flex-direction: column;
             background: #fef08a;
             border-color: #ca8a04;
@@ -361,7 +298,7 @@
         .tile-divider-h { width: 1px; height: 70%; background: #94a3b8; }
         .tile-divider-v { height: 1px; width: 70%; background: #ca8a04; }
 
-        /* Player Hand & Controls */
+        /* Hand & Controls */
         .my-hand-section {
             background: rgba(0, 0, 0, 0.5);
             padding: 6px;
@@ -394,7 +331,6 @@
             font-weight: bold;
             font-size: 11px;
             cursor: pointer;
-            user-select: none;
             display: flex;
             gap: 2px;
             align-items: center;
@@ -417,27 +353,6 @@
             border-radius: 4px;
         }
 
-        #chat-box { display: flex; flex-direction: column; gap: 4px; }
-        #messages {
-            background: #0d0e14;
-            height: 70px;
-            border-radius: 6px;
-            padding: 4px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            font-size: 11px;
-        }
-
-        .chat-message { word-break: break-word; }
-        .chat-message .author { font-weight: bold; color: #6366f1; }
-        .system-message { color: #888; font-style: italic; word-break: break-word; }
-
-        .chat-input-group { display: flex; gap: 4px; }
-        .chat-input-group input { flex: 1; padding: 5px; font-size: 11px; }
-        .chat-input-group button { width: auto; padding: 0 8px; font-size: 10px; }
-
         #toast-container {
             position: fixed;
             bottom: 10px;
@@ -459,86 +374,72 @@
 </head>
 <body>
 
-    <div id="diagnostic-bar">
-        <div class="status-indicator">
-            <div id="status-dot" class="dot"></div>
-            <span id="status-text">Connecting...</span>
-        </div>
-        <button id="retry-btn" class="hidden">Retry</button>
+    <!-- Universal Xgames Header Bar -->
+    <div id="xgames-nav">
+        <div class="xgames-logo">🎮 XGAMES <span>ARCADE</span></div>
+        <button id="return-hub-btn" class="hub-btn">Main Arcade Hub</button>
     </div>
 
-    <div id="lobby-container">
-        <h1>Xgames Lobby & Table</h1>
-
-        <div id="setup-section">
-            <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15">
-            <div class="button-group">
-                <button id="create-room-btn" disabled>Create Room</button>
+    <div id="app-container">
+        <!-- ARCADE HUB VIEW -->
+        <div id="hub-view">
+            <h2 style="font-size:16px; margin-bottom:6px; color:#c7d2fe;">Select an Xgames Title</h2>
+            <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15" value="Dwayne">
+            
+            <div class="arcade-grid">
+                <div class="game-card active" id="select-dominoes-card">
+                    <h3>🀏 Yard Dominoes</h3>
+                    <p>4-Player Six Love Block Style</p>
+                </div>
+                <div class="game-card" style="opacity: 0.5; cursor: not-allowed;">
+                    <h3>🎯 More Games</h3>
+                    <p>Coming Soon to Xgames</p>
+                </div>
             </div>
-            <div class="divider">OR</div>
-            <div class="join-group">
-                <input type="text" id="room-code-input" placeholder="Enter Room Code" maxlength="12">
-                <button id="join-room-btn" disabled>Join Room</button>
+
+            <div style="margin-top: 14px;">
+                <button id="launch-game-btn" class="success-btn">Launch Yard Dominoes</button>
             </div>
         </div>
 
-        <div id="room-section" class="hidden">
-            <div id="room-header">
-                <h2>Room: <span id="current-room-code">------</span></h2>
-                <button id="leave-room-btn" class="danger-btn">Leave</button>
-            </div>
-
-            <div id="lobby-ui-group">
-                <div id="host-panel" class="hidden" style="margin-bottom: 6px; display: flex; gap: 6px;">
-                    <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">+ Add Bot</button>
-                    <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">Lock Room</button>
+        <!-- DOMINOES GAME MODULE VIEW -->
+        <div id="dominoes-view" class="hidden">
+            <div id="match-scoreboard">
+                <div class="team-score">
+                    <span>TEAM N/S:</span>
+                    <span id="score-ns" class="score-pill">0</span>
                 </div>
-
-                <div id="voice-controls">
-                    <div class="voice-status">
-                        <span id="voice-dot" class="dot"></span>
-                        <span id="voice-label">Voice Disconnected</span>
-                    </div>
-                    <button id="mic-toggle-btn" class="voice-btn" disabled>Mute Mic</button>
-                </div>
-
-                <div id="player-list-container">
-                    <div class="player-header">
-                        <h3>Lobby Players</h3>
-                        <span id="player-count" style="font-size: 10px; color: #888;">0</span>
-                    </div>
-                    <ul id="player-list"></ul>
-                </div>
-
-                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                    <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:11px;">Toggle Ready</button>
-                    <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:6px; font-size:11px;">Start Dominoes</button>
+                <div style="font-size: 10px; color: #888;" id="hand-count-lbl">HAND 1 (Pose [6-6])</div>
+                <div class="team-score">
+                    <span>TEAM E/W:</span>
+                    <span id="score-we" class="score-pill">0</span>
                 </div>
             </div>
 
-            <!-- SQUARE 4-SIDE DOMINO TABLE WITH 2D CANVAS -->
-            <div id="dominoes-game-area" class="hidden">
+            <div id="dominoes-game-area">
                 <div class="table-top-bar">
-                    <span>🀏 YARD DOMINOES BOARD</span>
+                    <span>🀏 JAMAICAN SIX-LOVE BOARD</span>
                     <span id="turn-indicator">Turn: Waiting...</span>
                 </div>
 
                 <div class="square-table-layout">
-                    <div id="seat-top" class="player-seat seat-top">Top</div>
-                    <div id="seat-left" class="player-seat seat-left">Left</div>
+                    <div id="seat-top" class="player-seat seat-top">North (Partner)</div>
+                    <div id="seat-left" class="player-seat seat-left">West</div>
 
                     <div id="table-board-center">
-                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:80px;">Table empty. Slam the first tile!</div>
+                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:85px;">
+                            Pose [6-6] to start Hand 1!
+                        </div>
                     </div>
 
-                    <div id="seat-right" class="player-seat seat-right">Right</div>
-                    <div id="seat-bottom" class="player-seat seat-bottom">You</div>
+                    <div id="seat-right" class="player-seat seat-right">East</div>
+                    <div id="seat-bottom" class="player-seat seat-bottom">South (You)</div>
                 </div>
 
-                <div class="game-log" id="game-log">Match starting...</div>
+                <div class="game-log" id="game-log">Match started. Counter-clockwise play.</div>
 
                 <div class="my-hand-section">
-                    <div class="hand-label">YOUR HAND</div>
+                    <div class="hand-label">YOUR HAND (SOUTH)</div>
                     <div id="hand-container" class="hand-container"></div>
 
                     <div id="end-choice-bar" class="end-choice-bar hidden">
@@ -546,15 +447,7 @@
                         <button id="play-right-btn" class="end-btn">Slam Right (<span id="r-val">-</span>)</button>
                     </div>
 
-                    <button id="pass-btn" class="secondary-btn" style="padding:4px; font-size:10px;">Pass Turn</button>
-                </div>
-            </div>
-
-            <div id="chat-box">
-                <div id="messages"></div>
-                <div class="chat-input-group">
-                    <input type="text" id="message-input" placeholder="Type a message..." maxlength="300">
-                    <button id="send-message-btn">Send</button>
+                    <button id="pass-btn" class="secondary-btn hidden" style="padding:4px; font-size:10px;">Pass Turn</button>
                 </div>
             </div>
         </div>
@@ -563,38 +456,6 @@
     <div id="toast-container"></div>
 
     <script>
-        const SUPABASE_URL = "https://vlrscrzwqjkresgvcygh.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_8p4urYQqT6YqV3YNkS9qyA_z19pF0mH";
-
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        const CODE_LENGTH = 6;
-        const CODE_PREFIX = "XG-";
-        const MAX_MESSAGE_LENGTH = 300;
-        const DISCONNECT_GRACE_PERIOD_MS = 45000;
-
-        let authUserId = null;
-        let isHost = false;
-        let isReady = false;
-        let isLocked = false;
-        let activeRoom = null;
-        let roomChannel = null;
-        let currentUser = "";
-        let disconnectTimer = null;
-        let botCount = 0;
-        let bots = [];
-
-        let gameActive = false;
-        let myHand = [];
-        let leftEnd = null;
-        let rightEnd = null;
-        let playedTilesChain = [];
-        let selectedTileIndex = null;
-        let currentTurnPlayerId = null;
-        let playerOrder = [];
-        let playerHandsCount = {};
-
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSlamSound() {
@@ -623,7 +484,7 @@
                     const gain = audioCtx.createGain();
                     osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
                     gain.gain.setValueAtTime(0.3, audioCtx.currentTime + idx * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.25);
+                    gain.gain.exponentialRampToValueAtTime(0.01, idx * 0.1 + 0.25);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(audioCtx.currentTime + idx * 0.1);
@@ -632,36 +493,38 @@
             } catch (e) { console.error(e); }
         }
 
-        const statusDot = document.getElementById("status-dot");
-        const statusText = document.getElementById("status-text");
-        const retryBtn = document.getElementById("retry-btn");
-        const usernameInput = document.getElementById("username-input");
-        const createRoomBtn = document.getElementById("create-room-btn");
-        const roomCodeInput = document.getElementById("room-code-input");
-        const joinRoomBtn = document.getElementById("join-room-btn");
-        const setupSection = document.getElementById("setup-section");
-        const roomSection = document.getElementById("room-section");
-        const currentRoomCode = document.getElementById("current-room-code");
-        const leaveRoomBtn = document.getElementById("leave-room-btn");
-        const playerList = document.getElementById("player-list");
-        const playerCount = document.getElementById("player-count");
-        const hostPanel = document.getElementById("host-panel");
-        const addBotBtn = document.getElementById("add-bot-btn");
-        const lockRoomBtn = document.getElementById("lock-room-btn");
-        const readyToggleBtn = document.getElementById("ready-toggle-btn");
-        const startGameBtn = document.getElementById("start-game-btn");
-        const messageInput = document.getElementById("message-input");
-        const sendMessageBtn = document.getElementById("send-message-btn");
-        const messages = document.getElementById("messages");
-        const voiceDot = document.getElementById("voice-dot");
-        const voiceLabel = document.getElementById("voice-label");
-        const micToggleBtn = document.getElementById("mic-toggle-btn");
-        const lobbyUiGroup = document.getElementById("lobby-ui-group");
+        const POSITIONS = ['N', 'W', 'S', 'E'];
+        const TURN_NEXT = { 'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N' };
 
-        const dominoesGameArea = document.getElementById("dominoes-game-area");
+        let handNumber = 1;
+        let scoreNS = 0;
+        let scoreWE = 0;
+        let lastWinnerPos = null;
+
+        let players = [];
+        let currentTurn = 'S';
+        let leftEnd = null;
+        let rightEnd = null;
+        let centerTile = null;
+        let leftBranchTiles = [];
+        let rightBranchTiles = [];
+        let consecutivePasses = 0;
+        let selectedTileIndex = null;
+        let handActive = false;
+
+        // Views & Controls
+        const hubView = document.getElementById("hub-view");
+        const dominoesView = document.getElementById("dominoes-view");
+        const launchGameBtn = document.getElementById("launch-game-btn");
+        const returnHubBtn = document.getElementById("return-hub-btn");
+        const usernameInput = document.getElementById("username-input");
+
+        const scoreNsLbl = document.getElementById("score-ns");
+        const scoreWeLbl = document.getElementById("score-we");
+        const handCountLbl = document.getElementById("hand-count-lbl");
+
         const turnIndicator = document.getElementById("turn-indicator");
         const tableBoardCenter = document.getElementById("table-board-center");
-        const emptyTableMsg = document.getElementById("empty-table-msg");
         const gameLog = document.getElementById("game-log");
         const handContainer = document.getElementById("hand-container");
         const endChoiceBar = document.getElementById("end-choice-bar");
@@ -685,773 +548,403 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        function updateStatus(state, message) {
-            statusDot.className = "dot " + state;
-            statusText.textContent = message;
-            if (state === "offline") retryBtn.classList.remove("hidden");
-            else retryBtn.classList.add("hidden");
-        }
+        function logGame(msg) { gameLog.textContent = msg; }
 
-        async function initAuth() {
-            updateStatus("connecting", "Signing in...");
-            try {
-                const { data: sessionData } = await supabaseClient.auth.getSession();
-                if (sessionData && sessionData.session) {
-                    authUserId = sessionData.session.user.id;
-                } else {
-                    const { data: signInData, error: signInError } = await supabaseClient.auth.signInAnonymously();
-                    if (signInError) throw signInError;
-                    authUserId = signInData.user.id;
-                }
-                updateStatus("online", "Connected & Authenticated");
-                createRoomBtn.disabled = false;
-                joinRoomBtn.disabled = false;
-            } catch (err) {
-                console.error("Auth Error:", err);
-                updateStatus("offline", "Auth Failed");
-                showToast("Authentication error.");
-            }
-        }
-
-        retryBtn.addEventListener("click", initAuth);
-
-        function setBusy(busy) {
-            createRoomBtn.disabled = busy;
-            joinRoomBtn.disabled = busy;
-        }
-
-        function generateRoomCode() {
-            const bytes = new Uint8Array(CODE_LENGTH);
-            crypto.getRandomValues(bytes);
-            let code = "";
-            for (const b of bytes) code += CODE_CHARS[b % CODE_CHARS.length];
-            return CODE_PREFIX + code;
-        }
-
-        function normalizeCode(raw) {
-            let code = raw.trim().toUpperCase().replace(/\s+/g, "");
-            if (code && !code.startsWith(CODE_PREFIX)) code = CODE_PREFIX + code;
-            return code;
-        }
-
-        async function createRoomInSupabase() {
-            for (let attempt = 0; attempt < 5; attempt++) {
-                const code = generateRoomCode();
-                const { error } = await supabaseClient
-                    .from('rooms')
-                    .insert([{ code: code, host_id: authUserId, is_locked: false }]);
-
-                if (!error) return code;
-            }
-            return null;
-        }
-
-        async function getRoomDetails(code) {
-            const { data, error } = await supabaseClient
-                .from('rooms')
-                .select('*')
-                .eq('code', code)
-                .maybeSingle();
-
-            if (error) return null;
-            return data;
-        }
-
-        function subscribeToRoom(code) {
-            roomChannel = supabaseClient.channel(`room_${code}`, {
-                config: { presence: { key: authUserId } }
-            });
-
-            roomChannel.on('broadcast', { event: 'message' }, (payload) => {
-                const data = payload && payload.payload;
-                if (!data) return;
-                displayMessage(String(data.user || "Player").slice(0, 15), String(data.text || "").slice(0, MAX_MESSAGE_LENGTH));
-            });
-
-            roomChannel.on('broadcast', { event: 'kick' }, (payload) => {
-                if (payload.payload && payload.payload.targetId === authUserId) {
-                    showToast("You were kicked by the host.");
-                    leaveRoom();
-                }
-            });
-
-            roomChannel.on('broadcast', { event: 'game_start' }, (payload) => {
-                startDominoesClient(payload.payload);
-            });
-
-            roomChannel.on('broadcast', { event: 'play_tile' }, (payload) => {
-                handleTilePlayed(payload.payload);
-            });
-
-            roomChannel.on('presence', { event: 'sync' }, () => {
-                if (disconnectTimer) {
-                    clearTimeout(disconnectTimer);
-                    disconnectTimer = null;
-                }
-                updatePlayerList(roomChannel.presenceState());
-            });
-
-            roomChannel.subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    updateStatus("online", `In Room: ${code}`);
-                    await trackPresence();
-                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                    updateStatus("offline", "Connection Interrupted");
-                    disconnectTimer = setTimeout(() => leaveRoom(), DISCONNECT_GRACE_PERIOD_MS);
-                }
-            });
-        }
-
-        async function trackPresence() {
-            if (!roomChannel) return;
-            await roomChannel.track({
-                user: currentUser,
-                id: authUserId,
-                isHost: isHost,
-                isReady: isReady,
-                isBot: false
-            });
-        }
-
-        function updatePlayerList(presenceState) {
-            playerList.innerHTML = "";
-            let count = 0;
-            playerOrder = [];
-
-            Object.keys(presenceState).forEach(key => {
-                const playerData = presenceState[key][0];
-                if (playerData && playerData.user) {
-                    count++;
-                    playerOrder.push({ id: key, name: playerData.user, isBot: playerData.isBot });
-
-                    const li = document.createElement("li");
-                    const isMe = key === authUserId;
-
-                    const nameSpan = document.createElement("span");
-                    nameSpan.textContent = playerData.user + (isMe ? " (You)" : "");
-
-                    const badgesSpan = document.createElement("span");
-
-                    if (playerData.isBot) {
-                        const bBadge = document.createElement("span");
-                        bBadge.className = "badge badge-bot";
-                        bBadge.textContent = "BOT";
-                        badgesSpan.appendChild(bBadge);
-                    } else {
-                        if (playerData.isHost) {
-                            const hBadge = document.createElement("span");
-                            hBadge.className = "badge badge-host";
-                            hBadge.textContent = "HOST";
-                            badgesSpan.appendChild(hBadge);
-                        }
-
-                        const rBadge = document.createElement("span");
-                        rBadge.className = "badge " + (playerData.isReady ? "badge-ready" : "badge-notready");
-                        rBadge.textContent = playerData.isReady ? "READY" : "NOT READY";
-                        badgesSpan.appendChild(rBadge);
-                    }
-
-                    if (isHost && !isMe) {
-                        const kBtn = document.createElement("button");
-                        kBtn.className = "kick-btn";
-                        kBtn.textContent = playerData.isBot ? "Remove" : "Kick";
-                        kBtn.onclick = () => removePlayerOrBot(key, playerData.isBot);
-                        badgesSpan.appendChild(kBtn);
-                    }
-
-                    li.appendChild(nameSpan);
-                    li.appendChild(badgesSpan);
-                    playerList.appendChild(li);
-                }
-            });
-
-            bots.forEach(bot => {
-                count++;
-                playerOrder.push({ id: bot.id, name: bot.name, isBot: true });
-                const li = document.createElement("li");
-                const nameSpan = document.createElement("span");
-                nameSpan.textContent = bot.name;
-
-                const badgesSpan = document.createElement("span");
-                const bBadge = document.createElement("span");
-                bBadge.className = "badge badge-bot";
-                bBadge.textContent = "BOT";
-                badgesSpan.appendChild(bBadge);
-
-                if (isHost) {
-                    const kBtn = document.createElement("button");
-                    kBtn.className = "kick-btn";
-                    kBtn.textContent = "Remove";
-                    kBtn.onclick = () => removeBot(bot.id);
-                    badgesSpan.appendChild(kBtn);
-                }
-
-                li.appendChild(nameSpan);
-                li.appendChild(badgesSpan);
-                playerList.appendChild(li);
-            });
-
-            playerCount.textContent = count;
-            if (isHost && count >= 2) startGameBtn.classList.remove("hidden");
-            else startGameBtn.classList.add("hidden");
-        }
-
-        addBotBtn.addEventListener("click", () => {
-            if (!isHost) return;
-            if (playerOrder.length >= 4) {
-                showToast("Maximum 4 players.");
-                return;
-            }
-            botCount++;
-            const botId = "bot_" + Date.now() + "_" + botCount;
-            const botName = "XBot-" + botCount;
-            bots.push({ id: botId, name: botName, hand: [] });
-            showToast(`Added ${botName}`);
-            updatePlayerList(roomChannel ? roomChannel.presenceState() : {});
-        });
-
-        function removeBot(botId) {
-            bots = bots.filter(b => b.id !== botId);
-            updatePlayerList(roomChannel ? roomChannel.presenceState() : {});
-        }
-
-        async function removePlayerOrBot(key, isBotFlag) {
-            if (isBotFlag) removeBot(key);
-            else kickPlayer(key);
-        }
-
-        async function kickPlayer(targetUserId) {
-            if (!roomChannel) return;
-            await roomChannel.send({ type: 'broadcast', event: 'kick', payload: { targetId: targetUserId } });
-        }
-
-        async function enterRoomUI(code, hostStatus) {
-            activeRoom = code;
-            isHost = hostStatus;
-            currentRoomCode.textContent = code;
-
-            if (isHost) hostPanel.classList.remove("hidden");
-            else hostPanel.classList.add("hidden");
-
-            setupSection.classList.add("hidden");
-            roomSection.classList.remove("hidden");
-            subscribeToRoom(code);
-            addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
-
-            voiceDot.className = "dot online";
-            voiceLabel.textContent = "Voice Ready";
-            micToggleBtn.disabled = false;
-        }
-
-        function displayMessage(author, text) {
-            const msgElement = document.createElement("div");
-            msgElement.classList.add("chat-message");
-            const authorSpan = document.createElement("span");
-            authorSpan.classList.add("author");
-            authorSpan.textContent = author + ":";
-            msgElement.appendChild(authorSpan);
-            msgElement.appendChild(document.createTextNode(" " + text));
-            messages.appendChild(msgElement);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        function addSystemMessage(text) {
-            const msgElement = document.createElement("div");
-            msgElement.classList.add("system-message");
-            msgElement.textContent = text;
-            messages.appendChild(msgElement);
-            messages.scrollTop = messages.scrollHeight;
-        }
-
-        function logGame(text) { gameLog.textContent = text; }
-
-        function generateDominoSet() {
+        function generateFullSet() {
             const tiles = [];
             for (let i = 0; i <= 6; i++) {
-                for (let j = i; j <= 6; j++) tiles.push([i, j]);
+                for (let j = i; j <= 6; j++) {
+                    tiles.push({
+                        tile_id: `tile_${i}_${j}`,
+                        left_pip: i,
+                        right_pip: j,
+                        is_double: i === j
+                    });
+                }
             }
             return tiles.sort(() => Math.random() - 0.5);
         }
 
-        startGameBtn.addEventListener("click", async () => {
-            if (!isHost) return;
-            const fullDeck = generateDominoSet();
-            const handsMap = {};
+        launchGameBtn.addEventListener("click", () => {
+            hubView.classList.add("hidden");
+            dominoesView.classList.remove("hidden");
 
-            playerOrder.forEach((p, index) => {
-                handsMap[p.id] = fullDeck.slice(index * 7, (index + 1) * 7);
-                if (p.isBot) {
-                    const b = bots.find(bot => bot.id === p.id);
-                    if (b) b.hand = handsMap[p.id];
-                }
-            });
+            scoreNS = 0;
+            scoreWE = 0;
+            handNumber = 1;
+            lastWinnerPos = null;
 
-            const startPayload = {
-                handsMap: handsMap,
-                playerOrder: playerOrder,
-                startingTurnId: playerOrder[0].id
-            };
-
-            await roomChannel.send({ type: 'broadcast', event: 'game_start', payload: startPayload });
-            startDominoesClient(startPayload);
+            initNewHand();
         });
 
-        function startDominoesClient(payload) {
-            gameActive = true;
+        returnHubBtn.addEventListener("click", () => {
+            handActive = false;
+            dominoesView.classList.add("hidden");
+            hubView.classList.remove("hidden");
+        });
+
+        function initNewHand() {
+            const deck = generateFullSet();
+            const playerName = usernameInput.value.trim() || "South";
+
+            players = [
+                { id: 'p_N', name: 'North (Partner)', pos: 'N', hand: deck.slice(0, 7), is_ai: true },
+                { id: 'p_W', name: 'West', pos: 'W', hand: deck.slice(7, 14), is_ai: true },
+                { id: 'p_S', name: playerName, pos: 'S', hand: deck.slice(14, 21), is_ai: false },
+                { id: 'p_E', name: 'East', pos: 'E', hand: deck.slice(21, 28), is_ai: true }
+            ];
+
             leftEnd = null;
             rightEnd = null;
-            playedTilesChain = [];
+            centerTile = null;
+            leftBranchTiles = [];
+            rightBranchTiles = [];
+            consecutivePasses = 0;
             selectedTileIndex = null;
-            playerOrder = payload.playerOrder;
-            currentTurnPlayerId = payload.startingTurnId;
-            myHand = payload.handsMap[authUserId] || [];
+            handActive = true;
 
-            playerOrder.forEach(p => {
-                playerHandsCount[p.id] = 7;
-            });
+            if (handNumber === 1 || lastWinnerPos === null) {
+                let poserPos = 'S';
+                players.forEach(p => {
+                    if (p.hand.some(t => t.left_pip === 6 && t.right_pip === 6)) {
+                        poserPos = p.pos;
+                    }
+                });
+                currentTurn = poserPos;
+                logGame(`Hand 1: ${getPlayerByPos(currentTurn).name} holds [6-6] and poses first!`);
+            } else {
+                currentTurn = lastWinnerPos;
+                logGame(`Hand ${handNumber}: Previous winner ${getPlayerByPos(currentTurn).name} poses first!`);
+            }
 
-            lobbyUiGroup.classList.add("hidden");
-            dominoesGameArea.classList.remove("hidden");
-
+            updateScoreboardUI();
             renderTableBoard();
             renderHand();
             updateTurnDisplay();
-            logGame("Match started! Slam a tile to begin.");
-            checkBotTurn();
+
+            if (getPlayerByPos(currentTurn).is_ai) {
+                setTimeout(processAiTurn, 1000);
+            }
         }
 
-        /* 2D COORDINATE SNAKE ENGINE (90° CORNER TURNS) */
+        function getPlayerByPos(pos) { return players.find(p => p.pos === pos); }
+
+        function updateScoreboardUI() {
+            scoreNsLbl.textContent = scoreNS;
+            scoreWeLbl.textContent = scoreWE;
+            handCountLbl.textContent = `HAND ${handNumber}`;
+        }
+
         function renderTableBoard() {
-            const myIndex = playerOrder.findIndex(p => p.id === authUserId);
-            
-            const seats = [seatBottom, seatLeft, seatTop, seatRight];
-            seats.forEach((s, idx) => {
-                const targetP = playerOrder[(myIndex + idx) % playerOrder.length];
-                if (targetP) {
-                    const isActive = targetP.id === currentTurnPlayerId;
-                    s.className = "player-seat " + (idx === 0 ? "seat-bottom" : idx === 1 ? "seat-left" : idx === 2 ? "seat-top" : "seat-right") + (isActive ? " active-turn" : "");
-                    s.innerHTML = `<div>${targetP.name}${idx === 0 ? " (You)" : ""}</div><div class="seat-tiles-count">🀏 ${playerHandsCount[targetP.id] || 0}</div>`;
-                } else {
-                    s.innerHTML = "<div>Empty</div>";
-                }
+            const seats = { 'N': seatTop, 'W': seatLeft, 'S': seatBottom, 'E': seatRight };
+            POSITIONS.forEach(pos => {
+                const p = getPlayerByPos(pos);
+                const isActive = pos === currentTurn;
+                seats[pos].className = `player-seat seat-${pos === 'N' ? 'top' : pos === 'W' ? 'left' : pos === 'S' ? 'bottom' : 'right'}${isActive ? ' active-turn' : ''}`;
+                seats[pos].innerHTML = `<div>${p.name}</div><div class="seat-tiles-count">🀏 ${p.hand.length} tiles</div>`;
             });
 
             tableBoardCenter.innerHTML = "";
-            if (playedTilesChain.length === 0) {
-                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:80px;">Table empty. Slam the first tile!</div>`;
+            if (!centerTile) {
+                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:85px;">Table empty. Posing tile to start!</div>`;
                 return;
             }
 
-            // Engine Board Boundaries
-            const centerX = tableBoardCenter.clientWidth / 2 - 15;
-            const centerY = tableBoardCenter.clientHeight / 2 - 15;
-            const marginX = 110; 
-            const stepX = 32;
-            const stepY = 22;
+            const cX = tableBoardCenter.clientWidth / 2 - 14;
+            const cY = tableBoardCenter.clientHeight / 2 - 14;
+            const boundX = 100;
+            const stepX = 30;
+            const stepY = 24;
 
-            let curX = centerX;
-            let curY = centerY;
-            let dirX = 1; // 1 = right, -1 = left
+            renderTileElement(centerTile, cX, cY);
 
-            playedTilesChain.forEach((t, i) => {
-                const isDouble = t.vals[0] === t.vals[1];
-                const tileEl = document.createElement("div");
+            let currX = cX;
+            let currY = cY;
+            let hDir = -1;
 
-                if (i === 0) {
-                    // Center Spinner
-                    curX = centerX;
-                    curY = centerY;
+            leftBranchTiles.forEach(t => {
+                if (currX <= cX - boundX && hDir === -1) {
+                    currY += stepY;
+                    hDir = 1;
+                } else if (currX >= cX + boundX && hDir === 1) {
+                    currY += stepY;
+                    hDir = -1;
                 } else {
-                    // Check if reaching boundary to execute 90 degree corner turn
-                    if (dirX === 1 && curX >= centerX + marginX) {
-                        // Turn Downward
-                        curY += stepY;
-                        dirX = -1; // Reverse horizontal direction left
-                    } else if (dirX === -1 && curX <= centerX - marginX) {
-                        // Turn Downward
-                        curY += stepY;
-                        dirX = 1; // Reverse horizontal direction right
-                    } else {
-                        curX += (dirX * stepX);
-                    }
+                    currX += (hDir * stepX);
                 }
-
-                tileEl.style.left = `${curX}px`;
-                tileEl.style.top = `${curY}px`;
-
-                if (isDouble) {
-                    tileEl.className = "real-tile vert";
-                    tileEl.innerHTML = `
-                        <div class="tile-half">${t.vals[0]}</div>
-                        <div class="tile-divider-v"></div>
-                        <div class="tile-half">${t.vals[1]}</div>
-                    `;
-                } else {
-                    tileEl.className = "real-tile horiz";
-                    tileEl.innerHTML = `
-                        <div class="tile-half">${t.vals[0]}</div>
-                        <div class="tile-divider-h"></div>
-                        <div class="tile-half">${t.vals[1]}</div>
-                    `;
-                }
-                tableBoardCenter.appendChild(tileEl);
+                renderTileElement(t, currX, currY);
             });
+
+            currX = cX;
+            currY = cY;
+            hDir = 1;
+
+            rightBranchTiles.forEach(t => {
+                if (currX >= cX + boundX && hDir === 1) {
+                    currY += stepY;
+                    hDir = -1;
+                } else if (currX <= cX - boundX && hDir === -1) {
+                    currY += stepY;
+                    hDir = 1;
+                } else {
+                    currX += (hDir * stepX);
+                }
+                renderTileElement(t, currX, currY);
+            });
+        }
+
+        function renderTileElement(tile, x, y) {
+            const tileEl = document.createElement("div");
+            tileEl.style.left = `${x}px`;
+            tileEl.style.top = `${y}px`;
+
+            if (tile.is_double) {
+                tileEl.className = "real-tile vert";
+                tileEl.innerHTML = `<div class="tile-half">${tile.left_pip}</div><div class="tile-divider-v"></div><div class="tile-half">${tile.right_pip}</div>`;
+            } else {
+                tileEl.className = "real-tile horiz";
+                tileEl.innerHTML = `<div class="tile-half">${tile.left_pip}</div><div class="tile-divider-h"></div><div class="tile-half">${tile.right_pip}</div>`;
+            }
+            tableBoardCenter.appendChild(tileEl);
         }
 
         function renderHand() {
             handContainer.innerHTML = "";
             endChoiceBar.classList.add("hidden");
 
+            const myHand = getPlayerByPos('S').hand;
             myHand.forEach((tile, index) => {
                 const el = document.createElement("div");
-                const isDouble = tile[0] === tile[1];
                 const isSelected = selectedTileIndex === index;
-                el.className = "domino-tile-hand" + (isDouble ? " double" : "") + (isSelected ? " selected" : "");
-                el.textContent = `[${tile[0]}|${tile[1]}]`;
+                el.className = `domino-tile-hand${tile.is_double ? " double" : ""}${isSelected ? " selected" : ""}`;
+                el.textContent = `[${tile.left_pip}|${tile.right_pip}]`;
                 el.onclick = () => selectHandTile(index, tile);
                 handContainer.appendChild(el);
             });
+
+            if (currentTurn === 'S' && handActive && centerTile !== null) {
+                const hasMove = myHand.some(t => isValidMove(t));
+                if (!hasMove) passBtn.classList.remove("hidden");
+                else passBtn.classList.add("hidden");
+            } else {
+                passBtn.classList.add("hidden");
+            }
+        }
+
+        function isValidMove(tile) {
+            if (!centerTile) {
+                if (handNumber === 1) return tile.left_pip === 6 && tile.right_pip === 6;
+                return true;
+            }
+            return (tile.left_pip === leftEnd || tile.right_pip === leftEnd ||
+                    tile.left_pip === rightEnd || tile.right_pip === rightEnd);
         }
 
         function selectHandTile(index, tile) {
-            if (!gameActive || currentTurnPlayerId !== authUserId) {
+            if (!handActive || currentTurn !== 'S') {
                 showToast("It's not your turn!");
+                return;
+            }
+
+            if (!isValidMove(tile)) {
+                if (handNumber === 1 && !centerTile) {
+                    showToast("Hand 1 Pose MUST be the Double-Six [6-6]!");
+                } else {
+                    showToast("Tile doesn't fit table open ends!");
+                }
                 return;
             }
 
             selectedTileIndex = index;
             renderHand();
 
-            if (leftEnd === null && rightEnd === null) {
-                playTileDirect(index, tile, "first");
+            if (!centerTile) {
+                executePlay(index, tile, 'first');
             } else {
-                const matchesLeft = (tile[0] === leftEnd || tile[1] === leftEnd);
-                const matchesRight = (tile[0] === rightEnd || tile[1] === rightEnd);
+                const matchesLeft = (tile.left_pip === leftEnd || tile.right_pip === leftEnd);
+                const matchesRight = (tile.left_pip === rightEnd || tile.right_pip === rightEnd);
 
                 if (matchesLeft && matchesRight) {
                     lVal.textContent = leftEnd;
                     rVal.textContent = rightEnd;
                     endChoiceBar.classList.remove("hidden");
-                    playLeftBtn.onclick = () => playTileDirect(index, tile, "left");
-                    playRightBtn.onclick = () => playTileDirect(index, tile, "right");
+                    playLeftBtn.onclick = () => executePlay(index, tile, 'left');
+                    playRightBtn.onclick = () => executePlay(index, tile, 'right');
                 } else if (matchesLeft) {
-                    playTileDirect(index, tile, "left");
+                    executePlay(index, tile, 'left');
                 } else if (matchesRight) {
-                    playTileDirect(index, tile, "right");
-                } else {
-                    showToast("Tile doesn't fit table ends!");
+                    executePlay(index, tile, 'right');
                 }
             }
         }
 
-        async function playTileDirect(handIndex, tile, side) {
-            let orientedVals = [...tile];
+        function executePlay(handIndex, tile, side) {
+            const player = getPlayerByPos(currentTurn);
+            player.hand.splice(handIndex, 1);
+            consecutivePasses = 0;
 
-            if (side === "first") {
-                leftEnd = tile[0];
-                rightEnd = tile[1];
-                playedTilesChain.push({ vals: orientedVals });
-            } else if (side === "left") {
-                if (tile[0] === leftEnd) {
-                    orientedVals = [tile[1], tile[0]];
-                    leftEnd = tile[1];
+            let playTile = { ...tile };
+
+            if (side === 'first') {
+                leftEnd = tile.left_pip;
+                rightEnd = tile.right_pip;
+                centerTile = playTile;
+            } else if (side === 'left') {
+                if (playTile.left_pip === leftEnd) {
+                    playTile = { ...playTile, left_pip: tile.right_pip, right_pip: tile.left_pip };
+                    leftEnd = playTile.left_pip;
                 } else {
-                    orientedVals = [tile[0], tile[1]];
-                    leftEnd = tile[0];
+                    leftEnd = playTile.left_pip;
                 }
-                playedTilesChain.unshift({ vals: orientedVals });
-            } else if (side === "right") {
-                if (tile[0] === rightEnd) {
-                    orientedVals = [tile[0], tile[1]];
-                    rightEnd = tile[1];
+                leftBranchTiles.push(playTile);
+            } else if (side === 'right') {
+                if (playTile.left_pip === rightEnd) {
+                    rightEnd = playTile.right_pip;
                 } else {
-                    orientedVals = [tile[1], tile[0]];
-                    rightEnd = tile[0];
+                    playTile = { ...playTile, left_pip: tile.right_pip, right_pip: tile.left_pip };
+                    rightEnd = playTile.right_pip;
                 }
-                playedTilesChain.push({ vals: orientedVals });
+                rightBranchTiles.push(playTile);
             }
-
-            myHand.splice(handIndex, 1);
-            playerHandsCount[authUserId] = myHand.length;
-            selectedTileIndex = null;
-
-            const currentIndex = playerOrder.findIndex(p => p.id === authUserId);
-            const nextIndex = (currentIndex + 1) % playerOrder.length;
-            const nextPlayerId = playerOrder[nextIndex].id;
-
-            const movePayload = {
-                playerId: authUserId,
-                playerName: currentUser,
-                tile: tile,
-                leftEnd: leftEnd,
-                rightEnd: rightEnd,
-                playedTilesChain: playedTilesChain,
-                nextTurnId: nextPlayerId,
-                handCount: myHand.length
-            };
-
-            await roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: movePayload });
-            handleTilePlayed(movePayload);
-        }
-
-        function handleTilePlayed(payload) {
-            leftEnd = payload.leftEnd;
-            rightEnd = payload.rightEnd;
-            playedTilesChain = payload.playedTilesChain;
-            currentTurnPlayerId = payload.nextTurnId;
-            playerHandsCount[payload.playerId] = payload.handCount;
 
             playSlamSound();
+            logGame(`💥 ${player.name} slammed [${tile.left_pip}|${tile.right_pip}]!`);
+
+            if (player.hand.length === 0) {
+                handleHandWin(player.pos, `${player.name} went out!`);
+                return;
+            }
+
+            advanceTurn();
+        }
+
+        passBtn.addEventListener("click", () => {
+            if (currentTurn !== 'S' || !handActive) return;
+            executePass();
+        });
+
+        function executePass() {
+            const player = getPlayerByPos(currentTurn);
+            consecutivePasses++;
+            logGame(`✋ ${player.name} passed!`);
+
+            if (consecutivePasses >= 4) {
+                handleBlockedGame();
+                return;
+            }
+
+            advanceTurn();
+        }
+
+        function advanceTurn() {
+            currentTurn = TURN_NEXT[currentTurn];
+            selectedTileIndex = null;
             renderTableBoard();
             renderHand();
             updateTurnDisplay();
 
-            logGame(`💥 ${payload.playerName} slammed [${payload.tile[0]}|${payload.tile[1]}]!`);
-
-            if (payload.handCount === 0) {
-                playWinSound();
-                logGame(`🎉 ${payload.playerName} wins the match!`);
-                showToast(`${payload.playerName} DOMINOES!`);
-                gameActive = false;
-                return;
+            if (getPlayerByPos(currentTurn).is_ai && handActive) {
+                setTimeout(processAiTurn, 1000);
             }
+        }
 
-            checkBotTurn();
+        function processAiTurn() {
+            if (!handActive) return;
+            const ai = getPlayerByPos(currentTurn);
+
+            const validPlays = [];
+            ai.hand.forEach((tile, idx) => {
+                if (isValidMove(tile)) {
+                    if (!centerTile) {
+                        validPlays.push({ index: idx, tile, side: 'first' });
+                    } else {
+                        if (tile.left_pip === leftEnd || tile.right_pip === leftEnd) {
+                            validPlays.push({ index: idx, tile, side: 'left' });
+                        }
+                        if (tile.left_pip === rightEnd || tile.right_pip === rightEnd) {
+                            validPlays.push({ index: idx, tile, side: 'right' });
+                        }
+                    }
+                }
+            });
+
+            if (validPlays.length > 0) {
+                const choice = validPlays[Math.floor(Math.random() * validPlays.length)];
+                executePlay(choice.index, choice.tile, choice.side);
+            } else {
+                executePass();
+            }
         }
 
         function updateTurnDisplay() {
-            const currentP = playerOrder.find(p => p.id === currentTurnPlayerId);
-            const isMyTurn = currentTurnPlayerId === authUserId;
-            turnIndicator.textContent = isMyTurn ? "Your Turn!" : `Turn: ${currentP ? currentP.name : '...'}`;
-            renderTableBoard();
+            const currentP = getPlayerByPos(currentTurn);
+            turnIndicator.textContent = currentTurn === 'S' ? "Your Turn!" : `Turn: ${currentP.name}`;
         }
 
-        passBtn.addEventListener("click", async () => {
-            if (!gameActive || currentTurnPlayerId !== authUserId) return;
+        function handleBlockedGame() {
+            logGame("🔒 Game Blocked! Counting remaining pips...");
 
-            const currentIndex = playerOrder.findIndex(p => p.id === authUserId);
-            const nextIndex = (currentIndex + 1) % playerOrder.length;
-            const nextPlayerId = playerOrder[nextIndex].id;
+            let nsPips = 0;
+            let wePips = 0;
 
-            const passPayload = {
-                playerId: authUserId,
-                playerName: currentUser,
-                tile: [null, null],
-                leftEnd: leftEnd,
-                rightEnd: rightEnd,
-                playedTilesChain: playedTilesChain,
-                nextTurnId: nextPlayerId,
-                handCount: myHand.length,
-                passed: true
-            };
+            players.forEach(p => {
+                const pips = p.hand.reduce((sum, t) => sum + t.left_pip + t.right_pip, 0);
+                if (p.pos === 'N' || p.pos === 'S') nsPips += pips;
+                else wePips += pips;
+            });
 
-            await roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: passPayload });
-            logGame(`${currentUser} passed.`);
-            currentTurnPlayerId = nextPlayerId;
-            updateTurnDisplay();
-            checkBotTurn();
-        });
+            if (nsPips < wePips) {
+                handleHandWin('S', `Team N/S wins block! (N/S: ${nsPips} pips vs E/W: ${wePips} pips)`);
+            } else if (wePips < nsPips) {
+                handleHandWin('E', `Team E/W wins block! (E/W: ${wePips} pips vs N/S: ${nsPips} pips)`);
+            } else {
+                logGame("🤝 Hand Tied! Score remains unchanged.");
+                setTimeout(() => {
+                    handNumber++;
+                    initNewHand();
+                }, 3000);
+            }
+        }
 
-        function checkBotTurn() {
-            if (!gameActive || !isHost) return;
-            const currentP = playerOrder.find(p => p.id === currentTurnPlayerId);
-            if (!currentP || !currentP.isBot) return;
+        function handleHandWin(winnerPos, reason) {
+            playWinSound();
+            handActive = false;
+            lastWinnerPos = winnerPos;
+
+            const isNSWinner = (winnerPos === 'N' || winnerPos === 'S');
+
+            if (isNSWinner) {
+                if (scoreWE > 0 && scoreNS === 0) {
+                    showToast("BREAK! Score reset to 0-0!");
+                    scoreWE = 0;
+                }
+                scoreNS++;
+            } else {
+                if (scoreNS > 0 && scoreWE === 0) {
+                    showToast("BREAK! Score reset to 0-0!");
+                    scoreNS = 0;
+                }
+                scoreWE++;
+            }
+
+            updateScoreboardUI();
+            logGame(`🎉 ${reason}`);
+
+            if (scoreNS >= 6) {
+                showToast("🏆 TEAM N/S WINS THE SIX-LOVE MATCH!");
+                logGame("🏆 MATCH OVER: TEAM N/S VICTORY!");
+                return;
+            } else if (scoreWE >= 6) {
+                showToast("🏆 TEAM E/W WINS THE SIX-LOVE MATCH!");
+                logGame("🏆 MATCH OVER: TEAM E/W VICTORY!");
+                return;
+            }
 
             setTimeout(() => {
-                const b = bots.find(bot => bot.id === currentP.id);
-                if (!b) return;
-
-                let playableIndex = -1;
-                let playSide = "left";
-
-                for (let i = 0; i < b.hand.length; i++) {
-                    const tile = b.hand[i];
-                    if (leftEnd === null && rightEnd === null) {
-                        playableIndex = i;
-                        playSide = "first";
-                        break;
-                    }
-                    if (tile[0] === leftEnd || tile[1] === leftEnd) {
-                        playableIndex = i;
-                        playSide = "left";
-                        break;
-                    }
-                    if (tile[0] === rightEnd || tile[1] === rightEnd) {
-                        playableIndex = i;
-                        playSide = "right";
-                        break;
-                    }
-                }
-
-                const currentIndex = playerOrder.findIndex(p => p.id === currentP.id);
-                const nextIndex = (currentIndex + 1) % playerOrder.length;
-                const nextPlayerId = playerOrder[nextIndex].id;
-
-                if (playableIndex !== -1) {
-                    const tile = b.hand.splice(playableIndex, 1)[0];
-                    let orientedVals = [...tile];
-
-                    if (playSide === "first") {
-                        leftEnd = tile[0];
-                        rightEnd = tile[1];
-                        playedTilesChain.push({ vals: orientedVals });
-                    } else if (playSide === "left") {
-                        if (tile[0] === leftEnd) {
-                            orientedVals = [tile[1], tile[0]];
-                            leftEnd = tile[1];
-                        } else {
-                            orientedVals = [tile[0], tile[1]];
-                            leftEnd = tile[0];
-                        }
-                        playedTilesChain.unshift({ vals: orientedVals });
-                    } else if (playSide === "right") {
-                        if (tile[0] === rightEnd) {
-                            orientedVals = [tile[0], tile[1]];
-                            rightEnd = tile[1];
-                        } else {
-                            orientedVals = [tile[1], tile[0]];
-                            rightEnd = tile[0];
-                        }
-                        playedTilesChain.push({ vals: orientedVals });
-                    }
-
-                    const botPayload = {
-                        playerId: b.id,
-                        playerName: b.name,
-                        tile: tile,
-                        leftEnd: leftEnd,
-                        rightEnd: rightEnd,
-                        playedTilesChain: playedTilesChain,
-                        nextTurnId: nextPlayerId,
-                        handCount: b.hand.length
-                    };
-
-                    roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: botPayload });
-                    handleTilePlayed(botPayload);
-                } else {
-                    const passPayload = {
-                        playerId: b.id,
-                        playerName: b.name,
-                        tile: [null, null],
-                        leftEnd: leftEnd,
-                        rightEnd: rightEnd,
-                        playedTilesChain: playedTilesChain,
-                        nextTurnId: nextPlayerId,
-                        handCount: b.hand.length,
-                        passed: true
-                    };
-
-                    roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: passPayload });
-                    logGame(`${b.name} passed.`);
-                    currentTurnPlayerId = nextPlayerId;
-                    updateTurnDisplay();
-                    checkBotTurn();
-                }
-            }, 1200);
+                handNumber++;
+                initNewHand();
+            }, 3500);
         }
-
-        readyToggleBtn.addEventListener("click", async () => {
-            isReady = !isReady;
-            readyToggleBtn.textContent = isReady ? "Unready" : "Toggle Ready";
-            await trackPresence();
-        });
-
-        lockRoomBtn.addEventListener("click", async () => {
-            if (!isHost) return;
-            isLocked = !isLocked;
-            lockRoomBtn.textContent = isLocked ? "Unlock Room" : "Lock Room";
-            await supabaseClient.from('rooms').update({ is_locked: isLocked }).eq('code', activeRoom);
-            showToast(isLocked ? "Room Locked" : "Room Unlocked");
-        });
-
-        createRoomBtn.addEventListener("click", async () => {
-            const name = usernameInput.value.trim();
-            if (!name) {
-                showToast("Please enter a nickname.");
-                return;
-            }
-
-            setBusy(true);
-            const newCode = await createRoomInSupabase();
-            setBusy(false);
-
-            if (newCode) {
-                currentUser = name;
-                enterRoomUI(newCode, true);
-            } else {
-                showToast("Failed to create room.");
-            }
-        });
-
-        joinRoomBtn.addEventListener("click", async () => {
-            const name = usernameInput.value.trim();
-            const code = normalizeCode(roomCodeInput.value);
-
-            if (!name || !code || code === CODE_PREFIX) {
-                showToast("Please enter nickname and valid code.");
-                return;
-            }
-
-            setBusy(true);
-            const roomData = await getRoomDetails(code);
-            setBusy(false);
-
-            if (!roomData || roomData.is_locked) {
-                showToast("Room unavailable or locked.");
-                return;
-            }
-
-            currentUser = name;
-            enterRoomUI(code, roomData.host_id === authUserId);
-        });
-
-        async function leaveRoom() {
-            if (roomChannel) {
-                await supabaseClient.removeChannel(roomChannel);
-                roomChannel = null;
-            }
-            activeRoom = null;
-            isHost = false;
-            isReady = false;
-            gameActive = false;
-            bots = [];
-
-            lobbyUiGroup.classList.remove("hidden");
-            dominoesGameArea.classList.add("hidden");
-            messages.innerHTML = "";
-            playerList.innerHTML = "";
-            roomSection.classList.add("hidden");
-            setupSection.classList.remove("hidden");
-            updateStatus("online", "Connected & Authenticated");
-        }
-
-        leaveRoomBtn.addEventListener("click", leaveRoom);
-
-        micToggleBtn.addEventListener("click", () => {
-            isMicMuted = !isMicMuted;
-            micToggleBtn.textContent = isMicMuted ? "Unmute Mic" : "Mute Mic";
-            micToggleBtn.classList.toggle("muted", isMicMuted);
-        });
-
-        async function sendMessage() {
-            const text = messageInput.value.trim().slice(0, MAX_MESSAGE_LENGTH);
-            if (text && activeRoom && roomChannel) {
-                await roomChannel.send({
-                    type: 'broadcast',
-                    event: 'message',
-                    payload: { user: currentUser, text: text }
-                });
-                displayMessage(currentUser, text);
-                messageInput.value = "";
-            }
-        }
-
-        sendMessageBtn.addEventListener("click", sendMessage);
-        messageInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") sendMessage();
-        });
-
-        document.addEventListener("DOMContentLoaded", initAuth);
     </script>
 </body>
 </html>
