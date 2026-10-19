@@ -149,7 +149,7 @@ const log = m => $('log').textContent = m;
 
 /* ---------- STATE ---------- */
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
-let lobby = [], botN = 0, isHost = false;
+let lobby = [], botN = 0, isHost = false, roomStatus = 'waiting';
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
 const byPos = p => players.find(x => x.pos === p);
@@ -157,8 +157,8 @@ const byPos = p => players.find(x => x.pos === p);
 /* ---------- SUPABASE REALTIME SYNC ---------- */
 async function syncRoomState() {
   if (!roomCode) return;
-  const stateData = { handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
-  await sb.from('game_rooms').upsert({ room_code: roomCode, state: stateData, updated_at: new Date() }, { onConflict: 'room_code' });
+  const stateData = { status: roomStatus, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+  await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: stateData, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
 }
 
 function listenToRoom() {
@@ -167,10 +167,16 @@ function listenToRoom() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
       const st = payload.new.state;
       if (!st) return;
+      roomStatus = st.status || 'waiting';
       handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
       players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
       lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
       if (st.lobby) { lobby = st.lobby; renderLobby(); }
+      
+      if (roomStatus === 'playing' && $('game').classList.contains('hidden')) {
+        $('lobby').classList.add('hidden');
+        $('game').classList.remove('hidden');
+      }
       refresh();
     }).subscribe();
 }
@@ -178,12 +184,22 @@ function listenToRoom() {
 /* ---------- LOBBY & SHARE ---------- */
 $('createBtn').onclick = async () => {
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  isHost = true; mySeatPos = 'S';
+  isHost = true; mySeatPos = 'S'; roomStatus = 'waiting';
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (You)', isBot: false, pos: 'S' }];
+  lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (Host)', isBot: false, pos: 'S' }];
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby(); toast('Room ' + roomCode + ' created!');
-  listenToRoom(); await syncRoomState();
+  renderLobby();
+  
+  // IMMEDIATELY SEED ROOM IN SUPABASE DATABASE
+  const { error } = await sb.from('game_rooms').insert([{
+    room_code: roomCode,
+    status: 'waiting',
+    state: { status: 'waiting', lobby, handNo: 1, sNS: 0, sWE: 0 }
+  }]);
+  
+  if (error) { toast('Error creating room'); return; }
+  toast('Room ' + roomCode + ' created!');
+  listenToRoom();
 };
 
 $('joinBtn').onclick = async () => {
@@ -193,17 +209,25 @@ $('joinBtn').onclick = async () => {
 };
 
 async function joinRoomByCode(code) {
-  const { data } = await sb.from('game_rooms').select('state').eq('room_code', code).single();
-  if (!data) return toast('Room not found');
-  roomCode = code; isHost = false;
+  const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).single();
+  if (error || !data) return toast('Room not found');
+  
+  roomCode = code; isHost = false; roomStatus = data.status || 'waiting';
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
+  
   const currentLobby = data.state.lobby || [];
   const positions = ['S', 'W', 'N', 'E'];
   const taken = currentLobby.map(p => p.pos);
   const freePos = positions.find(p => !taken.includes(p)) || 'W';
+  
   mySeatPos = freePos;
   lobby = currentLobby;
-  lobby.push({ name: ($('nameIn').value.trim() || 'Player') + ' (You)', isBot: false, pos: freePos });
+  
+  // Avoid duplicate entries
+  if (!lobby.some(p => p.name.startsWith($('nameIn').value.trim() || 'Player'))) {
+    lobby.push({ name: ($('nameIn').value.trim() || 'Player') + ' (You)', isBot: false, pos: freePos });
+  }
+  
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
   renderLobby(); listenToRoom(); await syncRoomState();
 }
@@ -260,6 +284,7 @@ $('startBtn').onclick = () => {
   positions.forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) lobby.push({ name: 'XBot-' + (++botN), isBot: true, pos });
   });
+  roomStatus = 'playing';
   newMatch();
 };
 
@@ -267,11 +292,8 @@ $('startBtn').onclick = () => {
 $('micBtn').onclick = () => {
   if (AC.state === 'suspended') AC.resume();
   micActive = !micActive;
-  
-  // Instant UI update
   updateMicUI(micActive);
 
-  // Background async LiveKit toggle
   setTimeout(async () => {
     try {
       if (micActive) {
@@ -521,7 +543,7 @@ const SEATS = {
 function drawSeat(pos) {
   const p = byPos(pos); if (!p) return;
   const s = SEATS[pos], act = pos === turn && active;
-  const nm = p.name.replace(' (You)', ''), n = p.hand ? p.hand.length : 0;
+  const nm = p.name.replace(' (Host)', '').replace(' (You)', ''), n = p.hand ? p.hand.length : 0;
   rr(ctx, s.x, s.y, s.w, s.h, 9);
   ctx.fillStyle = act ? '#4a3510' : 'rgba(0,0,0,.55)'; ctx.fill();
   ctx.lineWidth = act ? 2 : 1; ctx.strokeStyle = act ? '#facc15' : '#3a2a14'; ctx.stroke();
