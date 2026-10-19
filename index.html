@@ -252,10 +252,27 @@
         const CODE_PREFIX = "XG-";
         const MAX_MESSAGE_LENGTH = 300;
 
-        // Unique ID for this browser session, so two players with the same nickname don't collide
-        const clientId = (window.crypto && crypto.randomUUID)
-            ? crypto.randomUUID()
-            : "c-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+        // The player's real, server-issued ID (set after anonymous sign-in).
+        // It survives refreshes because Supabase keeps the session in this browser.
+        let userId = null;
+        let lastCreateError = null; // shown on screen so problems are easy to diagnose from a phone
+
+        async function ensureSignedIn() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) return session.user.id;
+
+            const { data, error } = await supabaseClient.auth.signInAnonymously();
+            if (error) throw error;
+            return data.user.id;
+        }
+
+        // Remember the nickname on this device (storage can be blocked, so never let it crash)
+        function loadNickname() {
+            try { return localStorage.getItem("xg_nickname") || ""; } catch (e) { return ""; }
+        }
+        function saveNickname(name) {
+            try { localStorage.setItem("xg_nickname", name); } catch (e) { /* ignore */ }
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             const usernameInput = document.getElementById("username-input");
@@ -313,6 +330,7 @@
                     // 23505 = that code already exists, so try a different one
                     if (error.code !== "23505") {
                         console.error("Error creating room:", error);
+                        lastCreateError = error;
                         return null;
                     }
                 }
@@ -338,7 +356,7 @@
 
             function subscribeToRoom(code) {
                 roomChannel = supabaseClient.channel(`room_${code}`, {
-                    config: { presence: { key: clientId } }
+                    config: { presence: { key: userId } }
                 });
 
                 // Live chat from other players
@@ -371,7 +389,7 @@
                     const user = presenceState[key][0] && presenceState[key][0].user;
                     if (user) {
                         const li = document.createElement("li");
-                        const isMe = key === clientId;
+                        const isMe = key === userId;
                         li.textContent = `● ${String(user).slice(0, 15)}${isMe ? " (You)" : ""}`;
                         playerList.appendChild(li);
                     }
@@ -382,6 +400,7 @@
 
             function enterRoomUI(code) {
                 activeRoom = code;
+                saveNickname(currentUser);
                 currentRoomCode.textContent = code;
                 setupSection.classList.add("hidden");
                 roomSection.classList.remove("hidden");
@@ -429,7 +448,10 @@
                     currentUser = name;
                     enterRoomUI(newCode);
                 } else {
-                    alert("Failed to create room. Check that the rooms table and its policies exist in Supabase.");
+                    const detail = lastCreateError
+                        ? `${lastCreateError.code || ""} ${lastCreateError.message || ""}`.trim()
+                        : "unknown error";
+                    alert("Failed to create room.\n\n" + detail);
                 }
             });
 
@@ -494,6 +516,20 @@
             messageInput.addEventListener("keypress", (e) => {
                 if (e.key === "Enter") sendMessage();
             });
+
+            // ---------- startup ----------
+            usernameInput.value = loadNickname();
+            setBusy(true); // locked until sign-in finishes
+
+            ensureSignedIn()
+                .then((id) => {
+                    userId = id;
+                    setBusy(false);
+                })
+                .catch((err) => {
+                    console.error("Sign-in failed:", err);
+                    alert("Couldn't sign you in. If you're the developer, check that anonymous sign-ins are turned on in Supabase.");
+                });
         });
     </script>
 </body>
