@@ -201,7 +201,6 @@ $('saveProfileBtn').onclick = () => {
   $('homeBox').classList.remove('hidden');
   toast('Profile saved!');
   
-  // Resume pending room join if URL link present
   const params = new URLSearchParams(window.location.search);
   const roomParam = params.get('room');
   if (roomParam) joinRoomByCode(roomParam.toUpperCase());
@@ -213,9 +212,9 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
-/* ---------- SUPABASE REALTIME SYNC ---------- */
+/* ---------- HOST-ONLY SYNC & BROADCAST ---------- */
 async function syncRoomState() {
-  if (!roomCode) return;
+  if (!roomCode || !isHost) return; // Strict Host Guard
   const stateData = { status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
   await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: stateData, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
 }
@@ -227,6 +226,27 @@ function listenToRoom() {
   roomSubscription = sb.channel('room_' + roomCode)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
       handleRoomPayload(payload.new.state);
+    })
+    .on('broadcast', { event: 'JOIN_EVENT' }, payload => {
+      if (isHost && payload.payload) {
+        const guest = payload.payload;
+        if (!lobby.some(p => p.clientId === guest.clientId)) {
+          const positions = ['S', 'W', 'N', 'E'];
+          const taken = lobby.map(p => p.pos);
+          const freePos = positions.find(p => !taken.includes(p)) || 'W';
+          lobby.push({ clientId: guest.clientId, name: guest.name, isBot: false, pos: freePos, isHost: false });
+          renderLobby();
+          syncRoomState();
+          toast(guest.name + ' joined the table!');
+        }
+      }
+    })
+    .on('broadcast', { event: 'ACTION_MOVE' }, payload => {
+      if (isHost && payload.payload) {
+        const move = payload.payload;
+        if (move.type === 'PLAY') play(move.index, move.side);
+        else if (move.type === 'PASS') pass();
+      }
     })
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
@@ -254,10 +274,11 @@ function handleRoomPayload(st) {
   isHost = (hostClientId === myClientId);
   
   handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
-  players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
+  if (st.players && st.players.length > 0) players = st.players;
+  turn = st.turn; L = st.L; R = st.R; center = st.center;
   lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
   
-  if (st.lobby) {
+  if (st.lobby && st.lobby.length > 0) {
     lobby = st.lobby;
     const meInLobby = lobby.find(p => p.clientId === myClientId);
     if (meInLobby) mySeatPos = meInLobby.pos;
@@ -314,21 +335,32 @@ async function joinRoomByCode(code) {
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   
   let currentLobby = data.state.lobby || [];
-  const positions = ['S', 'W', 'N', 'E'];
-  const taken = currentLobby.map(p => p.pos);
-  const freePos = positions.find(p => !taken.includes(p)) || 'W';
-  
   const existingPlayer = currentLobby.find(p => p.clientId === myClientId);
-  if (existingPlayer) {
-    mySeatPos = existingPlayer.pos;
-  } else {
+  
+  if (!existingPlayer) {
+    const positions = ['S', 'W', 'N', 'E'];
+    const taken = currentLobby.map(p => p.pos);
+    const freePos = positions.find(p => !taken.includes(p)) || 'W';
     mySeatPos = freePos;
     currentLobby.push({ clientId: myClientId, name: myNickname, isBot: false, pos: freePos, isHost: false });
+  } else {
+    mySeatPos = existingPlayer.pos;
   }
   
   lobby = currentLobby;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby(); listenToRoom(); await syncRoomState();
+  renderLobby(); 
+  listenToRoom();
+  
+  setTimeout(() => {
+    if (roomSubscription) {
+      roomSubscription.send({
+        type: 'broadcast',
+        event: 'JOIN_EVENT',
+        payload: { clientId: myClientId, name: myNickname }
+      });
+    }
+  }, 300);
 }
 
 $('copyBtn').onclick = () => {
@@ -355,7 +387,6 @@ $('leaveBtn').onclick = () => {
   lobby = []; roomCode = ''; $('roomBadge').textContent = 'No room yet';
   if (lobbyPollInterval) clearInterval(lobbyPollInterval);
   $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
-  // Clear URL room parameter when returning to Arcade Hub
   window.history.replaceState({}, document.title, window.location.pathname);
 };
 
@@ -500,6 +531,12 @@ function isValid(t) {
 }
 
 function play(i, side) {
+  if (!isHost) {
+    if (roomSubscription) {
+      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PLAY', index: i, side } });
+    }
+    return;
+  }
   const p = byPos(turn), t = p.hand.splice(i, 1)[0]; passes = 0;
   if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
   else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
@@ -511,6 +548,12 @@ function play(i, side) {
 }
 
 function pass() {
+  if (!isHost) {
+    if (roomSubscription) {
+      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PASS' } });
+    }
+    return;
+  }
   const p = byPos(turn); passes++; knock(); log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
   next();
@@ -519,6 +562,7 @@ function pass() {
 function next() { turn = NEXT[turn]; refresh(); syncRoomState(); maybeAi(); }
 
 function maybeAi() {
+  if (!isHost) return;
   const e = epoch;
   if (active && byPos(turn).ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
 }
@@ -567,7 +611,9 @@ function win(pos, why) {
 let selIdx = null;
 function selectTile(i) {
   if (!active || turn !== mySeatPos) return toast('Not your turn');
-  const t = byPos(mySeatPos).hand[i];
+  const me = byPos(mySeatPos);
+  if (!me || !me.hand) return;
+  const t = me.hand[i];
   if (!isValid(t)) return toast(!center && needD6 ? 'Hand 1 must start with [6|6]' : "That tile doesn't fit");
   if (!center) return play(i, 'first');
   const ml = t.a === L || t.b === L, mr = t.a === R || t.b === R;
@@ -582,7 +628,7 @@ $('passBtn').onclick = () => { if (active && turn === mySeatPos) pass(); };
 
 function renderHand() {
   const box = $('hand'); box.innerHTML = '';
-  const me = byPos(mySeatPos); if (!me) return;
+  const me = byPos(mySeatPos); if (!me || !me.hand) return;
   const mine = active && turn === mySeatPos;
   me.hand.forEach((t, i) => {
     const c = document.createElement('canvas'); c.width = 128; c.height = 72;
@@ -707,7 +753,8 @@ function drawBoard() {
 function refresh() {
   $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Practice';
   $('sNS').textContent = sNS; $('sWE').textContent = sWE; $('handLbl').textContent = 'Hand ' + handNo;
-  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (byPos(turn) ? byPos(turn).name : ''));
+  const currPlayer = byPos(turn);
+  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (currPlayer ? currPlayer.name : 'Waiting...'));
   selIdx = null; drawBoard(); renderHand();
   $('againBtn').classList.toggle('hidden', !matchOver);
 }
