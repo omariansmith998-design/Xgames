@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xgames Lobby</title>
+    <title>Xgames Lobby & Dominoes</title>
     <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- LiveKit Web Client SDK -->
@@ -24,18 +24,18 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 15px;
+            padding: 12px;
         }
 
         /* Diagnostic Bar */
         #diagnostic-bar {
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
             background: #18181c;
             border: 1px solid #2a2a32;
             padding: 8px 14px;
             border-radius: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -52,7 +52,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #eab308; /* Default yellow/connecting */
+            background: #eab308;
         }
 
         .dot.online { background: #10b981; }
@@ -71,17 +71,17 @@
         #lobby-container {
             background: #18181c;
             border: 1px solid #2a2a32;
-            padding: 24px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
         }
 
         h1 {
             font-size: 22px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             color: #6366f1;
         }
 
@@ -143,11 +143,18 @@
 
         .secondary-btn {
             background: #374151;
-            margin-top: 8px;
         }
 
         .secondary-btn:hover {
             background: #4b5563;
+        }
+
+        .success-btn {
+            background: #059669;
+        }
+
+        .success-btn:hover {
+            background: #047857;
         }
 
         .danger-btn {
@@ -189,8 +196,9 @@
         .badge-host { background: #f59e0b; color: #000; }
         .badge-ready { background: #10b981; color: #fff; }
         .badge-notready { background: #6b7280; color: #fff; }
+        .badge-bot { background: #8b5cf6; color: #fff; }
 
-        /* Voice Panel (Phase 3b) */
+        /* Voice Controls */
         #voice-controls {
             background: #111115;
             border: 1px solid #2a2a32;
@@ -221,7 +229,7 @@
         }
 
         #player-list-container {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             background: #111115;
             padding: 10px;
             border-radius: 6px;
@@ -265,6 +273,7 @@
             border-radius: 4px;
             cursor: pointer;
             width: auto;
+            margin-left: 4px;
         }
 
         #chat-box {
@@ -275,7 +284,7 @@
 
         #messages {
             background: #111115;
-            height: 160px;
+            height: 120px;
             border-radius: 6px;
             padding: 10px;
             overflow-y: auto;
@@ -296,6 +305,86 @@
 
         .chat-input-group input { flex: 1; }
         .chat-input-group button { width: auto; padding: 0 16px; }
+
+        /* Dominoes Game Board (Phase 4) */
+        #dominoes-game-area {
+            background: #0d131a;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .game-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #38bdf8;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .table-ends-display {
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: #e2e8f0;
+        }
+
+        .hand-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .domino-tile {
+            background: #f8fafc;
+            color: #0f172a;
+            border: 2px solid #94a3b8;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            transition: transform 0.1s, border-color 0.1s;
+        }
+
+        .domino-tile:hover {
+            transform: translateY(-2px);
+            border-color: #6366f1;
+        }
+
+        .domino-tile.double {
+            background: #fef08a;
+            border-color: #eab308;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .game-log {
+            font-size: 11px;
+            color: #94a3b8;
+            height: 45px;
+            overflow-y: auto;
+            background: #111827;
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
 
         /* Toast Popup */
         #toast-container {
@@ -335,7 +424,7 @@
     </div>
 
     <div id="lobby-container">
-        <h1>Xgames Lobby</h1>
+        <h1>Xgames Lobby & Games</h1>
 
         <!-- Setup / Join Section -->
         <div id="setup-section">
@@ -357,12 +446,13 @@
                 <button id="leave-room-btn" class="danger-btn">Leave</button>
             </div>
 
-            <!-- Host Controls Panel (Phase 3c) -->
-            <div id="host-panel" class="hidden" style="margin-bottom: 10px;">
-                <button id="lock-room-btn" class="secondary-btn">Lock Room</button>
+            <!-- Host Controls Panel -->
+            <div id="host-panel" class="hidden" style="margin-bottom: 10px; display: flex; gap: 8px;">
+                <button id="add-bot-btn" class="secondary-btn" style="flex:1;">+ Add Bot</button>
+                <button id="lock-room-btn" class="secondary-btn" style="flex:1;">Lock Room</button>
             </div>
 
-            <!-- Voice Controls Panel (Phase 3b) -->
+            <!-- Voice Controls Panel -->
             <div id="voice-controls">
                 <div class="voice-status">
                     <span id="voice-dot" class="dot"></span>
@@ -380,8 +470,31 @@
                 <ul id="player-list"></ul>
             </div>
 
-            <!-- Ready Up Toggle -->
-            <button id="ready-toggle-btn" class="secondary-btn" style="margin-bottom: 12px;">Toggle Ready Status</button>
+            <!-- Ready Up / Start Game Bar -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button id="ready-toggle-btn" class="secondary-btn" style="flex:1;">Toggle Ready</button>
+                <button id="start-game-btn" class="success-btn hidden" style="flex:1;">Start Dominoes</button>
+            </div>
+
+            <!-- Phase 4: Dominoes Game Area -->
+            <div id="dominoes-game-area" class="hidden">
+                <div class="game-status-bar">
+                    <span>🀏 Dominoes Match</span>
+                    <span id="turn-indicator">Turn: ---</span>
+                </div>
+                <div class="table-ends-display">
+                    Table Ends: <b id="left-end-val">None</b> | <b id="right-end-val">None</b>
+                </div>
+
+                <div class="game-log" id="game-log">Game ready. First turn starting...</div>
+
+                <div style="font-size: 11px; color: #888; margin-bottom: 4px; text-align: center;">YOUR HAND</div>
+                <div id="hand-container" class="hand-container"></div>
+
+                <div class="action-row">
+                    <button id="pass-btn" class="secondary-btn">Pass Turn</button>
+                </div>
+            </div>
 
             <!-- Room Chat -->
             <div id="chat-box">
@@ -406,7 +519,7 @@
         const CODE_LENGTH = 6;
         const CODE_PREFIX = "XG-";
         const MAX_MESSAGE_LENGTH = 300;
-        const DISCONNECT_GRACE_PERIOD_MS = 45000; // 45 seconds grace window
+        const DISCONNECT_GRACE_PERIOD_MS = 45000;
 
         let authUserId = null;
         let isHost = false;
@@ -416,9 +529,18 @@
         let roomChannel = null;
         let currentUser = "";
         let disconnectTimer = null;
+        let botCount = 0;
+        let bots = [];
 
-        // LiveKit Voice state
-        let livekitRoom = null;
+        // Game State (Dominoes)
+        let gameActive = false;
+        let myHand = [];
+        let leftEnd = null;
+        let rightEnd = null;
+        let currentTurnPlayerId = null;
+        let playerOrder = [];
+
+        // Voice state
         let isMicMuted = false;
 
         // DOM Elements
@@ -436,8 +558,10 @@
         const playerList = document.getElementById("player-list");
         const playerCount = document.getElementById("player-count");
         const hostPanel = document.getElementById("host-panel");
+        const addBotBtn = document.getElementById("add-bot-btn");
         const lockRoomBtn = document.getElementById("lock-room-btn");
         const readyToggleBtn = document.getElementById("ready-toggle-btn");
+        const startGameBtn = document.getElementById("start-game-btn");
         const messageInput = document.getElementById("message-input");
         const sendMessageBtn = document.getElementById("send-message-btn");
         const messages = document.getElementById("messages");
@@ -445,7 +569,15 @@
         const voiceLabel = document.getElementById("voice-label");
         const micToggleBtn = document.getElementById("mic-toggle-btn");
 
-        // Utility: Mobile Toast Notification
+        // Game DOM
+        const dominoesGameArea = document.getElementById("dominoes-game-area");
+        const turnIndicator = document.getElementById("turn-indicator");
+        const leftEndVal = document.getElementById("left-end-val");
+        const rightEndVal = document.getElementById("right-end-val");
+        const gameLog = document.getElementById("game-log");
+        const handContainer = document.getElementById("hand-container");
+        const passBtn = document.getElementById("pass-btn");
+
         function showToast(msg) {
             const container = document.getElementById("toast-container");
             const toast = document.createElement("div");
@@ -455,7 +587,6 @@
             setTimeout(() => toast.remove(), 3500);
         }
 
-        // Diagnostic / Failure Monitor Update
         function updateStatus(state, message) {
             statusDot.className = "dot " + state;
             statusText.textContent = message;
@@ -466,7 +597,6 @@
             }
         }
 
-        // Initialize Anonymous Sign-In
         async function initAuth() {
             updateStatus("connecting", "Signing in...");
             try {
@@ -488,9 +618,7 @@
             }
         }
 
-        retryBtn.addEventListener("click", () => {
-            initAuth();
-        });
+        retryBtn.addEventListener("click", initAuth);
 
         function setBusy(busy) {
             createRoomBtn.disabled = busy;
@@ -560,6 +688,16 @@
                 }
             });
 
+            roomChannel.on('broadcast', { event: 'game_start' }, (payload) => {
+                const data = payload.payload;
+                startDominoesClient(data);
+            });
+
+            roomChannel.on('broadcast', { event: 'play_tile' }, (payload) => {
+                const data = payload.payload;
+                handleTilePlayed(data);
+            });
+
             roomChannel.on('presence', { event: 'sync' }, () => {
                 if (disconnectTimer) {
                     clearTimeout(disconnectTimer);
@@ -571,16 +709,10 @@
             roomChannel.subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
                     updateStatus("online", `In Room: ${code}`);
-                    await roomChannel.track({
-                        user: currentUser,
-                        id: authUserId,
-                        isHost: isHost,
-                        isReady: isReady
-                    });
+                    await trackPresence();
                 } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
                     updateStatus("offline", "Connection Interrupted");
                     showToast("Reconnecting in grace window...");
-                    // Disconnect grace window timer
                     disconnectTimer = setTimeout(() => {
                         showToast("Reconnection window timed out.");
                         leaveRoom();
@@ -589,13 +721,28 @@
             });
         }
 
+        async function trackPresence() {
+            if (!roomChannel) return;
+            await roomChannel.track({
+                user: currentUser,
+                id: authUserId,
+                isHost: isHost,
+                isReady: isReady,
+                isBot: false
+            });
+        }
+
         function updatePlayerList(presenceState) {
             playerList.innerHTML = "";
             let count = 0;
+            playerOrder = [];
+
             Object.keys(presenceState).forEach(key => {
                 const playerData = presenceState[key][0];
                 if (playerData && playerData.user) {
                     count++;
+                    playerOrder.push({ id: key, name: playerData.user, isBot: playerData.isBot });
+
                     const li = document.createElement("li");
                     const isMe = key === authUserId;
 
@@ -603,25 +750,31 @@
                     nameSpan.textContent = playerData.user + (isMe ? " (You)" : "");
 
                     const badgesSpan = document.createElement("span");
-                    
-                    if (playerData.isHost) {
-                        const hBadge = document.createElement("span");
-                        hBadge.className = "badge badge-host";
-                        hBadge.textContent = "HOST";
-                        badgesSpan.appendChild(hBadge);
+
+                    if (playerData.isBot) {
+                        const bBadge = document.createElement("span");
+                        bBadge.className = "badge badge-bot";
+                        bBadge.textContent = "BOT";
+                        badgesSpan.appendChild(bBadge);
+                    } else {
+                        if (playerData.isHost) {
+                            const hBadge = document.createElement("span");
+                            hBadge.className = "badge badge-host";
+                            hBadge.textContent = "HOST";
+                            badgesSpan.appendChild(hBadge);
+                        }
+
+                        const rBadge = document.createElement("span");
+                        rBadge.className = "badge " + (playerData.isReady ? "badge-ready" : "badge-notready");
+                        rBadge.textContent = playerData.isReady ? "READY" : "NOT READY";
+                        badgesSpan.appendChild(rBadge);
                     }
 
-                    const rBadge = document.createElement("span");
-                    rBadge.className = "badge " + (playerData.isReady ? "badge-ready" : "badge-notready");
-                    rBadge.textContent = playerData.isReady ? "READY" : "NOT READY";
-                    badgesSpan.appendChild(rBadge);
-
-                    // Kick Button for Host
                     if (isHost && !isMe) {
                         const kBtn = document.createElement("button");
                         kBtn.className = "kick-btn";
-                        kBtn.textContent = "Kick";
-                        kBtn.onclick = () => kickPlayer(key);
+                        kBtn.textContent = playerData.isBot ? "Remove" : "Kick";
+                        kBtn.onclick = () => removePlayerOrBot(key, playerData.isBot);
                         badgesSpan.appendChild(kBtn);
                     }
 
@@ -630,7 +783,75 @@
                     playerList.appendChild(li);
                 }
             });
+
+            // Append local host-managed bots to state
+            bots.forEach(bot => {
+                count++;
+                playerOrder.push({ id: bot.id, name: bot.name, isBot: true });
+                const li = document.createElement("li");
+                const nameSpan = document.createElement("span");
+                nameSpan.textContent = bot.name;
+
+                const badgesSpan = document.createElement("span");
+                const bBadge = document.createElement("span");
+                bBadge.className = "badge badge-bot";
+                bBadge.textContent = "BOT";
+                badgesSpan.appendChild(bBadge);
+
+                const rBadge = document.createElement("span");
+                rBadge.className = "badge badge-ready";
+                rBadge.textContent = "READY";
+                badgesSpan.appendChild(rBadge);
+
+                if (isHost) {
+                    const kBtn = document.createElement("button");
+                    kBtn.className = "kick-btn";
+                    kBtn.textContent = "Remove";
+                    kBtn.onclick = () => removeBot(bot.id);
+                    badgesSpan.appendChild(kBtn);
+                }
+
+                li.appendChild(nameSpan);
+                li.appendChild(badgesSpan);
+                playerList.appendChild(li);
+            });
+
             playerCount.textContent = count;
+
+            if (isHost && count >= 2) {
+                startGameBtn.classList.remove("hidden");
+            } else {
+                startGameBtn.classList.add("hidden");
+            }
+        }
+
+        // Add Bot (Host Only)
+        addBotBtn.addEventListener("click", () => {
+            if (!isHost) return;
+            if (playerOrder.length >= 4) {
+                showToast("Maximum 4 players in Dominoes room.");
+                return;
+            }
+            botCount++;
+            const botId = "bot_" + Date.now() + "_" + botCount;
+            const botName = "XBot-" + botCount;
+            bots.push({ id: botId, name: botName, hand: [] });
+            showToast(`Added ${botName}`);
+            updatePlayerList(roomChannel ? roomChannel.presenceState() : {});
+        });
+
+        function removeBot(botId) {
+            bots = bots.filter(b => b.id !== botId);
+            showToast("Bot removed.");
+            updatePlayerList(roomChannel ? roomChannel.presenceState() : {});
+        }
+
+        async function removePlayerOrBot(key, isBotFlag) {
+            if (isBotFlag) {
+                removeBot(key);
+            } else {
+                kickPlayer(key);
+            }
         }
 
         async function kickPlayer(targetUserId) {
@@ -659,7 +880,6 @@
             subscribeToRoom(code);
             addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
 
-            // Initialize Voice status UI
             voiceDot.className = "dot online";
             voiceLabel.textContent = "Voice Ready";
             micToggleBtn.disabled = false;
@@ -687,18 +907,283 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
-        // Ready Up Toggle
+        function logGame(text) {
+            gameLog.textContent = text;
+        }
+
+        // Dominoes Game Engine (Phase 4)
+        function generateDominoSet() {
+            const tiles = [];
+            for (let i = 0; i <= 6; i++) {
+                for (let j = i; j <= 6; j++) {
+                    tiles.push([i, j]);
+                }
+            }
+            return tiles.sort(() => Math.random() - 0.5); // Shuffle
+        }
+
+        startGameBtn.addEventListener("click", async () => {
+            if (!isHost) return;
+            const fullDeck = generateDominoSet();
+
+            // Deal 7 tiles to each player
+            const handsMap = {};
+            playerOrder.forEach((p, index) => {
+                handsMap[p.id] = fullDeck.slice(index * 7, (index + 1) * 7);
+                if (p.isBot) {
+                    const b = bots.find(bot => bot.id === p.id);
+                    if (b) b.hand = handsMap[p.id];
+                }
+            });
+
+            const startPayload = {
+                handsMap: handsMap,
+                playerOrder: playerOrder,
+                startingTurnId: playerOrder[0].id
+            };
+
+            await roomChannel.send({
+                type: 'broadcast',
+                event: 'game_start',
+                payload: startPayload
+            });
+
+            startDominoesClient(startPayload);
+        });
+
+        function startDominoesClient(payload) {
+            gameActive = true;
+            leftEnd = null;
+            rightEnd = null;
+            leftEndVal.textContent = "None";
+            rightEndVal.textContent = "None";
+
+            playerOrder = payload.playerOrder;
+            currentTurnPlayerId = payload.startingTurnId;
+            myHand = payload.handsMap[authUserId] || [];
+
+            dominoesGameArea.classList.remove("hidden");
+            renderHand();
+            updateTurnDisplay();
+            logGame("Match started! Standard double-six rules.");
+
+            checkBotTurn();
+        }
+
+        function renderHand() {
+            handContainer.innerHTML = "";
+            myHand.forEach((tile, index) => {
+                const el = document.createElement("div");
+                const isDouble = tile[0] === tile[1];
+                el.className = "domino-tile" + (isDouble ? " double" : "");
+                el.textContent = `[${tile[0]}|${tile[1]}]`;
+                el.onclick = () => attemptPlayTile(index, tile);
+                handContainer.appendChild(el);
+            });
+        }
+
+        function updateTurnDisplay() {
+            const currentPlayer = playerOrder.find(p => p.id === currentTurnPlayerId);
+            const isMyTurn = currentTurnPlayerId === authUserId;
+            turnIndicator.textContent = isMyTurn ? "Your Turn!" : `Turn: ${currentPlayer ? currentPlayer.name : 'Unknown'}`;
+        }
+
+        async function attemptPlayTile(handIndex, tile) {
+            if (!gameActive) return;
+            if (currentTurnPlayerId !== authUserId) {
+                showToast("It's not your turn!");
+                return;
+            }
+
+            let playedSide = null;
+            if (leftEnd === null && rightEnd === null) {
+                leftEnd = tile[0];
+                rightEnd = tile[1];
+                playedSide = "first";
+            } else if (tile[0] === leftEnd) {
+                leftEnd = tile[1];
+                playedSide = "left";
+            } else if (tile[1] === leftEnd) {
+                leftEnd = tile[0];
+                playedSide = "left";
+            } else if (tile[0] === rightEnd) {
+                rightEnd = tile[1];
+                playedSide = "right";
+            } else if (tile[1] === rightEnd) {
+                rightEnd = tile[0];
+                playedSide = "right";
+            } else {
+                showToast("Tile does not match any table ends!");
+                return;
+            }
+
+            // Remove tile from hand
+            myHand.splice(handIndex, 1);
+            renderHand();
+
+            // Advance Turn
+            const currentIndex = playerOrder.findIndex(p => p.id === authUserId);
+            const nextIndex = (currentIndex + 1) % playerOrder.length;
+            const nextPlayerId = playerOrder[nextIndex].id;
+
+            const movePayload = {
+                playerId: authUserId,
+                playerName: currentUser,
+                tile: tile,
+                leftEnd: leftEnd,
+                rightEnd: rightEnd,
+                nextTurnId: nextPlayerId,
+                handCount: myHand.length
+            };
+
+            await roomChannel.send({
+                type: 'broadcast',
+                event: 'play_tile',
+                payload: movePayload
+            });
+
+            handleTilePlayed(movePayload);
+        }
+
+        function handleTilePlayed(payload) {
+            leftEnd = payload.leftEnd;
+            rightEnd = payload.rightEnd;
+            currentTurnPlayerId = payload.nextTurnId;
+
+            leftEndVal.textContent = leftEnd;
+            rightEndVal.textContent = rightEnd;
+
+            logGame(`${payload.playerName} played [${payload.tile[0]}|${payload.tile[1]}].`);
+            updateTurnDisplay();
+
+            if (payload.handCount === 0) {
+                logGame(`🎉 ${payload.playerName} won the round!`);
+                showToast(`${payload.playerName} Dominoes!`);
+                gameActive = false;
+                return;
+            }
+
+            checkBotTurn();
+        }
+
+        // Pass Turn
+        passBtn.addEventListener("click", async () => {
+            if (!gameActive || currentTurnPlayerId !== authUserId) return;
+
+            const currentIndex = playerOrder.findIndex(p => p.id === authUserId);
+            const nextIndex = (currentIndex + 1) % playerOrder.length;
+            const nextPlayerId = playerOrder[nextIndex].id;
+
+            const passPayload = {
+                playerId: authUserId,
+                playerName: currentUser,
+                tile: [null, null],
+                leftEnd: leftEnd,
+                rightEnd: rightEnd,
+                nextTurnId: nextPlayerId,
+                handCount: myHand.length,
+                passed: true
+            };
+
+            await roomChannel.send({
+                type: 'broadcast',
+                event: 'play_tile',
+                payload: passPayload
+            });
+
+            logGame(`${currentUser} passed.`);
+            currentTurnPlayerId = nextPlayerId;
+            updateTurnDisplay();
+            checkBotTurn();
+        });
+
+        // Bot Logic Executor
+        function checkBotTurn() {
+            if (!gameActive || !isHost) return;
+            const currentP = playerOrder.find(p => p.id === currentTurnPlayerId);
+            if (!currentP || !currentP.isBot) return;
+
+            setTimeout(() => {
+                const b = bots.find(bot => bot.id === currentP.id);
+                if (!b) return;
+
+                let playableIndex = -1;
+                let playableSide = null;
+
+                for (let i = 0; i < b.hand.length; i++) {
+                    const tile = b.hand[i];
+                    if (leftEnd === null && rightEnd === null) {
+                        playableIndex = i;
+                        break;
+                    }
+                    if (tile[0] === leftEnd || tile[1] === leftEnd || tile[0] === rightEnd || tile[1] === rightEnd) {
+                        playableIndex = i;
+                        break;
+                    }
+                }
+
+                const currentIndex = playerOrder.findIndex(p => p.id === currentP.id);
+                const nextIndex = (currentIndex + 1) % playerOrder.length;
+                const nextPlayerId = playerOrder[nextIndex].id;
+
+                if (playableIndex !== -1) {
+                    const tile = b.hand.splice(playableIndex, 1)[0];
+                    if (leftEnd === null) {
+                        leftEnd = tile[0];
+                        rightEnd = tile[1];
+                    } else if (tile[0] === leftEnd) leftEnd = tile[1];
+                    else if (tile[1] === leftEnd) leftEnd = tile[0];
+                    else if (tile[0] === rightEnd) rightEnd = tile[0];
+                    else if (tile[1] === rightEnd) rightEnd = tile[0];
+
+                    const botPayload = {
+                        playerId: b.id,
+                        playerName: b.name,
+                        tile: tile,
+                        leftEnd: leftEnd,
+                        rightEnd: rightEnd,
+                        nextTurnId: nextPlayerId,
+                        handCount: b.hand.length
+                    };
+
+                    roomChannel.send({
+                        type: 'broadcast',
+                        event: 'play_tile',
+                        payload: botPayload
+                    });
+
+                    handleTilePlayed(botPayload);
+                } else {
+                    const passPayload = {
+                        playerId: b.id,
+                        playerName: b.name,
+                        tile: [null, null],
+                        leftEnd: leftEnd,
+                        rightEnd: rightEnd,
+                        nextTurnId: nextPlayerId,
+                        handCount: b.hand.length,
+                        passed: true
+                    };
+
+                    roomChannel.send({
+                        type: 'broadcast',
+                        event: 'play_tile',
+                        payload: passPayload
+                    });
+
+                    logGame(`${b.name} passed.`);
+                    currentTurnPlayerId = nextPlayerId;
+                    updateTurnDisplay();
+                    checkBotTurn();
+                }
+            }, 1500);
+        }
+
+        // Ready Toggle
         readyToggleBtn.addEventListener("click", async () => {
             isReady = !isReady;
-            readyToggleBtn.textContent = isReady ? "Set Not Ready" : "Toggle Ready Status";
-            if (roomChannel) {
-                await roomChannel.track({
-                    user: currentUser,
-                    id: authUserId,
-                    isHost: isHost,
-                    isReady: isReady
-                });
-            }
+            readyToggleBtn.textContent = isReady ? "Unready" : "Toggle Ready";
+            await trackPresence();
         });
 
         // Host Lock Toggle
@@ -710,7 +1195,7 @@
             showToast(isLocked ? "Room Locked" : "Room Unlocked");
         });
 
-        // Create Room Click
+        // Create Room
         createRoomBtn.addEventListener("click", async () => {
             const name = usernameInput.value.trim();
             if (!name) {
@@ -726,11 +1211,11 @@
                 currentUser = name;
                 enterRoomUI(newCode, true);
             } else {
-                showToast("Failed to create room. Ensure rooms table exists.");
+                showToast("Failed to create room. Check database policies.");
             }
         });
 
-        // Join Room Click
+        // Join Room
         joinRoomBtn.addEventListener("click", async () => {
             const name = usernameInput.value.trim();
             const code = normalizeCode(roomCodeInput.value);
@@ -749,7 +1234,7 @@
             setBusy(false);
 
             if (!roomData) {
-                showToast("Room does not exist or couldn't be loaded.");
+                showToast("Room does not exist.");
                 return;
             }
 
@@ -776,7 +1261,10 @@
             activeRoom = null;
             isHost = false;
             isReady = false;
-            readyToggleBtn.textContent = "Toggle Ready Status";
+            gameActive = false;
+            bots = [];
+
+            dominoesGameArea.classList.add("hidden");
             messages.innerHTML = "";
             playerList.innerHTML = "";
             roomSection.classList.add("hidden");
@@ -824,7 +1312,6 @@
             if (e.key === "Enter") sendMessage();
         });
 
-        // Initialize on load
         document.addEventListener("DOMContentLoaded", initAuth);
     </script>
 </body>
