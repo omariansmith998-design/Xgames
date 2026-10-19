@@ -35,6 +35,7 @@ canvas#board{display:block;width:100%;height:auto}
 .hand canvas.sel{transform:translateY(-5px)}.hand canvas.dim{opacity:.4}
 .lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
 </style>
@@ -51,13 +52,22 @@ canvas#board{display:block;width:100%;height:auto}
 
   <!-- LOBBY -->
   <div id="lobby" class="stack">
-    <h2>Pick a name and a room</h2>
-    <input id="nameIn" placeholder="Your nickname" maxlength="15" value="Dwayne">
-    <div class="two">
-      <button class="green" id="createBtn">+ Create room</button>
-      <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
+    <div id="homeBox" class="stack">
+      <h2>Pick a name and a room</h2>
+      <input id="nameIn" placeholder="Your nickname" maxlength="15" value="Dwayne">
+      <div class="two">
+        <button class="green" id="createBtn">+ Create room</button>
+        <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
+      </div>
     </div>
     <div id="roomPanel" class="panel hidden">
+      <div class="lbl">Room code</div>
+      <div class="codeBig" id="codeBig">XG-XXXXX</div>
+      <div class="two" style="margin:8px 0">
+        <button class="blue" id="copyBtn">Copy code</button>
+        <button id="leaveBtn">Leave room</button>
+      </div>
+      <div class="status" style="margin-bottom:10px">Practice mode: other people can't join yet. Fill the seats with bots.</div>
       <div class="row between" style="margin-bottom:4px"><b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b><button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add bot</button></div>
       <div id="plist"></div>
       <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
@@ -123,18 +133,24 @@ let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [
 const byPos = p => players.find(x => x.pos === p);
 
 /* ---------- LOBBY ---------- */
+let roomCode = '';
 $('createBtn').onclick = () => {
-  const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  isHost = true; $('roomBadge').textContent = 'Room: ' + code;
+  roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  isHost = true; $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (You)', isBot: false }];
-  $('roomPanel').classList.remove('hidden'); renderLobby(); toast('Room ' + code + ' created');
+  $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
+  renderLobby(); toast('Room created');
 };
-$('joinBtn').onclick = () => {
-  const code = $('codeIn').value.trim().toUpperCase();
-  if (!code) return toast('Enter a room code');
-  isHost = false; $('roomBadge').textContent = 'Room: ' + code;
-  lobby = [{ name: ($('nameIn').value.trim() || 'Guest') + ' (You)', isBot: false }];
-  $('roomPanel').classList.remove('hidden'); renderLobby(); toast('Joined ' + code);
+// Honest for now: nobody else can reach this page's rooms until it is connected to the online lobby
+$('joinBtn').onclick = () => toast("Joining friends' rooms isn't live yet. Create a room and add bots.");
+$('copyBtn').onclick = () => {
+  const done = () => toast('Code copied');
+  if (navigator.clipboard) navigator.clipboard.writeText(roomCode).then(done, () => toast(roomCode));
+  else toast(roomCode);
+};
+$('leaveBtn').onclick = () => {
+  lobby = []; roomCode = ''; botN = 0; $('roomBadge').textContent = 'Room: Off-Line';
+  $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
 };
 $('botBtn').onclick = () => {
   if (lobby.length >= 4) return toast('Room is full');
@@ -346,9 +362,16 @@ function drawLinked(o) {
     drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1);
   }
 }
-function badge(x, y, txt) {
-  ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fill();
-  ctx.fillStyle = '#fff'; ctx.font = '800 9px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + .5);
+// Small muted tag in the open slot at the end of each branch, e.g. "L 6" = left end needs a 6
+function endTag(x, y, dir, txt) {
+  const w = 26, h = 13;
+  let cx = x + dir * (w / 2 + 3);
+  cx = Math.min(W - w / 2 - 2, Math.max(w / 2 + 2, cx)); // keep it inside the board
+  rr(ctx, cx - w / 2, y - h / 2, w, h, 6);
+  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill();
+  ctx.lineWidth = 1; ctx.strokeStyle = '#7c5a1c'; ctx.stroke();
+  ctx.fillStyle = '#fcd34d'; ctx.font = '700 8px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, cx, y + .5);
 }
 function drawBoard() {
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
@@ -377,9 +400,9 @@ function drawBoard() {
   lay.out.forEach(drawLinked);
   ray.out.forEach(drawLinked);
 
-  // The badges sit exactly where the next tile on each end will attach
-  badge(lay.x, lay.y, 'L');
-  badge(ray.x, ray.y, 'R');
+  // Muted tags sit in the open slot at each end and show which number that end needs
+  endTag(lay.x, lay.y, lay.dir, 'L ' + L);
+  endTag(ray.x, ray.y, ray.dir, 'R ' + R);
 }
 
 /* ---------- REFRESH ---------- */
