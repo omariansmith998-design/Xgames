@@ -121,6 +121,13 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let roomSubscription = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
 let micActive = false;
 
+// Unique client identifier per device tab
+let myClientId = sessionStorage.getItem('xg_client_id');
+if (!myClientId) {
+  myClientId = 'cid_' + Math.random().toString(36).slice(2, 9);
+  sessionStorage.setItem('xg_client_id', myClientId);
+}
+
 /* ---------- AUDIO ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
 function tone(f1, f2, d, type, vol, delay = 0) {
@@ -171,7 +178,13 @@ function listenToRoom() {
       handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
       players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
       lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
-      if (st.lobby) { lobby = st.lobby; renderLobby(); }
+      
+      if (st.lobby) {
+        lobby = st.lobby;
+        const meInLobby = lobby.find(p => p.clientId === myClientId);
+        if (meInLobby) mySeatPos = meInLobby.pos;
+        renderLobby();
+      }
       
       if (roomStatus === 'playing' && $('game').classList.contains('hidden')) {
         $('lobby').classList.add('hidden');
@@ -185,12 +198,13 @@ function listenToRoom() {
 $('createBtn').onclick = async () => {
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   isHost = true; mySeatPos = 'S'; roomStatus = 'waiting';
+  const myName = ($('nameIn').value.trim() || 'South') + ' (Host)';
+  
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (Host)', isBot: false, pos: 'S' }];
+  lobby = [{ clientId: myClientId, name: myName, isBot: false, pos: 'S' }];
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
   renderLobby();
   
-  // IMMEDIATELY SEED ROOM IN SUPABASE DATABASE
   const { error } = await sb.from('game_rooms').insert([{
     room_code: roomCode,
     status: 'waiting',
@@ -215,19 +229,22 @@ async function joinRoomByCode(code) {
   roomCode = code; isHost = false; roomStatus = data.status || 'waiting';
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   
-  const currentLobby = data.state.lobby || [];
+  let currentLobby = data.state.lobby || [];
   const positions = ['S', 'W', 'N', 'E'];
   const taken = currentLobby.map(p => p.pos);
   const freePos = positions.find(p => !taken.includes(p)) || 'W';
   
-  mySeatPos = freePos;
-  lobby = currentLobby;
-  
-  // Avoid duplicate entries
-  if (!lobby.some(p => p.name.startsWith($('nameIn').value.trim() || 'Player'))) {
-    lobby.push({ name: ($('nameIn').value.trim() || 'Player') + ' (You)', isBot: false, pos: freePos });
+  const existingPlayer = currentLobby.find(p => p.clientId === myClientId);
+  if (existingPlayer) {
+    mySeatPos = existingPlayer.pos;
+  } else {
+    mySeatPos = freePos;
+    let nick = $('nameIn').value.trim();
+    if (!nick || nick === 'Dwayne') nick = 'Guest-' + Math.floor(Math.random() * 90 + 10);
+    currentLobby.push({ clientId: myClientId, name: nick, isBot: false, pos: freePos });
   }
   
+  lobby = currentLobby;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
   renderLobby(); listenToRoom(); await syncRoomState();
 }
@@ -262,7 +279,7 @@ $('botBtn').onclick = () => {
   const positions = ['S', 'W', 'N', 'E'];
   const taken = lobby.map(p => p.pos);
   const freePos = positions.find(p => !taken.includes(p));
-  lobby.push({ name: 'XBot-' + (++botN), isBot: true, pos: freePos });
+  lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos: freePos });
   renderLobby(); syncRoomState();
 };
 
@@ -271,7 +288,7 @@ function renderLobby() {
   lobby.forEach((p, i) => {
     const d = document.createElement('div'); d.className = 'pl';
     d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : '') + '">' + (p.isBot ? 'BOT' : 'PLAYER') + '</span>' +
-      (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
+      (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×' : '') + '</span>';
     d.firstChild.textContent = p.name;
     const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
@@ -282,7 +299,9 @@ function renderLobby() {
 $('startBtn').onclick = () => {
   const positions = ['S', 'W', 'N', 'E'];
   positions.forEach(pos => {
-    if (!lobby.some(p => p.pos === pos)) lobby.push({ name: 'XBot-' + (++botN), isBot: true, pos });
+    if (!lobby.some(p => p.pos === pos)) {
+      lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos });
+    }
   });
   roomStatus = 'playing';
   newMatch();
@@ -357,7 +376,7 @@ function newHand() {
   const deck = fullSet();
   players = ['S', 'W', 'N', 'E'].map((pos, i) => {
     const playerObj = lobby.find(l => l.pos === pos) || { name: 'XBot-' + i, isBot: true };
-    return { name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
+    return { clientId: playerObj.clientId, name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
   });
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
   needD6 = lastWin === null;
@@ -480,7 +499,7 @@ const W = 400, H = 430, PITCH = 36, MARGIN = 44, CORNER = 20, CY = 218;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function rr(c, x, y, w, h, r) {
-  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.beginPath(); c.moveTo(x + r); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
 function pips(c, x, y, w, h, n, s) {
