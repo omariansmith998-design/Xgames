@@ -60,7 +60,6 @@
             gap: 10px;
         }
 
-        /* 16px stops iPhones from zooming in when you tap a field */
         input {
             width: 100%;
             padding: 12px;
@@ -206,12 +205,12 @@
         <div id="setup-section">
             <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15">
             <div class="button-group">
-                <button id="create-room-btn">Create Room</button>
+                <button id="create-room-btn" disabled>Create Room</button>
             </div>
             <div class="divider">OR</div>
             <div class="join-group">
                 <input type="text" id="room-code-input" placeholder="Enter Room Code" maxlength="12">
-                <button id="join-room-btn">Join Room</button>
+                <button id="join-room-btn" disabled>Join Room</button>
             </div>
         </div>
 
@@ -238,43 +237,19 @@
     </div>
 
     <script>
-        // SUPABASE CREDENTIALS
-        // The publishable key is safe in the browser ONLY because Row Level Security
-        // is on for the rooms table. Never put a "sb_secret_" key in this file.
         const SUPABASE_URL = "https://vlrscrzwqjkresgvcygh.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_8p4urYQqT6YqV3YNkS9qyA_z19pF0mH";
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Room code settings: no 0/O/1/I so codes are easy to read and type
         const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         const CODE_LENGTH = 6;
         const CODE_PREFIX = "XG-";
         const MAX_MESSAGE_LENGTH = 300;
 
-        // The player's real, server-issued ID (set after anonymous sign-in).
-        // It survives refreshes because Supabase keeps the session in this browser.
-        let userId = null;
-        let lastCreateError = null; // shown on screen so problems are easy to diagnose from a phone
+        let authUserId = null;
 
-        async function ensureSignedIn() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) return session.user.id;
-
-            const { data, error } = await supabaseClient.auth.signInAnonymously();
-            if (error) throw error;
-            return data.user.id;
-        }
-
-        // Remember the nickname on this device (storage can be blocked, so never let it crash)
-        function loadNickname() {
-            try { return localStorage.getItem("xg_nickname") || ""; } catch (e) { return ""; }
-        }
-        function saveNickname(name) {
-            try { localStorage.setItem("xg_nickname", name); } catch (e) { /* ignore */ }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             const usernameInput = document.getElementById("username-input");
             const createRoomBtn = document.getElementById("create-room-btn");
             const roomCodeInput = document.getElementById("room-code-input");
@@ -294,14 +269,29 @@
             let activeRoom = null;
             let roomChannel = null;
 
-            // ---------- helpers ----------
+            // Initialize Anonymous Auth Session
+            try {
+                const { data: sessionData } = await supabaseClient.auth.getSession();
+                if (sessionData && sessionData.session) {
+                    authUserId = sessionData.session.user.id;
+                } else {
+                    const { data: signInData, error: signInError } = await supabaseClient.auth.signInAnonymously();
+                    if (signInError) throw signInError;
+                    authUserId = signInData.user.id;
+                }
+                // Unlock buttons after auth completes
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
+            } catch (err) {
+                console.error("Auth Error:", err);
+                alert("Sign-in failed: " + (err.message || "Ensure Anonymous Auth is enabled in Supabase settings."));
+            }
 
             function setBusy(busy) {
                 createRoomBtn.disabled = busy;
                 joinRoomBtn.disabled = busy;
             }
 
-            // Secure random room code, e.g. XG-K7X9M2
             function generateRoomCode() {
                 const bytes = new Uint8Array(CODE_LENGTH);
                 crypto.getRandomValues(bytes);
@@ -310,14 +300,12 @@
                 return CODE_PREFIX + code;
             }
 
-            // Lets people type "K7X9M2" or "xg-k7x9m2"
             function normalizeCode(raw) {
                 let code = raw.trim().toUpperCase().replace(/\s+/g, "");
                 if (code && !code.startsWith(CODE_PREFIX)) code = CODE_PREFIX + code;
                 return code;
             }
 
-            // Returns the new room code, or null if it failed
             async function createRoomInSupabase() {
                 for (let attempt = 0; attempt < 5; attempt++) {
                     const code = generateRoomCode();
@@ -326,18 +314,14 @@
                         .insert([{ code: code }]);
 
                     if (!error) return code;
-
-                    // 23505 = that code already exists, so try a different one
                     if (error.code !== "23505") {
                         console.error("Error creating room:", error);
-                        lastCreateError = error;
                         return null;
                     }
                 }
                 return null;
             }
 
-            // Returns true / false, or null if the lookup itself failed (network, etc.)
             async function checkRoomExists(code) {
                 const { data, error } = await supabaseClient
                     .from('rooms')
@@ -352,14 +336,11 @@
                 return !!data;
             }
 
-            // ---------- realtime ----------
-
             function subscribeToRoom(code) {
                 roomChannel = supabaseClient.channel(`room_${code}`, {
-                    config: { presence: { key: userId } }
+                    config: { presence: { key: authUserId } }
                 });
 
-                // Live chat from other players
                 roomChannel.on('broadcast', { event: 'message' }, (payload) => {
                     const data = payload && payload.payload;
                     if (!data) return;
@@ -369,14 +350,13 @@
                     );
                 });
 
-                // Players currently in the room
                 roomChannel.on('presence', { event: 'sync' }, () => {
                     updatePlayerList(roomChannel.presenceState());
                 });
 
                 roomChannel.subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
-                        await roomChannel.track({ user: currentUser });
+                        await roomChannel.track({ user: currentUser, id: authUserId });
                     } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
                         addSystemMessage("Connection problem. Try leaving and rejoining.");
                     }
@@ -386,21 +366,18 @@
             function updatePlayerList(presenceState) {
                 playerList.innerHTML = "";
                 Object.keys(presenceState).forEach(key => {
-                    const user = presenceState[key][0] && presenceState[key][0].user;
-                    if (user) {
+                    const playerData = presenceState[key][0];
+                    if (playerData && playerData.user) {
                         const li = document.createElement("li");
-                        const isMe = key === userId;
-                        li.textContent = `● ${String(user).slice(0, 15)}${isMe ? " (You)" : ""}`;
+                        const isMe = key === authUserId;
+                        li.textContent = `● ${String(playerData.user).slice(0, 15)}${isMe ? " (You)" : ""}`;
                         playerList.appendChild(li);
                     }
                 });
             }
 
-            // ---------- UI ----------
-
             function enterRoomUI(code) {
                 activeRoom = code;
-                saveNickname(currentUser);
                 currentRoomCode.textContent = code;
                 setupSection.classList.add("hidden");
                 roomSection.classList.remove("hidden");
@@ -408,7 +385,6 @@
                 addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
             }
 
-            // textContent only (never innerHTML), so nobody can inject HTML or scripts via chat
             function displayMessage(author, text) {
                 const msgElement = document.createElement("div");
                 msgElement.classList.add("chat-message");
@@ -431,8 +407,6 @@
                 messages.scrollTop = messages.scrollHeight;
             }
 
-            // ---------- actions ----------
-
             createRoomBtn.addEventListener("click", async () => {
                 const name = usernameInput.value.trim();
                 if (!name) {
@@ -448,10 +422,7 @@
                     currentUser = name;
                     enterRoomUI(newCode);
                 } else {
-                    const detail = lastCreateError
-                        ? `${lastCreateError.code || ""} ${lastCreateError.message || ""}`.trim()
-                        : "unknown error";
-                    alert("Failed to create room.\n\n" + detail);
+                    alert("Failed to create room. Please check database policies.");
                 }
             });
 
@@ -473,7 +444,7 @@
                 setBusy(false);
 
                 if (exists === null) {
-                    alert("Couldn't reach the server. Check your connection and try again.");
+                    alert("Couldn't reach the server. Check your connection.");
                     return;
                 }
                 if (!exists) {
@@ -487,7 +458,6 @@
 
             leaveRoomBtn.addEventListener("click", async () => {
                 if (roomChannel) {
-                    // removeChannel fully cleans up, so rejoining doesn't stack duplicate channels
                     await supabaseClient.removeChannel(roomChannel);
                     roomChannel = null;
                 }
@@ -516,20 +486,6 @@
             messageInput.addEventListener("keypress", (e) => {
                 if (e.key === "Enter") sendMessage();
             });
-
-            // ---------- startup ----------
-            usernameInput.value = loadNickname();
-            setBusy(true); // locked until sign-in finishes
-
-            ensureSignedIn()
-                .then((id) => {
-                    userId = id;
-                    setBusy(false);
-                })
-                .catch((err) => {
-                    console.error("Sign-in failed:", err);
-                    alert("Couldn't sign you in. If you're the developer, check that anonymous sign-ins are turned on in Supabase.");
-                });
         });
     </script>
 </body>
