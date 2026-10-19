@@ -1,998 +1,370 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Xgames Arcade - Yard Dominoes (Six Love)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: #07080c;
-            color: #f1f5f9;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 8px;
-            overflow-x: hidden;
-        }
-
-        /* Screen Shake Animation on Heavy Slams */
-        .shake-impact {
-            animation: slamShake 0.25s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
-        @keyframes slamShake {
-            10%, 90% { transform: translate3d(-3px, -2px, 0); }
-            20%, 80% { transform: translate3d(4px, 3px, 0); }
-            30%, 50%, 70% { transform: translate3d(-5px, -4px, 0); }
-            40%, 60% { transform: translate3d(5px, 4px, 0); }
-        }
-
-        /* Pulsing Glow for Open End Markers */
-        @keyframes endPulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 6px #10b981; }
-            100% { transform: scale(1.15); box-shadow: 0 0 14px #10b981, 0 0 20px #34d399; }
-        }
-
-        .pulse-end {
-            animation: endPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
-        }
-
-        /* Pure CSS 3D Domino Tile Styling */
-        .domino-3d {
-            position: absolute;
-            background: linear-gradient(145deg, #ffffff 0%, #f4f1e8 55%, #e5e0d3 100%);
-            border: 1px solid #b3ad9e;
-            border-radius: 5px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            opacity: 1 !important;
-            visibility: visible !important;
-            transition: transform 0.15s ease-out;
-        }
-
-        .domino-3d.horiz {
-            width: 36px;
-            height: 20px;
-            flex-direction: row;
-        }
-
-        .domino-3d.vert {
-            width: 20px;
-            height: 36px;
-            flex-direction: column;
-            background: linear-gradient(145deg, #fffde8 0%, #fef08a 60%, #facc15 100%);
-            border-color: #ca8a04;
-        }
-
-        .divider-h { width: 1px; height: 80%; background: #94a3b8; }
-        .divider-v { height: 1px; width: 80%; background: #ca8a04; }
-
-        /* 3x3 Pip Matrix Engine */
-        .pip-grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            width: 100%;
-            height: 100%;
-            padding: 2px;
-        }
-
-        .pip-dot {
-            width: 3.5px;
-            height: 3.5px;
-            background-color: #0f172a;
-            border-radius: 50%;
-            justify-self: center;
-            align-self: center;
-            box-shadow: inset 0 1px 1px rgba(0,0,0,0.8);
-        }
-
-        /* Hand Interactive Tile */
-        .hand-tile {
-            background: linear-gradient(145deg, #ffffff 0%, #f3f0e6 100%);
-            color: #0f172a;
-            border: 2px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 4px 6px;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            transition: all 0.15s ease-out;
-        }
-
-        .hand-tile.double {
-            background: linear-gradient(145deg, #fef9c3 0%, #fef08a 100%);
-            border-color: #eab308;
-        }
-
-        .hand-tile.selected {
-            border-color: #facc15;
-            box-shadow: 0 0 12px #facc15;
-            transform: translateY(-5px);
-        }
-
-        .mini-half {
-            width: 14px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Xgames Arcade - Yard Dominoes (Six Love)</title>
+<style>
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#07080c;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
+.card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:10px}
+.row{display:flex;gap:8px;align-items:center}
+.between{justify-content:space-between}
+.hidden{display:none!important}
+.logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
+button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#334155}
+button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}
+input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:9px;padding:10px;outline:0;text-transform:none}
+input:focus{border-color:#6366f1}
+h2{margin:0;font-size:13px;color:#a5b4fc}
+.stack{display:flex;flex-direction:column;gap:10px}
+.panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
+.pl{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e2433;font-size:14px}
+.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}
+.status{font-size:11px;color:#94a3b8}.status b{color:#fbbf24}
+.score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
+.pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
+.mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
+.wrap{border:6px solid #5a3a1a;border-radius:16px;overflow:hidden;background:#120a04}
+canvas#board{display:block;width:100%;height:auto}
+.shake{animation:shake .25s both}
+@keyframes shake{20%,80%{transform:translate(-3px,-2px)}40%,60%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}}
+#log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:9px;font-size:13px;color:#e2e8f0}
+.hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:42px}
+.hand canvas{width:64px;height:36px;cursor:pointer;transition:transform .12s,opacity .12s}
+.hand canvas.sel{transform:translateY(-5px)}.hand canvas.dim{opacity:.4}
+.lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+</style>
 </head>
 <body>
 
-    <!-- XGAMES NAV BAR -->
-    <div class="w-full max-w-[460px] bg-[#11131f] border border-[#23273a] rounded-xl p-2.5 mb-2 flex justify-between items-center shadow-lg">
-        <div class="text-sm font-black tracking-wider text-indigo-400 flex items-center gap-1.5">
-            🎮 XGAMES <span class="text-rose-500">ARCADE</span>
-        </div>
-        <button id="nav-hub-btn" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-lg transition">
-            Main Arcade Hub
-        </button>
+<div class="card row between">
+  <div class="logo">XGAMES <b>ARCADE</b></div>
+  <button class="blue" id="hubBtn">Main Arcade Hub</button>
+</div>
+
+<div class="card stack">
+  <div class="panel row between status"><span>Online Sync Ready</span><b id="roomBadge">Room: Off-Line</b></div>
+
+  <!-- LOBBY -->
+  <div id="lobby" class="stack">
+    <h2>Pick a name and a room</h2>
+    <input id="nameIn" placeholder="Your nickname" maxlength="15" value="Dwayne">
+    <div class="two">
+      <button class="green" id="createBtn">+ Create room</button>
+      <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
     </div>
-
-    <!-- MAIN APP CONTAINER -->
-    <div id="app-container" class="w-full max-w-[460px] bg-[#141724] border border-[#23273a] rounded-2xl p-2.5 shadow-2xl flex flex-direction-column gap-2">
-
-        <!-- STATUS DIAGNOSTIC BAR -->
-        <div class="bg-[#0b0c12] border border-[#1f2433] rounded-lg px-3 py-1.5 text-[10px] flex justify-between items-center text-slate-400">
-            <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                <span id="network-status" class="font-semibold text-slate-300">Online Sync Ready</span>
-            </div>
-            <div id="room-code-badge" class="font-bold text-amber-400">Room: Off-Line</div>
-        </div>
-
-        <!-- VIEW 1: ARCADE LOBBY & ROOM SELECTOR -->
-        <div id="lobby-view" class="flex flex-col gap-2.5">
-            <h2 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">Select Player Identity & Room</h2>
-            
-            <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15" value="Dwayne"
-                class="w-full bg-[#0b0c12] border border-[#2a3045] rounded-lg p-2.5 text-xs text-white outline-none focus:border-indigo-500 transition">
-
-            <div class="grid grid-cols-2 gap-2">
-                <button id="create-room-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs p-2.5 rounded-lg transition shadow-md">
-                    + Create Room
-                </button>
-                <div class="flex gap-1">
-                    <input type="text" id="join-code-input" placeholder="Code (XG-XXXX)" maxlength="10"
-                        class="w-full bg-[#0b0c12] border border-[#2a3045] rounded-lg p-2 text-[11px] text-white outline-none uppercase">
-                    <button id="join-room-btn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-3 rounded-lg transition">
-                        Join
-                    </button>
-                </div>
-            </div>
-
-            <!-- ROOM PANEL (ONCE CREATED OR JOINED) -->
-            <div id="room-lobby-panel" class="hidden bg-[#0b0c12] border border-[#23273a] rounded-xl p-3 flex flex-col gap-2">
-                <div class="flex justify-between items-center pb-1 border-b border-slate-800">
-                    <span class="text-xs font-extrabold text-amber-400">Lobby Players (<span id="player-count">1</span>/4)</span>
-                    <button id="add-bot-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md transition">
-                        + Add Bot
-                    </button>
-                </div>
-
-                <ul id="player-list" class="space-y-1 my-1"></ul>
-
-                <button id="start-game-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded-lg transition shadow-lg">
-                    SLAM YARD DOMINOES 🀏
-                </button>
-            </div>
-        </div>
-
-        <!-- VIEW 2: JAMAICAN DOMINOES TABLE GAME AREA -->
-        <div id="dominoes-view" class="hidden flex flex-col gap-2">
-            
-            <!-- SIX LOVE MATCH SCOREBOARD -->
-            <div id="match-scoreboard" class="w-full">
-                <div class="team-box">
-                    <span class="team-label">TEAM N/S</span>
-                    <span id="score-ns" class="score-pill">0</span>
-                </div>
-                <div class="match-info-center">
-                    <div id="hand-count-lbl" class="hand-title">HAND 1</div>
-                    <span class="six-love-badge">SIX LOVE BLOCK</span>
-                </div>
-                <div class="team-box">
-                    <span class="team-label">TEAM E/W</span>
-                    <span id="score-we" class="score-pill">0</span>
-                </div>
-            </div>
-
-            <!-- SQUARE 4-SIDE TABLE BOARD -->
-            <div id="dominoes-game-area" class="w-full">
-                <div class="table-top-bar">
-                    <span class="tracking-wider">🀏 JAMAICAN YARD TABLE</span>
-                    <span id="turn-indicator" class="text-emerald-400">Turn: Waiting...</span>
-                </div>
-
-                <!-- TABLE CANVAS FRAME WITH OUTER CORNER BADGES -->
-                <div class="square-table-layout">
-                    <!-- OUTER NON-OVERLAPPING PLAYER SEATS (Z-INDEX 30) -->
-                    <div id="seat-top" class="player-seat seat-top">North</div>
-                    <div id="seat-left" class="player-seat seat-left">West</div>
-
-                    <!-- CENTER CANVAS ENGINE (Z-INDEX 5) -->
-                    <div id="table-board-center">
-                        <div id="empty-table-msg" class="text-[10px] text-amber-300 font-bold text-center pt-[115px]">
-                            Pose [6-6] to start Hand 1!
-                        </div>
-                    </div>
-
-                    <div id="seat-right" class="player-seat seat-right">East</div>
-                    <div id="seat-bottom" class="player-seat seat-bottom">South (You)</div>
-                </div>
-
-                <!-- GAME ACTION LOG -->
-                <div id="game-log" class="game-log">Match initialized. Counter-clockwise rotation active.</div>
-
-                <!-- PLAYER HAND & CONTROLS SECTION -->
-                <div class="my-hand-section">
-                    <div class="hand-label">YOUR HAND (SOUTH)</div>
-                    <div id="hand-container" class="hand-container min-h-[38px]"></div>
-
-                    <!-- DUAL END CHOICE BUTTONS -->
-                    <div id="end-choice-bar" class="end-choice-bar hidden">
-                        <button id="play-left-btn" class="end-btn rounded-lg text-white">Slam Left (<span id="l-val">-</span>)</button>
-                        <button id="play-right-btn" class="end-btn rounded-lg text-white">Slam Right (<span id="r-val">-</span>)</button>
-                    </div>
-
-                    <!-- TABLE KNOCK PASS BUTTON -->
-                    <button id="pass-btn" class="hidden w-full bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs p-1.5 rounded-lg border border-amber-500/30 transition">
-                        ✊ Knock Table (Pass Turn)
-                    </button>
-                </div>
-            </div>
-        </div>
-
+    <div id="roomPanel" class="panel hidden">
+      <div class="row between" style="margin-bottom:4px"><b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b><button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add bot</button></div>
+      <div id="plist"></div>
+      <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
+      <div class="status" style="margin-top:6px">Empty seats are filled with bots.</div>
     </div>
-
-    <div id="toast-container"></div>
-
-    <script>
-        // ==========================================
-        // WEB AUDIO SYNTHESIZER ENGINE
-        // ==========================================
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playTileClack() {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(480, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
-            } catch (e) { console.error(e); }
-        }
-
-        function playSlamImpact() {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                
-                // Deep low boom
-                const osc1 = audioCtx.createOscillator();
-                const gain1 = audioCtx.createGain();
-                osc1.type = 'triangle';
-                osc1.frequency.setValueAtTime(180, audioCtx.currentTime);
-                osc1.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.22);
-                gain1.gain.setValueAtTime(1.0, audioCtx.currentTime);
-                gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.22);
-                osc1.connect(gain1);
-                gain1.connect(audioCtx.destination);
-                osc1.start();
-                osc1.stop(audioCtx.currentTime + 0.22);
-
-                // Wood click snap
-                const osc2 = audioCtx.createOscillator();
-                const gain2 = audioCtx.createGain();
-                osc2.type = 'square';
-                osc2.frequency.setValueAtTime(650, audioCtx.currentTime);
-                osc2.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.06);
-                gain2.gain.setValueAtTime(0.7, audioCtx.currentTime);
-                gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
-                osc2.connect(gain2);
-                gain2.connect(audioCtx.destination);
-                osc2.start();
-                osc2.stop(audioCtx.currentTime + 0.06);
-
-                triggerScreenShake();
-            } catch (e) { console.error(e); }
-        }
-
-        function playKnockPass() {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                [0, 0.09].forEach(delay => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(240, audioCtx.currentTime + delay);
-                    osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + delay + 0.04);
-                    gain.gain.setValueAtTime(0.6, audioCtx.currentTime + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.04);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(audioCtx.currentTime + delay);
-                    osc.stop(audioCtx.currentTime + delay + 0.04);
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        function playWinFanfare() {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
-                notes.forEach((freq, idx) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.09);
-                    gain.gain.setValueAtTime(0.35, audioCtx.currentTime + idx * 0.09);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.09 + 0.3);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(audioCtx.currentTime + idx * 0.09);
-                    osc.stop(audioCtx.currentTime + idx * 0.09 + 0.3);
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        function triggerScreenShake() {
-            const container = document.getElementById("app-container");
-            container.classList.remove("shake-impact");
-            void container.offsetWidth; // Force reflow
-            container.classList.add("shake-impact");
-            setTimeout(() => container.classList.remove("shake-impact"), 250);
-        }
-
-        // ==========================================
-        // STATE MACHINE & CONSTANTS
-        // ==========================================
-        const POSITIONS = ['N', 'W', 'S', 'E'];
-        const TURN_NEXT = { 'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N' };
-
-        let currentRoomCode = null;
-        let isHost = false;
-        let lobbyPlayers = [];
-        let botCounter = 0;
-
-        let handNumber = 1;
-        let scoreNS = 0;
-        let scoreWE = 0;
-        let lastWinnerPos = null;
-
-        let players = [];
-        let currentTurn = 'S';
-        let leftEnd = null;
-        let rightEnd = null;
-        let centerTile = null;
-        let leftBranchTiles = [];
-        let rightBranchTiles = [];
-        let consecutivePasses = 0;
-        let selectedTileIndex = null;
-        let handActive = false;
-
-        // UI References
-        const lobbyView = document.getElementById("lobby-view");
-        const dominoesView = document.getElementById("dominoes-view");
-        const createRoomBtn = document.getElementById("create-room-btn");
-        const joinRoomBtn = document.getElementById("join-room-btn");
-        const joinCodeInput = document.getElementById("join-code-input");
-        const roomLobbyPanel = document.getElementById("room-lobby-panel");
-        const addBotBtn = document.getElementById("add-bot-btn");
-        const playerList = document.getElementById("player-list");
-        const playerCount = document.getElementById("player-count");
-        const startGameBtn = document.getElementById("start-game-btn");
-        const roomCodeBadge = document.getElementById("room-code-badge");
-        const navHubBtn = document.getElementById("nav-hub-btn");
-        const usernameInput = document.getElementById("username-input");
-
-        const scoreNsLbl = document.getElementById("score-ns");
-        const scoreWeLbl = document.getElementById("score-we");
-        const handCountLbl = document.getElementById("hand-count-lbl");
-
-        const turnIndicator = document.getElementById("turn-indicator");
-        const tableBoardCenter = document.getElementById("table-board-center");
-        const gameLog = document.getElementById("game-log");
-        const handContainer = document.getElementById("hand-container");
-        const endChoiceBar = document.getElementById("end-choice-bar");
-        const playLeftBtn = document.getElementById("play-left-btn");
-        const playRightBtn = document.getElementById("play-right-btn");
-        const lVal = document.getElementById("l-val");
-        const rVal = document.getElementById("r-val");
-        const passBtn = document.getElementById("pass-btn");
-
-        const seatTop = document.getElementById("seat-top");
-        const seatLeft = document.getElementById("seat-left");
-        const seatRight = document.getElementById("seat-right");
-        const seatBottom = document.getElementById("seat-bottom");
-
-        function showToast(msg) {
-            const container = document.getElementById("toast-container");
-            const toast = document.createElement("div");
-            toast.className = "toast";
-            toast.textContent = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
-        }
-
-        function logGame(msg) { gameLog.textContent = msg; }
-
-        createRoomBtn.addEventListener("click", () => {
-            const name = usernameInput.value.trim() || "South";
-            currentRoomCode = "XG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
-            isHost = true;
-            roomCodeBadge.textContent = `Room: ${currentRoomCode}`;
-
-            lobbyPlayers = [{ id: 'host_me', name: name + " (You)", isBot: false }];
-            roomLobbyPanel.classList.remove("hidden");
-            renderLobbyPlayers();
-            showToast(`Room ${currentRoomCode} Created!`);
-        });
-
-        joinRoomBtn.addEventListener("click", () => {
-            const code = joinCodeInput.value.trim().toUpperCase();
-            const name = usernameInput.value.trim() || "Guest";
-            if (!code) { showToast("Enter Room Code!"); return; }
-            currentRoomCode = code;
-            isHost = false;
-            roomCodeBadge.textContent = `Room: ${currentRoomCode}`;
-            lobbyPlayers = [{ id: 'me', name: name + " (You)", isBot: false }];
-            roomLobbyPanel.classList.remove("hidden");
-            renderLobbyPlayers();
-            showToast(`Joined Room ${currentRoomCode}`);
-        });
-
-        addBotBtn.addEventListener("click", () => {
-            if (lobbyPlayers.length >= 4) { showToast("Room Full (4 Players)!"); return; }
-            botCounter++;
-            lobbyPlayers.push({ id: `bot_${botCounter}`, name: `XBot-${botCounter}`, isBot: true });
-            renderLobbyPlayers();
-        });
-
-        function renderLobbyPlayers() {
-            playerList.innerHTML = "";
-            lobbyPlayers.forEach((p, idx) => {
-                const li = document.createElement("li");
-                li.className = "flex justify-between items-center text-xs py-1 border-b border-slate-800";
-                li.innerHTML = `<span class="text-slate-200 font-semibold">${p.name}</span>
-                    <div class="flex items-center gap-1">
-                        <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${p.isBot ? 'bg-purple-900 text-purple-200' : 'bg-amber-500 text-black'}">${p.isBot ? 'BOT' : 'PLAYER'}</span>
-                        ${isHost && idx > 0 ? `<button onclick="removeLobbyPlayer(${idx})" class="text-rose-400 hover:text-rose-300 ml-1 font-bold">×</button>` : ''}
-                    </div>`;
-                playerList.appendChild(li);
-            });
-            playerCount.textContent = lobbyPlayers.length;
-        }
-
-        window.removeLobbyPlayer = function(index) {
-            lobbyPlayers.splice(index, 1);
-            renderLobbyPlayers();
-        };
-
-        startGameBtn.addEventListener("click", () => {
-            if (lobbyPlayers.length < 4) { showToast("Need 4 players/bots to start!"); return; }
-            lobbyView.classList.add("hidden");
-            dominoesView.classList.remove("hidden");
-            scoreNS = 0;
-            scoreWE = 0;
-            handNumber = 1;
-            lastWinnerPos = null;
-            initNewHand();
-        });
-
-        navHubBtn.addEventListener("click", () => {
-            handActive = false;
-            dominoesView.classList.add("hidden");
-            lobbyView.classList.remove("hidden");
-        });
-
-        function generateFullSet() {
-            const tiles = [];
-            for (let i = 0; i <= 6; i++) {
-                for (let j = i; j <= 6; j++) {
-                    tiles.push({
-                        tile_id: `tile_${i}_${j}`,
-                        left_pip: i,
-                        right_pip: j,
-                        is_double: i === j
-                    });
-                }
-            }
-            return tiles.sort(() => Math.random() - 0.5);
-        }
-
-        function initNewHand() {
-            const deck = generateFullSet();
-
-            players = [
-                { id: lobbyPlayers[0].id, name: lobbyPlayers[0].name, pos: 'S', hand: deck.slice(0, 7), is_ai: lobbyPlayers[0].isBot },
-                { id: lobbyPlayers[1].id, name: lobbyPlayers[1].name, pos: 'W', hand: deck.slice(7, 14), is_ai: lobbyPlayers[1].isBot },
-                { id: lobbyPlayers[2].id, name: lobbyPlayers[2].name, pos: 'N', hand: deck.slice(14, 21), is_ai: lobbyPlayers[2].isBot },
-                { id: lobbyPlayers[3].id, name: lobbyPlayers[3].name, pos: 'E', hand: deck.slice(21, 28), is_ai: lobbyPlayers[3].isBot }
-            ];
-
-            leftEnd = null;
-            rightEnd = null;
-            centerTile = null;
-            leftBranchTiles = [];
-            rightBranchTiles = [];
-            consecutivePasses = 0;
-            selectedTileIndex = null;
-            handActive = true;
-
-            if (handNumber === 1 || lastWinnerPos === null) {
-                let poserPos = 'S';
-                players.forEach(p => {
-                    if (p.hand.some(t => t.left_pip === 6 && t.right_pip === 6)) {
-                        poserPos = p.pos;
-                    }
-                });
-                currentTurn = poserPos;
-                logGame(`Hand 1: ${getPlayerByPos(currentTurn).name} holds [6-6] and poses first!`);
-            } else {
-                currentTurn = lastWinnerPos;
-                logGame(`Hand ${handNumber}: Previous winner ${getPlayerByPos(currentTurn).name} poses first!`);
-            }
-
-            updateScoreboardUI();
-            renderTableBoard();
-            renderHand();
-            updateTurnDisplay();
-
-            if (getPlayerByPos(currentTurn).is_ai) {
-                setTimeout(processAiTurn, 1000);
-            }
-        }
-
-        function getPlayerByPos(pos) { return players.find(p => p.pos === pos); }
-
-        function updateScoreboardUI() {
-            scoreNsLbl.textContent = scoreNS;
-            scoreWeLbl.textContent = scoreWE;
-            handCountLbl.textContent = `HAND ${handNumber}`;
-        }
-
-        // ==========================================
-        // BULLETPROOF EMERGENCY 2D RENDER ENGINE
-        // ==========================================
-        function renderTableBoard() {
-            const seats = { 'N': seatTop, 'W': seatLeft, 'S': seatBottom, 'E': seatRight };
-            POSITIONS.forEach(pos => {
-                const p = getPlayerByPos(pos);
-                const isActive = pos === currentTurn;
-                seats[pos].className = `player-seat seat-${pos === 'N' ? 'top' : pos === 'W' ? 'left' : pos === 'S' ? 'bottom' : 'right'}${isActive ? ' active-turn' : ''}`;
-                seats[pos].innerHTML = `<div>${p.name}</div><div class="seat-tiles-count">🀏 ${p.hand.length}</div>`;
-            });
-
-            tableBoardCenter.innerHTML = "";
-            if (!centerTile) {
-                tableBoardCenter.innerHTML = `<div id="empty-table-msg" class="text-[10px] text-amber-300 font-bold text-center pt-[115px]">Table empty. Posing tile to start!</div>`;
-                return;
-            }
-
-            // Safe Absolute Center Calculation
-            const bounds = tableBoardCenter.getBoundingClientRect();
-            const width = bounds.width || 400;
-            const height = bounds.height || 270;
-
-            const cX = Math.floor(width / 2) - 18;
-            const cY = Math.floor(height / 2) - 10;
-
-            const STEP_X = 38;
-            const STEP_Y = 26;
-            const BOUND_X = 100;
-
-            // 1. Render Opening Spinner Center Tile
-            render3dTile(centerTile, cX, cY, false);
-
-            // 2. Left Branch Pathing
-            let currX = cX;
-            let currY = cY;
-            let dx = -1;
-
-            leftBranchTiles.forEach((t, i) => {
-                if ((dx === -1 && currX <= cX - BOUND_X) || (dx === 1 && currX >= cX + BOUND_X)) {
-                    currY += STEP_Y;
-                    dx = -dx; // Reverse horizontal vector
-                    render3dTile(t, currX, currY, true); // Corner vertical
-                } else {
-                    currX += (dx * STEP_X);
-                    render3dTile(t, currX, currY, false);
-                }
-
-                if (i === leftBranchTiles.length - 1) {
-                    renderEndBadge('L', currX, currY);
-                }
-            });
-
-            // 3. Right Branch Pathing
-            currX = cX;
-            currY = cY;
-            dx = 1;
-
-            rightBranchTiles.forEach((t, i) => {
-                if ((dx === 1 && currX >= cX + BOUND_X) || (dx === -1 && currX <= cX - BOUND_X)) {
-                    currY += STEP_Y;
-                    dx = -dx; // Reverse horizontal vector
-                    render3dTile(t, currX, currY, true); // Corner vertical
-                } else {
-                    currX += (dx * STEP_X);
-                    render3dTile(t, currX, currY, false);
-                }
-
-                if (i === rightBranchTiles.length - 1) {
-                    renderEndBadge('R', currX, currY);
-                }
-            });
-        }
-
-        // Render Individual Pure Dot Tile
-        function render3dTile(tile, rawX, rawY, isVerticalSegment = false) {
-            // Fail-Safe Coordinate Check
-            const x = (isNaN(rawX) || rawX === null) ? 180 : rawX;
-            const y = (isNaN(rawY) || rawY === null) ? 120 : rawY;
-
-            const tileEl = document.createElement("div");
-            tileEl.style.left = `${x}px`;
-            tileEl.style.top = `${y}px`;
-
-            const isVert = tile.is_double ? !isVerticalSegment : isVerticalSegment;
-            tileEl.className = `domino-3d ${isVert ? 'vert' : 'horiz'}`;
-
-            tileEl.appendChild(createPipGrid(tile.left_pip));
-            
-            const divider = document.createElement("div");
-            divider.className = isVert ? "divider-v" : "divider-h";
-            tileEl.appendChild(divider);
-
-            tileEl.appendChild(createPipGrid(tile.right_pip));
-
-            tableBoardCenter.appendChild(tileEl);
-        }
-
-        // 3x3 Dot Pip Renderer Matrix
-        function createPipGrid(val) {
-            const grid = document.createElement("div");
-            grid.className = "pip-grid";
-            
-            const pipMaps = {
-                0: [],
-                1: [5],
-                2: [1, 9],
-                3: [1, 5, 9],
-                4: [1, 3, 7, 9],
-                5: [1, 3, 5, 7, 9],
-                6: [1, 3, 4, 6, 7, 9]
-            };
-
-            const activePips = pipMaps[val] || [];
-            for (let pos = 1; pos <= 9; pos++) {
-                const cell = document.createElement("div");
-                cell.style.display = "flex";
-                cell.style.alignItems = "center";
-                cell.style.justifyContent = "center";
-
-                if (activePips.includes(pos)) {
-                    const pip = document.createElement("div");
-                    pip.className = "pip-dot";
-                    cell.appendChild(pip);
-                }
-                grid.appendChild(cell);
-            }
-            return grid;
-        }
-
-        function renderEndBadge(label, x, y) {
-            const badge = document.createElement("div");
-            badge.className = "absolute bg-emerald-500 text-white rounded-full w-4 h-4 text-[9px] font-black flex items-center justify-center pulse-end z-20";
-            badge.style.left = `${x + 10}px`;
-            badge.style.top = `${y - 10}px`;
-            badge.textContent = label;
-            tableBoardCenter.appendChild(badge);
-        }
-
-        function renderHand() {
-            handContainer.innerHTML = "";
-            endChoiceBar.classList.add("hidden");
-
-            const myPlayer = getPlayerByPos('S');
-            if (!myPlayer) return;
-
-            myPlayer.hand.forEach((tile, index) => {
-                const el = document.createElement("div");
-                const isSelected = selectedTileIndex === index;
-                el.className = `hand-tile${tile.is_double ? " double" : ""}${isSelected ? " selected" : ""}`;
-                
-                // Mini Pip Hand Graphics
-                const leftMini = document.createElement("div");
-                leftMini.className = "mini-half";
-                leftMini.appendChild(createPipGrid(tile.left_pip));
-
-                const divider = document.createElement("div");
-                divider.style.width = "1px";
-                divider.style.height = "14px";
-                divider.style.backgroundColor = tile.is_double ? "#ca8a04" : "#94a3b8";
-
-                const rightMini = document.createElement("div");
-                rightMini.className = "mini-half";
-                rightMini.appendChild(createPipGrid(tile.right_pip));
-
-                el.appendChild(leftMini);
-                el.appendChild(divider);
-                el.appendChild(rightMini);
-
-                el.onclick = () => selectHandTile(index, tile);
-                handContainer.appendChild(el);
-            });
-
-            if (currentTurn === 'S' && handActive && centerTile !== null) {
-                const hasMove = myPlayer.hand.some(t => isValidMove(t));
-                if (!hasMove) passBtn.classList.remove("hidden");
-                else passBtn.classList.add("hidden");
-            } else {
-                passBtn.classList.add("hidden");
-            }
-        }
-
-        function isValidMove(tile) {
-            if (!centerTile) {
-                if (handNumber === 1) return tile.left_pip === 6 && tile.right_pip === 6;
-                return true;
-            }
-            return (tile.left_pip === leftEnd || tile.right_pip === leftEnd ||
-                    tile.left_pip === rightEnd || tile.right_pip === rightEnd);
-        }
-
-        function selectHandTile(index, tile) {
-            if (!handActive || currentTurn !== 'S') {
-                showToast("It's not your turn!");
-                return;
-            }
-
-            if (!isValidMove(tile)) {
-                if (handNumber === 1 && !centerTile) {
-                    showToast("Hand 1 Pose MUST be Double-Six [6-6]!");
-                } else {
-                    showToast("Tile doesn't fit table ends!");
-                }
-                return;
-            }
-
-            selectedTileIndex = index;
-            renderHand();
-
-            if (!centerTile) {
-                executePlay(index, tile, 'first');
-            } else {
-                const matchesLeft = (tile.left_pip === leftEnd || tile.right_pip === leftEnd);
-                const matchesRight = (tile.left_pip === rightEnd || tile.right_pip === rightEnd);
-
-                if (matchesLeft && matchesRight) {
-                    lVal.textContent = leftEnd;
-                    rVal.textContent = rightEnd;
-                    endChoiceBar.classList.remove("hidden");
-                    playLeftBtn.onclick = () => executePlay(index, tile, 'left');
-                    playRightBtn.onclick = () => executePlay(index, tile, 'right');
-                } else if (matchesLeft) {
-                    executePlay(index, tile, 'left');
-                } else if (matchesRight) {
-                    executePlay(index, tile, 'right');
-                }
-            }
-        }
-
-        function executePlay(handIndex, tile, side) {
-            const player = getPlayerByPos(currentTurn);
-            player.hand.splice(handIndex, 1);
-            consecutivePasses = 0;
-
-            let playTile = { ...tile };
-
-            if (side === 'first') {
-                leftEnd = tile.left_pip;
-                rightEnd = tile.right_pip;
-                centerTile = playTile;
-            } else if (side === 'left') {
-                if (playTile.left_pip === leftEnd) {
-                    playTile = { ...playTile, left_pip: tile.right_pip, right_pip: tile.left_pip };
-                    leftEnd = playTile.left_pip;
-                } else {
-                    leftEnd = playTile.left_pip;
-                }
-                leftBranchTiles.push(playTile);
-            } else if (side === 'right') {
-                if (playTile.left_pip === rightEnd) {
-                    rightEnd = playTile.right_pip;
-                } else {
-                    playTile = { ...playTile, left_pip: tile.right_pip, right_pip: tile.left_pip };
-                    rightEnd = playTile.right_pip;
-                }
-                rightBranchTiles.push(playTile);
-            }
-
-            if (tile.is_double || player.hand.length === 0) {
-                playSlamImpact();
-            } else {
-                playTileClack();
-            }
-
-            logGame(`💥 ${player.name} slammed [${tile.left_pip}|${tile.right_pip}]!`);
-
-            if (player.hand.length === 0) {
-                handleHandWin(player.pos, `${player.name} went out!`);
-                return;
-            }
-
-            advanceTurn();
-        }
-
-        passBtn.addEventListener("click", () => {
-            if (currentTurn !== 'S' || !handActive) return;
-            executePass();
-        });
-
-        function executePass() {
-            const player = getPlayerByPos(currentTurn);
-            consecutivePasses++;
-            playKnockPass();
-            logGame(`✋ ${player.name} knocked the table (passed).`);
-
-            if (consecutivePasses >= 4) {
-                handleBlockedGame();
-                return;
-            }
-
-            advanceTurn();
-        }
-
-        function advanceTurn() {
-            currentTurn = TURN_NEXT[currentTurn];
-            selectedTileIndex = null;
-            renderTableBoard();
-            renderHand();
-            updateTurnDisplay();
-
-            if (getPlayerByPos(currentTurn).is_ai && handActive) {
-                setTimeout(processAiTurn, 1000);
-            }
-        }
-
-        function processAiTurn() {
-            if (!handActive) return;
-            const ai = getPlayerByPos(currentTurn);
-
-            const validPlays = [];
-            ai.hand.forEach((tile, idx) => {
-                if (isValidMove(tile)) {
-                    if (!centerTile) {
-                        validPlays.push({ index: idx, tile, side: 'first' });
-                    } else {
-                        if (tile.left_pip === leftEnd || tile.right_pip === leftEnd) {
-                            validPlays.push({ index: idx, tile, side: 'left' });
-                        }
-                        if (tile.left_pip === rightEnd || tile.right_pip === rightEnd) {
-                            validPlays.push({ index: idx, tile, side: 'right' });
-                        }
-                    }
-                }
-            });
-
-            if (validPlays.length > 0) {
-                const choice = validPlays[Math.floor(Math.random() * validPlays.length)];
-                executePlay(choice.index, choice.tile, choice.side);
-            } else {
-                executePass();
-            }
-        }
-
-        function updateTurnDisplay() {
-            const currentP = getPlayerByPos(currentTurn);
-            turnIndicator.textContent = currentTurn === 'S' ? "Your Turn!" : `Turn: ${currentP.name}`;
-        }
-
-        function handleBlockedGame() {
-            logGame("🔒 Game Blocked! Counting remaining pips...");
-
-            let nsPips = 0;
-            let wePips = 0;
-
-            players.forEach(p => {
-                const pips = p.hand.reduce((sum, t) => sum + t.left_pip + t.right_pip, 0);
-                if (p.pos === 'N' || p.pos === 'S') nsPips += pips;
-                else wePips += pips;
-            });
-
-            if (nsPips < wePips) {
-                handleHandWin('S', `Team N/S wins block! (N/S: ${nsPips} pips vs E/W: ${wePips} pips)`);
-            } else if (wePips < nsPips) {
-                handleHandWin('E', `Team E/W wins block! (E/W: ${wePips} pips vs N/S: ${nsPips} pips)`);
-            } else {
-                logGame("🤝 Hand Tied! Score remains unchanged.");
-                setTimeout(() => {
-                    handNumber++;
-                    initNewHand();
-                }, 3000);
-            }
-        }
-
-        function handleHandWin(winnerPos, reason) {
-            playWinFanfare();
-            handActive = false;
-            lastWinnerPos = winnerPos;
-
-            const isNSWinner = (winnerPos === 'N' || winnerPos === 'S');
-
-            // Six Love Break / Score Reset Mechanics
-            if (isNSWinner) {
-                if (scoreWE > 0 && scoreNS === 0) {
-                    showToast("BREAK! Match reset to 0-0!");
-                    scoreWE = 0;
-                }
-                scoreNS++;
-            } else {
-                if (scoreNS > 0 && scoreWE === 0) {
-                    showToast("BREAK! Match reset to 0-0!");
-                    scoreNS = 0;
-                }
-                scoreWE++;
-            }
-
-            updateScoreboardUI();
-            logGame(`🎉 ${reason}`);
-
-            if (scoreNS >= 6) {
-                showToast("🏆 TEAM N/S WINS THE SIX-LOVE MATCH!");
-                logGame("🏆 MATCH OVER: TEAM N/S VICTORY!");
-                return;
-            } else if (scoreWE >= 6) {
-                showToast("🏆 TEAM E/W WINS THE SIX-LOVE MATCH!");
-                logGame("🏆 MATCH OVER: TEAM E/W VICTORY!");
-                return;
-            }
-
-            setTimeout(() => {
-                handNumber++;
-                initNewHand();
-            }, 3500);
-        }
-
-        window.addEventListener('resize', () => {
-            if (handActive) renderTableBoard();
-        });
-    </script>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="stack hidden">
+    <div class="score">
+      <div>N/S<span class="pill" id="sNS">0</span></div>
+      <div class="mid"><span id="handLbl">Hand 1</span><i>Six love</i></div>
+      <div>E/W<span class="pill" id="sWE">0</span></div>
+    </div>
+    <div class="wrap" id="wrap"><canvas id="board" width="800" height="860"></canvas></div>
+    <div id="log"></div>
+    <div class="panel">
+      <div class="lbl" id="turnLbl">Your hand</div>
+      <div class="hand" id="hand"></div>
+      <div id="endBar" class="two hidden" style="margin-top:8px">
+        <button class="gold" id="goL">Play left (<span id="lv">-</span>)</button>
+        <button class="gold" id="goR">Play right (<span id="rv">-</span>)</button>
+      </div>
+      <button id="passBtn" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">Knock table (pass)</button>
+      <button id="againBtn" class="green hidden" style="width:100%;margin-top:8px">Play another match</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ---------- AUDIO ---------- */
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+function tone(f1, f2, d, type, vol, delay = 0) {
+  try {
+    if (AC.state === 'suspended') AC.resume();
+    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f1, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
+  } catch (e) {}
+}
+const clack = () => tone(480, 90, .05, 'sine', .5);
+const slam = () => { tone(180, 20, .22, 'triangle', 1); tone(650, 110, .06, 'square', .7); shake(); };
+const knock = () => { tone(240, 60, .04, 'sine', .6); tone(240, 60, .04, 'sine', .6, .09); };
+const fanfare = () => [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => tone(f, 0, .3, 'sine', .35, i * .09));
+function shake() {
+  const w = $('wrap'); w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
+  setTimeout(() => w.classList.remove('shake'), 260);
+}
+
+/* ---------- HELPERS ---------- */
+const $ = id => document.getElementById(id);
+function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
+const log = m => $('log').textContent = m;
+
+/* ---------- STATE ---------- */
+const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' }; // counter-clockwise
+let lobby = [], botN = 0, isHost = false;
+let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
+let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
+const byPos = p => players.find(x => x.pos === p);
+
+/* ---------- LOBBY ---------- */
+$('createBtn').onclick = () => {
+  const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  isHost = true; $('roomBadge').textContent = 'Room: ' + code;
+  lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (You)', isBot: false }];
+  $('roomPanel').classList.remove('hidden'); renderLobby(); toast('Room ' + code + ' created');
+};
+$('joinBtn').onclick = () => {
+  const code = $('codeIn').value.trim().toUpperCase();
+  if (!code) return toast('Enter a room code');
+  isHost = false; $('roomBadge').textContent = 'Room: ' + code;
+  lobby = [{ name: ($('nameIn').value.trim() || 'Guest') + ' (You)', isBot: false }];
+  $('roomPanel').classList.remove('hidden'); renderLobby(); toast('Joined ' + code);
+};
+$('botBtn').onclick = () => {
+  if (lobby.length >= 4) return toast('Room is full');
+  lobby.push({ name: 'XBot-' + (++botN), isBot: true }); renderLobby();
+};
+function renderLobby() {
+  $('plist').innerHTML = '';
+  lobby.forEach((p, i) => {
+    const d = document.createElement('div'); d.className = 'pl';
+    d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : '') + '">' + (p.isBot ? 'BOT' : 'PLAYER') + '</span>' +
+      (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
+    d.firstChild.textContent = p.name;
+    const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); };
+    $('plist').appendChild(d);
+  });
+  $('pc').textContent = lobby.length;
+}
+$('startBtn').onclick = () => {
+  while (lobby.length < 4) lobby.push({ name: 'XBot-' + (++botN), isBot: true });
+  renderLobby(); newMatch();
+};
+$('hubBtn').onclick = () => { epoch++; active = false; $('game').classList.add('hidden'); $('lobby').classList.remove('hidden'); };
+$('againBtn').onclick = newMatch;
+
+function newMatch() {
+  $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
+  sNS = 0; sWE = 0; handNo = 1; lastWin = null; matchOver = false;
+  newHand();
+}
+
+/* ---------- GAME CORE ---------- */
+function fullSet() {
+  const t = [];
+  for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
+  for (let i = t.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [t[i], t[j]] = [t[j], t[i]]; }
+  return t;
+}
+function newHand() {
+  epoch++;
+  const deck = fullSet();
+  players = ['S', 'W', 'N', 'E'].map((pos, i) => ({ name: lobby[i].name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: lobby[i].isBot }));
+  center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
+  needD6 = lastWin === null;
+  if (needD6) {
+    turn = players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos;
+    log(byPos(turn).name + ' holds [6|6] and poses first.');
+  } else {
+    turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.');
+  }
+  refresh(); maybeAi();
+}
+function isValid(t) {
+  if (!center) return needD6 ? (t.a === 6 && t.b === 6) : true;
+  return t.a === L || t.b === L || t.a === R || t.b === R;
+}
+function play(i, side) {
+  const p = byPos(turn), t = p.hand.splice(i, 1)[0]; passes = 0;
+  if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
+  else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
+  else { const o = t.a === R ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; R = o.b; rb.push(o); }
+  (t.d || !p.hand.length) ? slam() : clack();
+  log('💥 ' + p.name + ' slammed [' + t.a + '|' + t.b + ']');
+  if (!p.hand.length) return win(p.pos, p.name + ' went out!');
+  next();
+}
+function pass() {
+  const p = byPos(turn); passes++; knock(); log('✋ ' + p.name + ' knocked (passed).');
+  if (passes >= 4) return blocked();
+  next();
+}
+function next() { turn = NEXT[turn]; refresh(); maybeAi(); }
+function maybeAi() {
+  const e = epoch;
+  if (active && byPos(turn).ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
+}
+function aiTurn() {
+  const p = byPos(turn), opts = [];
+  p.hand.forEach((t, i) => {
+    if (!isValid(t)) return;
+    if (!center) opts.push({ i, side: 'first', w: t.a + t.b });
+    else {
+      if (t.a === L || t.b === L) opts.push({ i, side: 'left', w: t.a + t.b });
+      if (t.a === R || t.b === R) opts.push({ i, side: 'right', w: t.a + t.b });
+    }
+  });
+  if (!opts.length) return pass();
+  opts.sort((x, y) => y.w - x.w + (Math.random() - .5) * 3);
+  play(opts[0].i, opts[0].side);
+}
+function blocked() {
+  let ns = 0, we = 0;
+  players.forEach(p => { const s = p.hand.reduce((a, t) => a + t.a + t.b, 0); (p.pos === 'N' || p.pos === 'S') ? ns += s : we += s; });
+  if (ns < we) win('S', 'Blocked! N/S win (' + ns + ' vs ' + we + ' pips)');
+  else if (we < ns) win('E', 'Blocked! E/W win (' + we + ' vs ' + ns + ' pips)');
+  else {
+    active = false; log('🤝 Blocked and tied. Replaying the hand.'); const e = epoch;
+    setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
+  }
+}
+function win(pos, why) {
+  fanfare(); active = false; lastWin = pos;
+  const ns = pos === 'N' || pos === 'S';
+  if (ns) { if (sWE > 0 && sNS === 0) { toast('BREAK! Score reset to 0-0'); sWE = 0; } sNS++; }
+  else { if (sNS > 0 && sWE === 0) { toast('BREAK! Score reset to 0-0'); sNS = 0; } sWE++; }
+  log('🎉 ' + why);
+  if (sNS >= 6 || sWE >= 6) {
+    matchOver = true; log('🏆 Match over: Team ' + (sNS >= 6 ? 'N/S' : 'E/W') + ' wins six love!');
+    refresh(); return;
+  }
+  refresh(); const e = epoch;
+  setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
+}
+
+/* ---------- HAND UI ---------- */
+let selIdx = null;
+function selectTile(i) {
+  if (!active || turn !== 'S') return toast('Not your turn');
+  const t = byPos('S').hand[i];
+  if (!isValid(t)) return toast(!center && needD6 ? 'Hand 1 must start with [6|6]' : "That tile doesn't fit");
+  if (!center) return play(i, 'first');
+  const ml = t.a === L || t.b === L, mr = t.a === R || t.b === R;
+  if (ml && mr) {
+    selIdx = i; $('lv').textContent = L; $('rv').textContent = R; $('endBar').classList.remove('hidden');
+    $('goL').onclick = () => { selIdx = null; play(i, 'left'); };
+    $('goR').onclick = () => { selIdx = null; play(i, 'right'); };
+    renderHand();
+  } else play(i, ml ? 'left' : 'right');
+}
+$('passBtn').onclick = () => { if (active && turn === 'S') pass(); };
+
+function renderHand() {
+  const box = $('hand'); box.innerHTML = '';
+  const me = byPos('S'); if (!me) return;
+  const mine = active && turn === 'S';
+  me.hand.forEach((t, i) => {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 72;
+    const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
+    drawTile(x, 32, 18, t.a, t.b, false, 1.4);
+    if (mine && center && !isValid(t)) c.className = 'dim';
+    if (selIdx === i) c.className = 'sel';
+    c.onclick = () => selectTile(i);
+    box.appendChild(c);
+  });
+  const canMove = me.hand.some(isValid);
+  $('passBtn').classList.toggle('hidden', !(mine && center && !canMove));
+  if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
+}
+
+/* ---------- CANVAS ENGINE ---------- */
+const cv = $('board'), ctx = cv.getContext('2d');
+const W = 400, H = 430, PITCH = 44, MARGIN = 6;
+const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+
+function rr(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+function pips(c, x, y, w, h, n, s) {
+  c.fillStyle = '#111827';
+  PIPS[n].forEach(i => {
+    c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.9 * s, 0, 7); c.fill();
+  });
+}
+// Draws a 40x20 tile centred on (x,y). Left half = a, right half = b. vert rotates 90deg.
+function drawTile(c, x, y, a, b, vert, s) {
+  s = s || 1; const w = 40 * s, h = 20 * s, dbl = a === b;
+  c.save(); c.translate(x, y); if (vert) c.rotate(Math.PI / 2);
+  c.shadowColor = 'rgba(0,0,0,.65)'; c.shadowBlur = 4 * s; c.shadowOffsetY = 2 * s;
+  rr(c, -w / 2, -h / 2, w, h, 4 * s); c.fillStyle = dbl ? '#fde68a' : '#f5f1e6'; c.fill();
+  c.shadowColor = 'transparent';
+  c.lineWidth = 1; c.strokeStyle = dbl ? '#ca8a04' : '#a8a291'; c.stroke();
+  c.strokeStyle = '#8b8574'; c.beginPath(); c.moveTo(0, -h / 2 + 3 * s); c.lineTo(0, h / 2 - 3 * s); c.stroke();
+  pips(c, -w / 2, -h / 2, w / 2, h, a, s); pips(c, 0, -h / 2, w / 2, h, b, s);
+  c.restore();
+}
+// Lay a branch out in rows. rowDir +1 goes down, -1 goes up. Each row reverses direction.
+function layout(tiles, startX, y0, dir, rowDir) {
+  let x = startX, y = y0; const out = [];
+  tiles.forEach(t => {
+    const ew = t.d ? 20 : 40;
+    if ((dir > 0 && x + ew > W - MARGIN) || (dir < 0 && x - ew < MARGIN)) { y += rowDir * PITCH; dir = -dir; }
+    const cx = dir > 0 ? x + ew / 2 : x - ew / 2;
+    x += dir * ew;
+    out.push({ t, cx, cy: y, dir, ew });
+  });
+  return { out, x, y, dir };
+}
+function badge(x, y, txt) {
+  ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = '800 9px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + .5);
+}
+function drawBoard() {
+  ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1d1108'); g.addColorStop(1, '#0d0703');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  // seat strip (fixed, can never overlap the chain)
+  ['N', 'W', 'E', 'S'].forEach((pos, i) => {
+    const p = byPos(pos); if (!p) return;
+    const w = 94, x = 4 + i * (w + 4), act = pos === turn && active;
+    rr(ctx, x, 6, w, 38, 8); ctx.fillStyle = act ? '#4a3510' : 'rgba(0,0,0,.55)'; ctx.fill();
+    ctx.lineWidth = act ? 2 : 1; ctx.strokeStyle = act ? '#facc15' : '#3a2a14'; ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#fff'; ctx.font = '700 10px system-ui';
+    ctx.fillText(pos + ' · ' + p.name.replace(' (You)', '').slice(0, 9) + (pos === 'S' ? ' ★' : ''), x + w / 2, 21);
+    ctx.fillStyle = '#fbbf24'; ctx.font = '600 10px system-ui'; ctx.fillText(p.hand.length + (p.hand.length === 1 ? ' tile' : ' tiles'), x + w / 2, 35);
+  });
+
+  if (!center) {
+    ctx.fillStyle = '#fcd34d'; ctx.font = '700 13px system-ui'; ctx.textAlign = 'center';
+    ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, 245); return;
+  }
+  const cx = W / 2, cy = 52 + (H - 52) / 2, cw = center.d ? 20 : 40;
+  const lay = layout(lb, cx - cw / 2, cy, -1, -1), ray = layout(rb, cx + cw / 2, cy, 1, 1);
+
+  drawTile(ctx, cx, cy, center.a, center.b, center.d, 1);
+  lay.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1));
+  ray.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1));
+
+  const lastL = lay.out[lay.out.length - 1], lastR = ray.out[ray.out.length - 1];
+  badge(lastL ? lastL.cx + lastL.dir * lastL.ew / 2 : cx - cw / 2, lastL ? lastL.cy : cy, 'L');
+  badge(lastR ? lastR.cx + lastR.dir * lastR.ew / 2 : cx + cw / 2, lastR ? lastR.cy : cy, 'R');
+}
+
+/* ---------- REFRESH ---------- */
+function refresh() {
+  $('sNS').textContent = sNS; $('sWE').textContent = sWE; $('handLbl').textContent = 'Hand ' + handNo;
+  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === 'S' && active ? 'Your turn' : 'Turn: ' + (byPos(turn) ? byPos(turn).name : ''));
+  selIdx = null; drawBoard(); renderHand();
+  $('againBtn').classList.toggle('hidden', !matchOver);
+}
+</script>
 </body>
 </html>
-```
