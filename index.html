@@ -285,7 +285,9 @@ function renderHand() {
 
 /* ---------- CANVAS ENGINE ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
-const W = 400, H = 430, PITCH = 44, MARGIN = 6;
+// CORNER = width of the vertical turn tile. PITCH = distance between rows (a turn tile is 40 long, so
+// 36 lets it overlap both rows by 12 and read as one connected chain).
+const W = 400, H = 430, PITCH = 36, MARGIN = 6, CORNER = 20;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function rr(c, x, y, w, h, r) {
@@ -298,7 +300,8 @@ function pips(c, x, y, w, h, n, s) {
     c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.9 * s, 0, 7); c.fill();
   });
 }
-// Draws a 40x20 tile centred on (x,y). Left half = a, right half = b. vert rotates 90deg.
+// Draws a 40x20 tile centred on (x,y). Left half = a, right half = b. vert rotates 90deg clockwise,
+// so with vert the "a" half ends up on top and the "b" half on the bottom.
 function drawTile(c, x, y, a, b, vert, s) {
   s = s || 1; const w = 40 * s, h = 20 * s, dbl = a === b;
   c.save(); c.translate(x, y); if (vert) c.rotate(Math.PI / 2);
@@ -310,17 +313,38 @@ function drawTile(c, x, y, a, b, vert, s) {
   pips(c, -w / 2, -h / 2, w / 2, h, a, s); pips(c, 0, -h / 2, w / 2, h, b, s);
   c.restore();
 }
-// Lay a branch out in rows. rowDir +1 goes down, -1 goes up. Each row reverses direction.
+// Lays one branch out as a snake. Tiles run along a row; when the next tile would run out of room, that
+// tile becomes a vertical TURN tile past the end of the row, and the branch continues on the next row
+// in the opposite direction. rowDir +1 = next row is below, -1 = above.
+// Returns the placed tiles plus the cursor (x, y, dir) = where the NEXT tile will attach.
 function layout(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0; const out = [];
+  const limitR = W - MARGIN - CORNER, limitL = MARGIN + CORNER; // always leaves room for a turn tile
   tiles.forEach(t => {
     const ew = t.d ? 20 : 40;
-    if ((dir > 0 && x + ew > W - MARGIN) || (dir < 0 && x - ew < MARGIN)) { y += rowDir * PITCH; dir = -dir; }
-    const cx = dir > 0 ? x + ew / 2 : x - ew / 2;
-    x += dir * ew;
-    out.push({ t, cx, cy: y, dir, ew });
+    const fits = dir > 0 ? x + ew <= limitR : x - ew >= limitL;
+    if (fits) {
+      out.push({ t, cx: x + dir * ew / 2, cy: y, dir, corner: false });
+      x += dir * ew;
+    } else {
+      out.push({ t, cx: x + dir * CORNER / 2, cy: y + rowDir * PITCH / 2, rowDir, corner: true });
+      y += rowDir * PITCH; dir = -dir;
+    }
   });
   return { out, x, y, dir };
+}
+// Draw one laid-out tile so the half touching the previous tile always carries the matching number.
+// o.t.a = the end that touches the previous tile, o.t.b = the open end.
+function drawLinked(o) {
+  if (o.corner) {
+    // Vertical: "a" is drawn on top. Going down, the previous row is above (a on top).
+    // Going up, the previous row is below, so flip the halves.
+    const top = o.rowDir > 0 ? o.t.a : o.t.b, bottom = o.rowDir > 0 ? o.t.b : o.t.a;
+    drawTile(ctx, o.cx, o.cy, top, bottom, true, 1);
+  } else {
+    // Doubles stand crosswise to the line (vert = true for doubles)
+    drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1);
+  }
 }
 function badge(x, y, txt) {
   ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fill();
@@ -350,12 +374,12 @@ function drawBoard() {
   const lay = layout(lb, cx - cw / 2, cy, -1, -1), ray = layout(rb, cx + cw / 2, cy, 1, 1);
 
   drawTile(ctx, cx, cy, center.a, center.b, center.d, 1);
-  lay.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1));
-  ray.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1));
+  lay.out.forEach(drawLinked);
+  ray.out.forEach(drawLinked);
 
-  const lastL = lay.out[lay.out.length - 1], lastR = ray.out[ray.out.length - 1];
-  badge(lastL ? lastL.cx + lastL.dir * lastL.ew / 2 : cx - cw / 2, lastL ? lastL.cy : cy, 'L');
-  badge(lastR ? lastR.cx + lastR.dir * lastR.ew / 2 : cx + cw / 2, lastR ? lastR.cy : cy, 'R');
+  // The badges sit exactly where the next tile on each end will attach
+  badge(lay.x, lay.y, 'L');
+  badge(ray.x, ray.y, 'R');
 }
 
 /* ---------- REFRESH ---------- */
