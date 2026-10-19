@@ -240,7 +240,7 @@
         }
 
         /* ---------------------------------------------------- */
-        /* SQUARE 4-SIDE DOMINO TABLE BOARD WITH SNAKE GRID     */
+        /* SQUARE DOMINO TABLE BOARD WITH 2D CORNER ENGINE       */
         /* ---------------------------------------------------- */
         #dominoes-game-area {
             background: radial-gradient(circle, #2b170c 0%, #1a0d06 70%, #0c0502 100%);
@@ -266,7 +266,7 @@
             border: 1px solid rgba(253, 224, 71, 0.2);
         }
 
-        /* 4-Side Seating Grid Around Table */
+        /* 4-Side Seating Grid */
         .square-table-layout {
             display: grid;
             grid-template-columns: 75px 1fr 75px;
@@ -274,10 +274,10 @@
             gap: 4px;
             align-items: center;
             justify-items: center;
-            min-height: 260px;
+            min-height: 280px;
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
-            padding: 4px;
+            padding: 6px;
             border: 1px dashed rgba(253, 224, 71, 0.15);
         }
 
@@ -308,29 +308,19 @@
             color: #fde047;
         }
 
-        /* Snake Board Grid Center */
+        /* Absolute 2D Canvas Engine Container */
         #table-board-center {
             grid-column: 1 / span 3;
             grid-row: 2;
             width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-        }
-
-        .snake-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-            justify-content: center;
-            align-items: center;
-            max-width: 320px;
+            height: 180px;
+            position: relative;
+            overflow: hidden;
         }
 
         /* Domino Tile Graphics */
         .real-tile {
+            position: absolute;
             background: #fdfbf7;
             color: #111;
             border: 1px solid #c7c2b8;
@@ -341,18 +331,18 @@
             justify-content: center;
             font-weight: bold;
             user-select: none;
-            flex-shrink: 0;
+            transition: all 0.2s ease-in-out;
         }
 
         .real-tile.horiz {
-            width: 32px;
-            height: 18px;
+            width: 30px;
+            height: 16px;
             flex-direction: row;
         }
 
         .real-tile.vert {
-            width: 18px;
-            height: 32px;
+            width: 16px;
+            height: 30px;
             flex-direction: column;
             background: #fef08a;
             border-color: #ca8a04;
@@ -363,7 +353,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
             width: 100%;
             height: 100%;
         }
@@ -526,7 +516,7 @@
                 </div>
             </div>
 
-            <!-- SQUARE 4-SIDE DOMINO TABLE -->
+            <!-- SQUARE 4-SIDE DOMINO TABLE WITH 2D CANVAS -->
             <div id="dominoes-game-area" class="hidden">
                 <div class="table-top-bar">
                     <span>🀏 YARD DOMINOES BOARD</span>
@@ -538,9 +528,7 @@
                     <div id="seat-left" class="player-seat seat-left">Left</div>
 
                     <div id="table-board-center">
-                        <div id="snake-grid" class="snake-grid">
-                            <span style="font-size:10px; color:#fde047;" id="empty-table-msg">Table empty. Slam the first tile!</span>
-                        </div>
+                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:80px;">Table empty. Slam the first tile!</div>
                     </div>
 
                     <div id="seat-right" class="player-seat seat-right">Right</div>
@@ -672,7 +660,8 @@
 
         const dominoesGameArea = document.getElementById("dominoes-game-area");
         const turnIndicator = document.getElementById("turn-indicator");
-        const snakeGrid = document.getElementById("snake-grid");
+        const tableBoardCenter = document.getElementById("table-board-center");
+        const emptyTableMsg = document.getElementById("empty-table-msg");
         const gameLog = document.getElementById("game-log");
         const handContainer = document.getElementById("hand-container");
         const endChoiceBar = document.getElementById("end-choice-bar");
@@ -1031,11 +1020,10 @@
             checkBotTurn();
         }
 
-        /* 4-SQUARE SEATING & LOOPING BOARD RENDER ENGINE */
+        /* 2D COORDINATE SNAKE ENGINE (90° CORNER TURNS) */
         function renderTableBoard() {
             const myIndex = playerOrder.findIndex(p => p.id === authUserId);
             
-            // Map 4 Seats Counter-Clockwise around Table
             const seats = [seatBottom, seatLeft, seatTop, seatRight];
             seats.forEach((s, idx) => {
                 const targetP = playerOrder[(myIndex + idx) % playerOrder.length];
@@ -1048,33 +1036,66 @@
                 }
             });
 
-            // Loop Board Render
-            snakeGrid.innerHTML = "";
+            tableBoardCenter.innerHTML = "";
             if (playedTilesChain.length === 0) {
-                snakeGrid.innerHTML = `<span style="font-size:10px; color:#fde047;">Table empty. Slam the first tile!</span>`;
-            } else {
-                playedTilesChain.forEach(t => {
-                    const isDouble = t.vals[0] === t.vals[1];
-                    const tileEl = document.createElement("div");
-
-                    if (isDouble) {
-                        tileEl.className = "real-tile vert";
-                        tileEl.innerHTML = `
-                            <div class="tile-half">${t.vals[0]}</div>
-                            <div class="tile-divider-v"></div>
-                            <div class="tile-half">${t.vals[1]}</div>
-                        `;
-                    } else {
-                        tileEl.className = "real-tile horiz";
-                        tileEl.innerHTML = `
-                            <div class="tile-half">${t.vals[0]}</div>
-                            <div class="tile-divider-h"></div>
-                            <div class="tile-half">${t.vals[1]}</div>
-                        `;
-                    }
-                    snakeGrid.appendChild(tileEl);
-                });
+                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:80px;">Table empty. Slam the first tile!</div>`;
+                return;
             }
+
+            // Engine Board Boundaries
+            const centerX = tableBoardCenter.clientWidth / 2 - 15;
+            const centerY = tableBoardCenter.clientHeight / 2 - 15;
+            const marginX = 110; 
+            const stepX = 32;
+            const stepY = 22;
+
+            let curX = centerX;
+            let curY = centerY;
+            let dirX = 1; // 1 = right, -1 = left
+
+            playedTilesChain.forEach((t, i) => {
+                const isDouble = t.vals[0] === t.vals[1];
+                const tileEl = document.createElement("div");
+
+                if (i === 0) {
+                    // Center Spinner
+                    curX = centerX;
+                    curY = centerY;
+                } else {
+                    // Check if reaching boundary to execute 90 degree corner turn
+                    if (dirX === 1 && curX >= centerX + marginX) {
+                        // Turn Downward
+                        curY += stepY;
+                        dirX = -1; // Reverse horizontal direction left
+                    } else if (dirX === -1 && curX <= centerX - marginX) {
+                        // Turn Downward
+                        curY += stepY;
+                        dirX = 1; // Reverse horizontal direction right
+                    } else {
+                        curX += (dirX * stepX);
+                    }
+                }
+
+                tileEl.style.left = `${curX}px`;
+                tileEl.style.top = `${curY}px`;
+
+                if (isDouble) {
+                    tileEl.className = "real-tile vert";
+                    tileEl.innerHTML = `
+                        <div class="tile-half">${t.vals[0]}</div>
+                        <div class="tile-divider-v"></div>
+                        <div class="tile-half">${t.vals[1]}</div>
+                    `;
+                } else {
+                    tileEl.className = "real-tile horiz";
+                    tileEl.innerHTML = `
+                        <div class="tile-half">${t.vals[0]}</div>
+                        <div class="tile-divider-h"></div>
+                        <div class="tile-half">${t.vals[1]}</div>
+                    `;
+                }
+                tableBoardCenter.appendChild(tileEl);
+            });
         }
 
         function renderHand() {
