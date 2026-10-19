@@ -16,7 +16,7 @@ body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
 button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#334155}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
-input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:9px;padding:10px;outline:0;text-transform:none}
+input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px;outline:0;text-transform:none}
 input:focus{border-color:#6366f1}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
@@ -118,10 +118,9 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
-let roomSubscription = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
+let roomSubscription = null, lobbyPollInterval = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
 let micActive = false;
 
-// Unique client identifier per device tab
 let myClientId = sessionStorage.getItem('xg_client_id');
 if (!myClientId) {
   myClientId = 'cid_' + Math.random().toString(36).slice(2, 9);
@@ -170,28 +169,50 @@ async function syncRoomState() {
 
 function listenToRoom() {
   if (roomSubscription) roomSubscription.unsubscribe();
+  if (lobbyPollInterval) clearInterval(lobbyPollInterval);
+
   roomSubscription = sb.channel('room_' + roomCode)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
-      const st = payload.new.state;
-      if (!st) return;
-      roomStatus = st.status || 'waiting';
-      handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
-      players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
-      lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
-      
-      if (st.lobby) {
-        lobby = st.lobby;
-        const meInLobby = lobby.find(p => p.clientId === myClientId);
-        if (meInLobby) mySeatPos = meInLobby.pos;
-        renderLobby();
+      handleRoomPayload(payload.new.state);
+    })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        fetchLatestState();
       }
-      
-      if (roomStatus === 'playing' && $('game').classList.contains('hidden')) {
-        $('lobby').classList.add('hidden');
-        $('game').classList.remove('hidden');
-      }
-      refresh();
-    }).subscribe();
+    });
+
+  lobbyPollInterval = setInterval(() => {
+    if (!$('roomPanel').classList.contains('hidden') || active) {
+      fetchLatestState();
+    }
+  }, 2500);
+}
+
+async function fetchLatestState() {
+  if (!roomCode) return;
+  const { data } = await sb.from('game_rooms').select('state').eq('room_code', roomCode).single();
+  if (data && data.state) handleRoomPayload(data.state);
+}
+
+function handleRoomPayload(st) {
+  if (!st) return;
+  roomStatus = st.status || 'waiting';
+  handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
+  players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
+  lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
+  
+  if (st.lobby) {
+    lobby = st.lobby;
+    const meInLobby = lobby.find(p => p.clientId === myClientId);
+    if (meInLobby) mySeatPos = meInLobby.pos;
+    renderLobby();
+  }
+  
+  if (roomStatus === 'playing' && $('game').classList.contains('hidden')) {
+    $('lobby').classList.add('hidden');
+    $('game').classList.remove('hidden');
+  }
+  refresh();
 }
 
 /* ---------- LOBBY & SHARE ---------- */
@@ -271,6 +292,7 @@ $('shareBtn').onclick = () => {
 
 $('leaveBtn').onclick = () => {
   lobby = []; roomCode = ''; $('roomBadge').textContent = 'No room yet';
+  if (lobbyPollInterval) clearInterval(lobbyPollInterval);
   $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
 };
 
@@ -288,7 +310,7 @@ function renderLobby() {
   lobby.forEach((p, i) => {
     const d = document.createElement('div'); d.className = 'pl';
     d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : '') + '">' + (p.isBot ? 'BOT' : 'PLAYER') + '</span>' +
-      (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×' : '') + '</span>';
+      (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
     d.firstChild.textContent = p.name;
     const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
@@ -347,7 +369,6 @@ function updateMicUI(active) {
   }
 }
 
-/* Auto-check URL query for direct room links */
 window.addEventListener('load', () => {
   const params = new URLSearchParams(window.location.search);
   const roomParam = params.get('room');
@@ -499,7 +520,7 @@ const W = 400, H = 430, PITCH = 36, MARGIN = 44, CORNER = 20, CY = 218;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function rr(c, x, y, w, h, r) {
-  c.beginPath(); c.moveTo(x + r); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
 function pips(c, x, y, w, h, n, s) {
