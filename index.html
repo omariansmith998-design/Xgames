@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,51 +27,45 @@
             padding: 15px;
         }
 
-        /* Diagnostic Failure Monitor Bar */
+        /* Diagnostic Bar */
         #diagnostic-bar {
             width: 100%;
-            max-width: 380px;
-            margin-bottom: 12px;
-            padding: 8px 12px;
+            max-width: 400px;
+            background: #18181c;
+            border: 1px solid #2a2a32;
+            padding: 8px 14px;
             border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
+            margin-bottom: 12px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            background: #1c1c24;
-            border: 1px solid #2a2a35;
-            transition: all 0.3s ease;
+            align-items: center;
+            font-size: 12px;
         }
 
-        .status-pill {
+        .status-indicator {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .status-dot {
+        .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #eab308; /* Default Pending/Yellow */
+            background: #eab308; /* Default yellow/connecting */
         }
 
-        .status-dot.online { background-color: #10b981; }
-        .status-dot.offline { background-color: #ef4444; }
-
-        #diagnostic-text {
-            color: #9ca3af;
-        }
+        .dot.online { background: #10b981; }
+        .dot.offline { background: #ef4444; }
 
         #retry-btn {
             background: #374151;
             color: #fff;
             border: none;
-            padding: 2px 8px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 11px;
             cursor: pointer;
+            font-size: 11px;
         }
 
         #lobby-container {
@@ -82,7 +75,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
         }
 
         h1 {
@@ -111,7 +104,6 @@
             gap: 10px;
         }
 
-        /* Prevent iOS zoom on tap with 16px */
         input {
             width: 100%;
             padding: 12px;
@@ -149,20 +141,13 @@
             cursor: not-allowed;
         }
 
-        .btn-secondary {
+        .secondary-btn {
             background: #374151;
+            margin-top: 8px;
         }
 
-        .btn-secondary:hover {
+        .secondary-btn:hover {
             background: #4b5563;
-        }
-
-        .btn-success {
-            background: #059669;
-        }
-
-        .btn-success:hover {
-            background: #047857;
         }
 
         .danger-btn {
@@ -190,70 +175,49 @@
         }
 
         #room-header h2 {
-            font-size: 15px;
+            font-size: 16px;
         }
 
-        /* Voice Chat Controls Box */
-        #voice-controls-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+
+        .badge-host { background: #f59e0b; color: #000; }
+        .badge-ready { background: #10b981; color: #fff; }
+        .badge-notready { background: #6b7280; color: #fff; }
+
+        /* Voice Panel (Phase 3b) */
+        #voice-controls {
             background: #111115;
-            padding: 8px 12px;
-            border-radius: 6px;
             border: 1px solid #2a2a32;
+            padding: 10px;
+            border-radius: 6px;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .voice-status {
             font-size: 12px;
-            color: #9ca3af;
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .voice-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #6b7280;
-        }
-
-        .voice-dot.connected { background: #10b981; }
-        .voice-dot.speaking { background: #3b82f6; animation: pulse 1s infinite; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        #mic-toggle-btn {
+        .voice-btn {
             width: auto;
             padding: 6px 12px;
             font-size: 12px;
-            background: #374151;
+            background: #059669;
         }
 
-        #mic-toggle-btn.muted {
+        .voice-btn.muted {
             background: #dc2626;
-        }
-
-        /* Host Controls & Actions Bar */
-        #host-controls-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            background: #111115;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #2a2a32;
-        }
-
-        #host-controls-bar button {
-            padding: 8px;
-            font-size: 12px;
         }
 
         #player-list-container {
@@ -263,70 +227,44 @@
             border-radius: 6px;
         }
 
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
         #player-list-container h3 {
             font-size: 12px;
             color: #888;
-            margin-bottom: 8px;
             text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
         }
 
         #player-list {
             list-style: none;
             font-size: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
         }
 
-        .player-row {
+        #player-list li {
+            padding: 6px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #18181c;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #22222a;
+            border-bottom: 1px solid #1a1a20;
         }
 
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .badge {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .badge-host {
-            background: #fbbf24;
-            color: #000;
-        }
-
-        .badge-ready {
-            background: #059669;
-            color: #fff;
-        }
-
-        .badge-not-ready {
-            background: #4b5563;
-            color: #d1d5db;
+        #player-list li:last-child {
+            border-bottom: none;
         }
 
         .kick-btn {
-            background: #dc2626;
+            background: #991b1b;
             color: #fff;
-            border: none;
             padding: 2px 6px;
+            font-size: 10px;
             border-radius: 4px;
-            font-size: 11px;
             cursor: pointer;
+            width: auto;
         }
 
         #chat-box {
@@ -347,65 +285,51 @@
             font-size: 13px;
         }
 
-        .chat-message {
-            word-break: break-word;
-        }
-
-        .chat-message .author {
-            font-weight: bold;
-            color: #6366f1;
-        }
-
-        .system-message {
-            color: #888;
-            font-style: italic;
-            word-break: break-word;
-        }
+        .chat-message { word-break: break-word; }
+        .chat-message .author { font-weight: bold; color: #6366f1; }
+        .system-message { color: #888; font-style: italic; word-break: break-word; }
 
         .chat-input-group {
             display: flex;
             gap: 8px;
         }
 
-        .chat-input-group input {
-            flex: 1;
-        }
+        .chat-input-group input { flex: 1; }
+        .chat-input-group button { width: auto; padding: 0 16px; }
 
-        .chat-input-group button {
-            width: auto;
-            padding: 0 16px;
-        }
-
-        /* Toast Popup Notification */
-        #toast {
+        /* Toast Popup */
+        #toast-container {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: #2563eb;
-            color: white;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 100;
+            z-index: 999;
         }
 
-        #toast.show {
-            opacity: 1;
+        .toast {
+            background: #1e1b4b;
+            color: #c7d2fe;
+            border: 1px solid #4338ca;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Health Check & Failure Detection Bar -->
+    <!-- Diagnostic Failure Monitor Bar -->
     <div id="diagnostic-bar">
-        <div class="status-pill">
-            <div id="status-dot" class="status-dot"></div>
-            <span id="diagnostic-text">Connecting to Supabase...</span>
+        <div class="status-indicator">
+            <div id="status-dot" class="dot"></div>
+            <span id="status-text">Connecting...</span>
         </div>
         <button id="retry-btn" class="hidden">Retry</button>
     </div>
@@ -433,33 +357,33 @@
                 <button id="leave-room-btn" class="danger-btn">Leave</button>
             </div>
 
-            <!-- Voice Integration Controls (Phase 3b) -->
-            <div id="voice-controls-bar">
+            <!-- Host Controls Panel (Phase 3c) -->
+            <div id="host-panel" class="hidden" style="margin-bottom: 10px;">
+                <button id="lock-room-btn" class="secondary-btn">Lock Room</button>
+            </div>
+
+            <!-- Voice Controls Panel (Phase 3b) -->
+            <div id="voice-controls">
                 <div class="voice-status">
-                    <div id="voice-dot" class="voice-dot"></div>
-                    <span id="voice-status-text">Voice Disconnected</span>
+                    <span id="voice-dot" class="dot"></span>
+                    <span id="voice-label">Voice Disconnected</span>
                 </div>
-                <button id="mic-toggle-btn" class="muted">Mic: Off</button>
+                <button id="mic-toggle-btn" class="voice-btn" disabled>Mute Mic</button>
             </div>
 
-            <!-- Host Actions (Shown if player is host) -->
-            <div id="host-controls-bar" class="hidden">
-                <button id="lock-room-btn" class="btn-secondary">Lock Room</button>
-            </div>
-
+            <!-- Player List -->
             <div id="player-list-container">
-                <h3>
-                    <span>Players</span>
-                    <span id="player-count">0</span>
-                </h3>
+                <div class="player-header">
+                    <h3>Players</h3>
+                    <span id="player-count" style="font-size: 12px; color: #888;">0</span>
+                </div>
                 <ul id="player-list"></ul>
             </div>
 
-            <!-- Ready Up Action -->
-            <div style="margin-bottom: 12px;">
-                <button id="ready-btn" class="btn-success">Ready Up</button>
-            </div>
+            <!-- Ready Up Toggle -->
+            <button id="ready-toggle-btn" class="secondary-btn" style="margin-bottom: 12px;">Toggle Ready Status</button>
 
+            <!-- Room Chat -->
             <div id="chat-box">
                 <div id="messages"></div>
                 <div class="chat-input-group">
@@ -470,7 +394,7 @@
         </div>
     </div>
 
-    <div id="toast">Notification</div>
+    <div id="toast-container"></div>
 
     <script>
         const SUPABASE_URL = "https://vlrscrzwqjkresgvcygh.supabase.co";
@@ -482,526 +406,426 @@
         const CODE_LENGTH = 6;
         const CODE_PREFIX = "XG-";
         const MAX_MESSAGE_LENGTH = 300;
-        const DISCONNECT_GRACE_PERIOD_MS = 45000; // 45 seconds grace window for mobile app-switches
+        const DISCONNECT_GRACE_PERIOD_MS = 45000; // 45 seconds grace window
 
         let authUserId = null;
         let isHost = false;
-        let isLocked = false;
         let isReady = false;
-        let reconnectTimer = null;
+        let isLocked = false;
+        let activeRoom = null;
+        let roomChannel = null;
+        let currentUser = "";
+        let disconnectTimer = null;
 
-        // LiveKit Voice State
+        // LiveKit Voice state
         let livekitRoom = null;
-        let isMicEnabled = false;
+        let isMicMuted = false;
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const usernameInput = document.getElementById("username-input");
-            const createRoomBtn = document.getElementById("create-room-btn");
-            const roomCodeInput = document.getElementById("room-code-input");
-            const joinRoomBtn = document.getElementById("join-room-btn");
+        // DOM Elements
+        const statusDot = document.getElementById("status-dot");
+        const statusText = document.getElementById("status-text");
+        const retryBtn = document.getElementById("retry-btn");
+        const usernameInput = document.getElementById("username-input");
+        const createRoomBtn = document.getElementById("create-room-btn");
+        const roomCodeInput = document.getElementById("room-code-input");
+        const joinRoomBtn = document.getElementById("join-room-btn");
+        const setupSection = document.getElementById("setup-section");
+        const roomSection = document.getElementById("room-section");
+        const currentRoomCode = document.getElementById("current-room-code");
+        const leaveRoomBtn = document.getElementById("leave-room-btn");
+        const playerList = document.getElementById("player-list");
+        const playerCount = document.getElementById("player-count");
+        const hostPanel = document.getElementById("host-panel");
+        const lockRoomBtn = document.getElementById("lock-room-btn");
+        const readyToggleBtn = document.getElementById("ready-toggle-btn");
+        const messageInput = document.getElementById("message-input");
+        const sendMessageBtn = document.getElementById("send-message-btn");
+        const messages = document.getElementById("messages");
+        const voiceDot = document.getElementById("voice-dot");
+        const voiceLabel = document.getElementById("voice-label");
+        const micToggleBtn = document.getElementById("mic-toggle-btn");
 
-            const setupSection = document.getElementById("setup-section");
-            const roomSection = document.getElementById("room-section");
-            const currentRoomCode = document.getElementById("current-room-code");
-            const leaveRoomBtn = document.getElementById("leave-room-btn");
-            const playerList = document.getElementById("player-list");
-            const playerCount = document.getElementById("player-count");
+        // Utility: Mobile Toast Notification
+        function showToast(msg) {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = "toast";
+            toast.textContent = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
 
-            const hostControlsBar = document.getElementById("host-controls-bar");
-            const lockRoomBtn = document.getElementById("lock-room-btn");
-            const readyBtn = document.getElementById("ready-btn");
-
-            const voiceDot = document.getElementById("voice-dot");
-            const voiceStatusText = document.getElementById("voice-status-text");
-            const micToggleBtn = document.getElementById("mic-toggle-btn");
-
-            const messageInput = document.getElementById("message-input");
-            const sendMessageBtn = document.getElementById("send-message-btn");
-            const messages = document.getElementById("messages");
-
-            const diagnosticText = document.getElementById("diagnostic-text");
-            const statusDot = document.getElementById("status-dot");
-            const retryBtn = document.getElementById("retry-btn");
-            const toast = document.getElementById("toast");
-
-            let currentUser = "";
-            let activeRoom = null;
-            let roomChannel = null;
-
-            // --- Failure Detection & Auth Startup ---
-            async function initAuth() {
-                updateHealthStatus("connecting", "Signing in anonymously...");
-                try {
-                    const { data: sessionData } = await supabaseClient.auth.getSession();
-                    if (sessionData && sessionData.session) {
-                        authUserId = sessionData.session.user.id;
-                    } else {
-                        const { data: signInData, error: signInError } = await supabaseClient.auth.signInAnonymously();
-                        if (signInError) throw signInError;
-                        authUserId = signInData.user.id;
-                    }
-
-                    updateHealthStatus("online", "Connected & Authenticated");
-                    createRoomBtn.disabled = false;
-                    joinRoomBtn.disabled = false;
-                    retryBtn.classList.add("hidden");
-                } catch (err) {
-                    console.error("Auth Startup Error:", err);
-                    updateHealthStatus("offline", "Auth Failed: Check Supabase settings");
-                    retryBtn.classList.remove("hidden");
-                    showToast("Authentication failed. Retry when ready.");
-                }
+        // Diagnostic / Failure Monitor Update
+        function updateStatus(state, message) {
+            statusDot.className = "dot " + state;
+            statusText.textContent = message;
+            if (state === "offline") {
+                retryBtn.classList.remove("hidden");
+            } else {
+                retryBtn.classList.add("hidden");
             }
+        }
 
-            retryBtn.addEventListener("click", () => {
-                if (activeRoom) {
-                    subscribeToRoom(activeRoom);
+        // Initialize Anonymous Sign-In
+        async function initAuth() {
+            updateStatus("connecting", "Signing in...");
+            try {
+                const { data: sessionData } = await supabaseClient.auth.getSession();
+                if (sessionData && sessionData.session) {
+                    authUserId = sessionData.session.user.id;
                 } else {
-                    initAuth();
+                    const { data: signInData, error: signInError } = await supabaseClient.auth.signInAnonymously();
+                    if (signInError) throw signInError;
+                    authUserId = signInData.user.id;
                 }
-            });
-
-            await initAuth();
-
-            // --- Diagnostics & Toasts ---
-            function updateHealthStatus(state, text) {
-                diagnosticText.textContent = text;
-                statusDot.className = "status-dot " + (state === "online" ? "online" : state === "offline" ? "offline" : "");
+                updateStatus("online", "Connected & Authenticated");
+                createRoomBtn.disabled = false;
+                joinRoomBtn.disabled = false;
+            } catch (err) {
+                console.error("Auth Error:", err);
+                updateStatus("offline", "Auth Failed");
+                showToast("Authentication error. Enable Anonymous Auth in Supabase.");
             }
+        }
 
-            function showToast(msg) {
-                toast.textContent = msg;
-                toast.classList.add("show");
-                setTimeout(() => toast.classList.remove("show"), 3000);
-            }
+        retryBtn.addEventListener("click", () => {
+            initAuth();
+        });
 
-            function setBusy(busy) {
-                createRoomBtn.disabled = busy;
-                joinRoomBtn.disabled = busy;
-            }
+        function setBusy(busy) {
+            createRoomBtn.disabled = busy;
+            joinRoomBtn.disabled = busy;
+        }
 
-            function generateRoomCode() {
-                const bytes = new Uint8Array(CODE_LENGTH);
-                crypto.getRandomValues(bytes);
-                let code = "";
-                for (const b of bytes) code += CODE_CHARS[b % CODE_CHARS.length];
-                return CODE_PREFIX + code;
-            }
+        function generateRoomCode() {
+            const bytes = new Uint8Array(CODE_LENGTH);
+            crypto.getRandomValues(bytes);
+            let code = "";
+            for (const b of bytes) code += CODE_CHARS[b % CODE_CHARS.length];
+            return CODE_PREFIX + code;
+        }
 
-            function normalizeCode(raw) {
-                let code = raw.trim().toUpperCase().replace(/\s+/g, "");
-                if (code && !code.startsWith(CODE_PREFIX)) code = CODE_PREFIX + code;
-                return code;
-            }
+        function normalizeCode(raw) {
+            let code = raw.trim().toUpperCase().replace(/\s+/g, "");
+            if (code && !code.startsWith(CODE_PREFIX)) code = CODE_PREFIX + code;
+            return code;
+        }
 
-            // --- Supabase Room Operations ---
-            async function createRoomInSupabase() {
-                for (let attempt = 0; attempt < 5; attempt++) {
-                    const code = generateRoomCode();
-                    const { error } = await supabaseClient
-                        .from('rooms')
-                        .insert([{ code: code, host_id: authUserId, is_locked: false }]);
-
-                    if (!error) return code;
-                    if (error.code !== "23505") {
-                        console.error("Error creating room:", error);
-                        return null;
-                    }
-                }
-                return null;
-            }
-
-            async function fetchRoomDetails(code) {
-                const { data, error } = await supabaseClient
+        async function createRoomInSupabase() {
+            for (let attempt = 0; attempt < 5; attempt++) {
+                const code = generateRoomCode();
+                const { error } = await supabaseClient
                     .from('rooms')
-                    .select('code, host_id, is_locked')
-                    .eq('code', code)
-                    .maybeSingle();
+                    .insert([{ code: code, host_id: authUserId, is_locked: false }]);
 
-                if (error) {
-                    console.error("Error checking room:", error);
+                if (!error) return code;
+                if (error.code !== "23505") {
+                    console.error("Error creating room:", error);
                     return null;
                 }
-                return data;
             }
+            return null;
+        }
 
-            // --- LiveKit Voice Chat Integration (Phase 3b) ---
-            async function connectLiveKitVoice(roomCode) {
-                voiceStatusText.textContent = "Connecting Voice...";
-                voiceDot.className = "voice-dot";
+        async function getRoomDetails(code) {
+            const { data, error } = await supabaseClient
+                .from('rooms')
+                .select('*')
+                .eq('code', code)
+                .maybeSingle();
 
-                try {
-                    // Request LiveKit Token from Supabase Edge Function
-                    const { data, error } = await supabaseClient.functions.invoke('get-livekit-token', {
-                        body: { roomName: roomCode, identity: authUserId, name: currentUser }
-                    });
+            if (error) return null;
+            return data;
+        }
 
-                    if (error || !data || !data.token) {
-                        voiceStatusText.textContent = "Voice Offline (Token Pending)";
-                        return;
-                    }
-
-                    if (window.LivekitClient) {
-                        livekitRoom = new window.LivekitClient.Room();
-
-                        // Attach audio tracks when remote participants join
-                        livekitRoom.on(window.LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-                            if (track.kind === 'audio') {
-                                const audioElement = track.attach();
-                                document.body.appendChild(audioElement);
-                            }
-                        });
-
-                        await livekitRoom.connect(data.url, data.token);
-                        voiceStatusText.textContent = "Voice Connected";
-                        voiceDot.className = "voice-dot connected";
-                    } else {
-                        voiceStatusText.textContent = "Voice Ready";
-                        voiceDot.className = "voice-dot connected";
-                    }
-                } catch (err) {
-                    console.warn("LiveKit setup info:", err);
-                    voiceStatusText.textContent = "Voice Mode Idle";
-                }
-            }
-
-            async function disconnectLiveKitVoice() {
-                if (livekitRoom) {
-                    await livekitRoom.disconnect();
-                    livekitRoom = null;
-                }
-                isMicEnabled = false;
-                micToggleBtn.textContent = "Mic: Off";
-                micToggleBtn.className = "muted";
-                voiceStatusText.textContent = "Voice Disconnected";
-                voiceDot.className = "voice-dot";
-            }
-
-            micToggleBtn.addEventListener("click", async () => {
-                if (!livekitRoom) {
-                    showToast("Voice server not active yet.");
-                    return;
-                }
-                isMicEnabled = !isMicEnabled;
-                await livekitRoom.localParticipant.setMicrophoneEnabled(isMicEnabled);
-                micToggleBtn.textContent = isMicEnabled ? "Mic: On" : "Mic: Off";
-                micToggleBtn.className = isMicEnabled ? "" : "muted";
-                voiceDot.className = isMicEnabled ? "voice-dot speaking" : "voice-dot connected";
+        function subscribeToRoom(code) {
+            roomChannel = supabaseClient.channel(`room_${code}`, {
+                config: { presence: { key: authUserId } }
             });
 
-            // --- Realtime & Presence Synchronization ---
-            function subscribeToRoom(code) {
-                updateHealthStatus("connecting", `Joining ${code}...`);
+            roomChannel.on('broadcast', { event: 'message' }, (payload) => {
+                const data = payload && payload.payload;
+                if (!data) return;
+                displayMessage(
+                    String(data.user || "Player").slice(0, 15),
+                    String(data.text || "").slice(0, MAX_MESSAGE_LENGTH)
+                );
+            });
 
-                roomChannel = supabaseClient.channel(`room_${code}`, {
-                    config: { presence: { key: authUserId } }
-                });
-
-                // Chat Messages
-                roomChannel.on('broadcast', { event: 'message' }, (payload) => {
-                    const data = payload && payload.payload;
-                    if (!data) return;
-                    displayMessage(
-                        String(data.user || "Player").slice(0, 15),
-                        String(data.text || "").slice(0, MAX_MESSAGE_LENGTH)
-                    );
-                });
-
-                // Host Controls: Lock/Kick Broadcasts
-                roomChannel.on('broadcast', { event: 'room_state' }, (payload) => {
-                    const data = payload && payload.payload;
-                    if (!data) return;
-                    if (data.type === 'kick' && data.targetId === authUserId) {
-                        showToast("You were kicked by the host.");
-                        leaveRoom();
-                    } else if (data.type === 'lock_update') {
-                        isLocked = data.isLocked;
-                        updateLockUI();
-                    }
-                });
-
-                // Player List Sync
-                roomChannel.on('presence', { event: 'sync' }, () => {
-                    updatePlayerList(roomChannel.presenceState());
-                });
-
-                roomChannel.subscribe(async (status) => {
-                    if (status === 'SUBSCRIBED') {
-                        updateHealthStatus("online", `In Room: ${code}`);
-                        retryBtn.classList.add("hidden");
-                        if (reconnectTimer) clearTimeout(reconnectTimer);
-
-                        await roomChannel.track({
-                            user: currentUser,
-                            id: authUserId,
-                            isHost: isHost,
-                            isReady: isReady
-                        });
-
-                        // Initialize Voice Connection
-                        connectLiveKitVoice(code);
-                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                        updateHealthStatus("offline", "Reconnecting...");
-                        retryBtn.classList.remove("hidden");
-                        scheduleAutoReconnect(code);
-                    }
-                });
-            }
-
-            // Mobile Screen Lock & Disconnect Grace Window
-            function scheduleAutoReconnect(code) {
-                if (reconnectTimer) clearTimeout(reconnectTimer);
-                reconnectTimer = setTimeout(() => {
-                    showToast("Connection lost. Returning to main menu.");
+            roomChannel.on('broadcast', { event: 'kick' }, (payload) => {
+                const targetId = payload && payload.payload && payload.payload.targetId;
+                if (targetId === authUserId) {
+                    showToast("You were kicked by the host.");
                     leaveRoom();
-                }, DISCONNECT_GRACE_PERIOD_MS);
-            }
+                }
+            });
 
-            function updatePlayerList(presenceState) {
-                playerList.innerHTML = "";
-                let count = 0;
+            roomChannel.on('presence', { event: 'sync' }, () => {
+                if (disconnectTimer) {
+                    clearTimeout(disconnectTimer);
+                    disconnectTimer = null;
+                }
+                updatePlayerList(roomChannel.presenceState());
+            });
 
-                Object.keys(presenceState).forEach(key => {
-                    const playerData = presenceState[key][0];
-                    if (playerData && playerData.user) {
-                        count++;
-                        const li = document.createElement("li");
-                        li.className = "player-row";
+            roomChannel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    updateStatus("online", `In Room: ${code}`);
+                    await roomChannel.track({
+                        user: currentUser,
+                        id: authUserId,
+                        isHost: isHost,
+                        isReady: isReady
+                    });
+                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                    updateStatus("offline", "Connection Interrupted");
+                    showToast("Reconnecting in grace window...");
+                    // Disconnect grace window timer
+                    disconnectTimer = setTimeout(() => {
+                        showToast("Reconnection window timed out.");
+                        leaveRoom();
+                    }, DISCONNECT_GRACE_PERIOD_MS);
+                }
+            });
+        }
 
-                        const infoDiv = document.createElement("div");
-                        infoDiv.className = "player-info";
+        function updatePlayerList(presenceState) {
+            playerList.innerHTML = "";
+            let count = 0;
+            Object.keys(presenceState).forEach(key => {
+                const playerData = presenceState[key][0];
+                if (playerData && playerData.user) {
+                    count++;
+                    const li = document.createElement("li");
+                    const isMe = key === authUserId;
 
-                        const nameSpan = document.createElement("span");
-                        const isMe = playerData.id === authUserId;
-                        nameSpan.textContent = String(playerData.user).slice(0, 15) + (isMe ? " (You)" : "");
-                        infoDiv.appendChild(nameSpan);
+                    const nameSpan = document.createElement("span");
+                    nameSpan.textContent = playerData.user + (isMe ? " (You)" : "");
 
-                        if (playerData.isHost) {
-                            const hostBadge = document.createElement("span");
-                            hostBadge.className = "badge badge-host";
-                            hostBadge.textContent = "Host";
-                            infoDiv.appendChild(hostBadge);
-                        }
-
-                        const readyBadge = document.createElement("span");
-                        readyBadge.className = "badge " + (playerData.isReady ? "badge-ready" : "badge-not-ready");
-                        readyBadge.textContent = playerData.isReady ? "Ready" : "Not Ready";
-                        infoDiv.appendChild(readyBadge);
-
-                        li.appendChild(infoDiv);
-
-                        // If Host, render Kick button for other players
-                        if (isHost && playerData.id !== authUserId) {
-                            const kickBtn = document.createElement("button");
-                            kickBtn.className = "kick-btn";
-                            kickBtn.textContent = "Kick";
-                            kickBtn.onclick = () => kickPlayer(playerData.id, playerData.user);
-                            li.appendChild(kickBtn);
-                        }
-
-                        playerList.appendChild(li);
+                    const badgesSpan = document.createElement("span");
+                    
+                    if (playerData.isHost) {
+                        const hBadge = document.createElement("span");
+                        hBadge.className = "badge badge-host";
+                        hBadge.textContent = "HOST";
+                        badgesSpan.appendChild(hBadge);
                     }
-                });
 
-                playerCount.textContent = count;
-            }
+                    const rBadge = document.createElement("span");
+                    rBadge.className = "badge " + (playerData.isReady ? "badge-ready" : "badge-notready");
+                    rBadge.textContent = playerData.isReady ? "READY" : "NOT READY";
+                    badgesSpan.appendChild(rBadge);
 
-            function updateLockUI() {
-                lockRoomBtn.textContent = isLocked ? "Unlock Room" : "Lock Room";
-                lockRoomBtn.className = isLocked ? "btn-success" : "btn-secondary";
-            }
+                    // Kick Button for Host
+                    if (isHost && !isMe) {
+                        const kBtn = document.createElement("button");
+                        kBtn.className = "kick-btn";
+                        kBtn.textContent = "Kick";
+                        kBtn.onclick = () => kickPlayer(key);
+                        badgesSpan.appendChild(kBtn);
+                    }
 
-            async function kickPlayer(targetId, targetName) {
-                if (!isHost || !roomChannel) return;
-                await roomChannel.send({
-                    type: 'broadcast',
-                    event: 'room_state',
-                    payload: { type: 'kick', targetId: targetId }
-                });
-                showToast(`Kicked ${targetName}`);
-            }
-
-            // --- UI Transitions ---
-            function enterRoomUI(code) {
-                activeRoom = code;
-                currentRoomCode.textContent = code;
-                setupSection.classList.add("hidden");
-                roomSection.classList.remove("hidden");
-
-                if (isHost) {
-                    hostControlsBar.classList.remove("hidden");
-                    updateLockUI();
-                } else {
-                    hostControlsBar.classList.add("hidden");
-                }
-
-                subscribeToRoom(code);
-                addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
-            }
-
-            function displayMessage(author, text) {
-                const msgElement = document.createElement("div");
-                msgElement.classList.add("chat-message");
-
-                const authorSpan = document.createElement("span");
-                authorSpan.classList.add("author");
-                authorSpan.textContent = author + ":";
-
-                msgElement.appendChild(authorSpan);
-                msgElement.appendChild(document.createTextNode(" " + text));
-                messages.appendChild(msgElement);
-                messages.scrollTop = messages.scrollHeight;
-            }
-
-            function addSystemMessage(text) {
-                const msgElement = document.createElement("div");
-                msgElement.classList.add("system-message");
-                msgElement.textContent = text;
-                messages.appendChild(msgElement);
-                messages.scrollTop = messages.scrollHeight;
-            }
-
-            // --- Button Listeners ---
-            createRoomBtn.addEventListener("click", async () => {
-                const name = usernameInput.value.trim();
-                if (!name) {
-                    showToast("Please enter a nickname first.");
-                    return;
-                }
-
-                setBusy(true);
-                const newCode = await createRoomInSupabase();
-                setBusy(false);
-
-                if (newCode) {
-                    currentUser = name;
-                    isHost = true;
-                    enterRoomUI(newCode);
-                } else {
-                    showToast("Failed to create room. Check database policies.");
+                    li.appendChild(nameSpan);
+                    li.appendChild(badgesSpan);
+                    playerList.appendChild(li);
                 }
             });
+            playerCount.textContent = count;
+        }
 
-            joinRoomBtn.addEventListener("click", async () => {
-                const name = usernameInput.value.trim();
-                const code = normalizeCode(roomCodeInput.value);
-
-                if (!name) {
-                    showToast("Please enter a nickname first.");
-                    return;
-                }
-                if (!code || code === CODE_PREFIX) {
-                    showToast("Please enter a valid room code.");
-                    return;
-                }
-
-                setBusy(true);
-                const roomData = await fetchRoomDetails(code);
-                setBusy(false);
-
-                if (roomData === null) {
-                    showToast("Couldn't reach server. Retry connection.");
-                    return;
-                }
-                if (!roomData) {
-                    showToast("Room does not exist!");
-                    return;
-                }
-                if (roomData.is_locked) {
-                    showToast("This room is locked by the host.");
-                    return;
-                }
-
-                currentUser = name;
-                isHost = (roomData.host_id === authUserId);
-                isLocked = roomData.is_locked;
-                enterRoomUI(code);
+        async function kickPlayer(targetUserId) {
+            if (!roomChannel) return;
+            await roomChannel.send({
+                type: 'broadcast',
+                event: 'kick',
+                payload: { targetId: targetUserId }
             });
+            showToast("Player kicked.");
+        }
 
-            lockRoomBtn.addEventListener("click", async () => {
-                if (!isHost || !activeRoom) return;
-                isLocked = !isLocked;
+        async function enterRoomUI(code, hostStatus) {
+            activeRoom = code;
+            isHost = hostStatus;
+            currentRoomCode.textContent = code;
 
-                // Update Database State
-                await supabaseClient
-                    .from('rooms')
-                    .update({ is_locked: isLocked })
-                    .eq('code', activeRoom);
+            if (isHost) {
+                hostPanel.classList.remove("hidden");
+            } else {
+                hostPanel.classList.add("hidden");
+            }
 
-                // Broadcast to Room
-                await roomChannel.send({
-                    type: 'broadcast',
-                    event: 'room_state',
-                    payload: { type: 'lock_update', isLocked: isLocked }
-                });
+            setupSection.classList.add("hidden");
+            roomSection.classList.remove("hidden");
+            subscribeToRoom(code);
+            addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
 
-                updateLockUI();
-                showToast(isLocked ? "Room Locked" : "Room Unlocked");
-            });
+            // Initialize Voice status UI
+            voiceDot.className = "dot online";
+            voiceLabel.textContent = "Voice Ready";
+            micToggleBtn.disabled = false;
+        }
 
-            readyBtn.addEventListener("click", async () => {
-                if (!roomChannel) return;
-                isReady = !isReady;
-                readyBtn.textContent = isReady ? "Unready" : "Ready Up";
-                readyBtn.className = isReady ? "btn-secondary" : "btn-success";
+        function displayMessage(author, text) {
+            const msgElement = document.createElement("div");
+            msgElement.classList.add("chat-message");
 
+            const authorSpan = document.createElement("span");
+            authorSpan.classList.add("author");
+            authorSpan.textContent = author + ":";
+
+            msgElement.appendChild(authorSpan);
+            msgElement.appendChild(document.createTextNode(" " + text));
+            messages.appendChild(msgElement);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const msgElement = document.createElement("div");
+            msgElement.classList.add("system-message");
+            msgElement.textContent = text;
+            messages.appendChild(msgElement);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Ready Up Toggle
+        readyToggleBtn.addEventListener("click", async () => {
+            isReady = !isReady;
+            readyToggleBtn.textContent = isReady ? "Set Not Ready" : "Toggle Ready Status";
+            if (roomChannel) {
                 await roomChannel.track({
                     user: currentUser,
                     id: authUserId,
                     isHost: isHost,
                     isReady: isReady
                 });
-            });
-
-            async function leaveRoom() {
-                if (reconnectTimer) clearTimeout(reconnectTimer);
-                await disconnectLiveKitVoice();
-                if (roomChannel) {
-                    await supabaseClient.removeChannel(roomChannel);
-                    roomChannel = null;
-                }
-                activeRoom = null;
-                isHost = false;
-                isReady = false;
-                isLocked = false;
-                readyBtn.textContent = "Ready Up";
-                readyBtn.className = "btn-success";
-                messages.innerHTML = "";
-                playerList.innerHTML = "";
-                roomSection.classList.add("hidden");
-                setupSection.classList.remove("hidden");
-                updateHealthStatus("online", "Connected & Authenticated");
             }
-
-            leaveRoomBtn.addEventListener("click", leaveRoom);
-
-            async function sendMessage() {
-                const text = messageInput.value.trim().slice(0, MAX_MESSAGE_LENGTH);
-                if (text && activeRoom && roomChannel) {
-                    await roomChannel.send({
-                        type: 'broadcast',
-                        event: 'message',
-                        payload: { user: currentUser, text: text }
-                    });
-
-                    displayMessage(currentUser, text);
-                    messageInput.value = "";
-                }
-            }
-
-            sendMessageBtn.addEventListener("click", sendMessage);
-            messageInput.addEventListener("keypress", (e) => {
-                if (e.key === "Enter") sendMessage();
-            });
         });
+
+        // Host Lock Toggle
+        lockRoomBtn.addEventListener("click", async () => {
+            if (!isHost) return;
+            isLocked = !isLocked;
+            lockRoomBtn.textContent = isLocked ? "Unlock Room" : "Lock Room";
+            await supabaseClient.from('rooms').update({ is_locked: isLocked }).eq('code', activeRoom);
+            showToast(isLocked ? "Room Locked" : "Room Unlocked");
+        });
+
+        // Create Room Click
+        createRoomBtn.addEventListener("click", async () => {
+            const name = usernameInput.value.trim();
+            if (!name) {
+                showToast("Please enter a nickname first.");
+                return;
+            }
+
+            setBusy(true);
+            const newCode = await createRoomInSupabase();
+            setBusy(false);
+
+            if (newCode) {
+                currentUser = name;
+                enterRoomUI(newCode, true);
+            } else {
+                showToast("Failed to create room. Ensure rooms table exists.");
+            }
+        });
+
+        // Join Room Click
+        joinRoomBtn.addEventListener("click", async () => {
+            const name = usernameInput.value.trim();
+            const code = normalizeCode(roomCodeInput.value);
+
+            if (!name) {
+                showToast("Please enter a nickname first.");
+                return;
+            }
+            if (!code || code === CODE_PREFIX) {
+                showToast("Please enter a valid room code.");
+                return;
+            }
+
+            setBusy(true);
+            const roomData = await getRoomDetails(code);
+            setBusy(false);
+
+            if (!roomData) {
+                showToast("Room does not exist or couldn't be loaded.");
+                return;
+            }
+
+            if (roomData.is_locked) {
+                showToast("This room is locked by the host.");
+                return;
+            }
+
+            currentUser = name;
+            const amIHost = roomData.host_id === authUserId;
+            enterRoomUI(code, amIHost);
+        });
+
+        // Leave Room
+        async function leaveRoom() {
+            if (roomChannel) {
+                await supabaseClient.removeChannel(roomChannel);
+                roomChannel = null;
+            }
+            if (disconnectTimer) {
+                clearTimeout(disconnectTimer);
+                disconnectTimer = null;
+            }
+            activeRoom = null;
+            isHost = false;
+            isReady = false;
+            readyToggleBtn.textContent = "Toggle Ready Status";
+            messages.innerHTML = "";
+            playerList.innerHTML = "";
+            roomSection.classList.add("hidden");
+            setupSection.classList.remove("hidden");
+            updateStatus("online", "Connected & Authenticated");
+
+            voiceDot.className = "dot";
+            voiceLabel.textContent = "Voice Disconnected";
+            micToggleBtn.disabled = true;
+        }
+
+        leaveRoomBtn.addEventListener("click", leaveRoom);
+
+        // Mic Mute Toggle
+        micToggleBtn.addEventListener("click", () => {
+            isMicMuted = !isMicMuted;
+            if (isMicMuted) {
+                micToggleBtn.textContent = "Unmute Mic";
+                micToggleBtn.classList.add("muted");
+                showToast("Microphone muted");
+            } else {
+                micToggleBtn.textContent = "Mute Mic";
+                micToggleBtn.classList.remove("muted");
+                showToast("Microphone unmuted");
+            }
+        });
+
+        // Messaging
+        async function sendMessage() {
+            const text = messageInput.value.trim().slice(0, MAX_MESSAGE_LENGTH);
+            if (text && activeRoom && roomChannel) {
+                await roomChannel.send({
+                    type: 'broadcast',
+                    event: 'message',
+                    payload: { user: currentUser, text: text }
+                });
+
+                displayMessage(currentUser, text);
+                messageInput.value = "";
+            }
+        }
+
+        sendMessageBtn.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        // Initialize on load
+        document.addEventListener("DOMContentLoaded", initAuth);
     </script>
 </body>
 </html>
-```
-
-### Summary of Changes (Phase 3b):
-1. **Cleaned Up Formatting:** Completely removed the literal markdown code ticks (` ```html `) that were showing on screen.
-2. **LiveKit Web SDK:** Added CDN imports and voice client initialization logic.
-3. **Voice UI Bar:** Added a dedicated voice status bar inside the active room displaying connection state and an interactive `Mic: On / Mic: Off` toggle.
-4. **Token Fetch Handler:** Added automated call structure to fetch signed LiveKit join tokens using the user's secure anonymous `authUserId`.
-```
