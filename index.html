@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xgames Lobby & Yard Dominoes</title>
-    <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- LiveKit Web Client SDK -->
     <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
     <style>
         * {
@@ -24,18 +22,17 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 8px;
+            padding: 6px;
         }
 
-        /* Diagnostic Bar */
         #diagnostic-bar {
             width: 100%;
-            max-width: 460px;
+            max-width: 440px;
             background: #12131a;
             border: 1px solid #222530;
             padding: 6px 12px;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -71,24 +68,24 @@
         #lobby-container {
             background: #14161f;
             border: 1px solid #232736;
-            padding: 14px;
+            padding: 12px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
             width: 100%;
-            max-width: 460px;
+            max-width: 440px;
         }
 
         h1 {
-            font-size: 19px;
+            font-size: 18px;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #6366f1;
         }
 
         #setup-section {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .divider {
@@ -101,7 +98,7 @@
         .join-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         input {
@@ -111,7 +108,7 @@
             background: #0d0e14;
             color: #fff;
             border-radius: 6px;
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
         }
 
@@ -141,7 +138,7 @@
         .danger-btn {
             background: #dc2626;
             width: auto;
-            padding: 4px 10px;
+            padding: 4px 8px;
             font-size: 11px;
         }
 
@@ -151,12 +148,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             padding-bottom: 6px;
             border-bottom: 1px solid #232736;
         }
 
-        #room-header h2 { font-size: 14px; }
+        #room-header h2 { font-size: 13px; }
 
         .badge {
             font-size: 9px;
@@ -177,7 +174,7 @@
             border: 1px solid #232736;
             padding: 6px 8px;
             border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -200,9 +197,9 @@
         .voice-btn.muted { background: #dc2626; }
 
         #player-list-container {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             background: #0d0e14;
-            padding: 8px;
+            padding: 6px;
             border-radius: 6px;
         }
 
@@ -219,10 +216,10 @@
             text-transform: uppercase;
         }
 
-        #player-list { list-style: none; font-size: 12px; }
+        #player-list { list-style: none; font-size: 11px; }
 
         #player-list li {
-            padding: 4px 0;
+            padding: 3px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -234,7 +231,7 @@
         .kick-btn {
             background: #991b1b;
             color: #fff;
-            padding: 1px 5px;
+            padding: 1px 4px;
             font-size: 9px;
             border-radius: 3px;
             cursor: pointer;
@@ -243,16 +240,17 @@
         }
 
         /* ---------------------------------------------------- */
-        /* REALISTIC 2D YARD DOMINO TABLE BOARD                  */
+        /* SQUARE 4-SIDE DOMINO TABLE BOARD WITH SNAKE GRID     */
         /* ---------------------------------------------------- */
         #dominoes-game-area {
-            background: radial-gradient(circle, #22150c 0%, #170d07 70%, #0a0502 100%);
-            border: 5px solid #3d2110;
+            background: radial-gradient(circle, #2b170c 0%, #1a0d06 70%, #0c0502 100%);
+            border: 6px solid #4a2813;
             border-radius: 12px;
             padding: 8px;
-            margin-bottom: 10px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
-            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .table-top-bar {
@@ -261,7 +259,6 @@
             align-items: center;
             font-size: 11px;
             color: #fde047;
-            margin-bottom: 6px;
             font-weight: bold;
             background: rgba(0, 0, 0, 0.6);
             padding: 4px 8px;
@@ -269,22 +266,35 @@
             border: 1px solid rgba(253, 224, 71, 0.2);
         }
 
-        /* 4-Player Table Seating */
-        .opponents-row {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 6px;
+        /* 4-Side Seating Grid Around Table */
+        .square-table-layout {
+            display: grid;
+            grid-template-columns: 75px 1fr 75px;
+            grid-template-rows: auto 1fr auto;
+            gap: 4px;
+            align-items: center;
+            justify-items: center;
+            min-height: 260px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px dashed rgba(253, 224, 71, 0.15);
         }
 
+        .seat-top { grid-column: 2; grid-row: 1; }
+        .seat-left { grid-column: 1; grid-row: 2; }
+        .seat-right { grid-column: 3; grid-row: 2; }
+        .seat-bottom { grid-column: 2; grid-row: 3; }
+
         .player-seat {
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 3px 6px;
             border-radius: 5px;
             font-size: 10px;
             color: #fff;
             text-align: center;
-            min-width: 75px;
+            width: 100%;
         }
 
         .player-seat.active-turn {
@@ -296,61 +306,56 @@
         .seat-tiles-count {
             font-size: 9px;
             color: #fde047;
-            margin-top: 1px;
         }
 
-        /* Continuous Horizontal Scrollboard Track */
-        #table-chain-container {
-            background: rgba(0, 0, 0, 0.45);
-            border: 1px dashed rgba(253, 224, 71, 0.2);
-            min-height: 100px;
-            border-radius: 8px;
+        /* Snake Board Grid Center */
+        #table-board-center {
+            grid-column: 1 / span 3;
+            grid-row: 2;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 12px;
-            margin-bottom: 6px;
-            white-space: nowrap;
-            scrollbar-width: thin;
+            justify-content: center;
+            padding: 4px;
         }
 
-        .board-snake-wrap {
+        .snake-grid {
             display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
             align-items: center;
-            gap: 4px;
-            flex-wrap: nowrap; /* Prevent stacking into multiple rows */
+            max-width: 320px;
         }
 
-        /* REALISTIC DOMINO TILE GRAPHICS */
+        /* Domino Tile Graphics */
         .real-tile {
             background: #fdfbf7;
             color: #111;
             border: 1px solid #c7c2b8;
-            border-radius: 4px;
-            box-shadow: 2px 3px 6px rgba(0,0,0,0.7), inset -1px -1px 2px rgba(0,0,0,0.15);
+            border-radius: 3px;
+            box-shadow: 1px 2px 4px rgba(0,0,0,0.6);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             user-select: none;
-            position: relative;
             flex-shrink: 0;
         }
 
         .real-tile.horiz {
-            width: 42px;
-            height: 22px;
+            width: 32px;
+            height: 18px;
             flex-direction: row;
         }
 
         .real-tile.vert {
-            width: 22px;
-            height: 42px;
+            width: 18px;
+            height: 32px;
             flex-direction: column;
             background: #fef08a;
-            border-color: #eab308;
+            border-color: #ca8a04;
         }
 
         .tile-half {
@@ -358,24 +363,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             width: 100%;
             height: 100%;
         }
 
-        .tile-divider-h {
-            width: 1px;
-            height: 70%;
-            background: #94a3b8;
-        }
+        .tile-divider-h { width: 1px; height: 70%; background: #94a3b8; }
+        .tile-divider-v { height: 1px; width: 70%; background: #ca8a04; }
 
-        .tile-divider-v {
-            height: 1px;
-            width: 70%;
-            background: #ca8a04;
-        }
-
-        /* Hand & Play Panel */
+        /* Player Hand & Controls */
         .my-hand-section {
             background: rgba(0, 0, 0, 0.5);
             padding: 6px;
@@ -389,13 +385,12 @@
             text-align: center;
             margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .hand-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 4px;
             justify-content: center;
             margin-bottom: 6px;
         }
@@ -404,74 +399,44 @@
             background: #fdfbf7;
             color: #0f172a;
             border: 2px solid #cbd5e1;
-            border-radius: 5px;
-            padding: 4px 6px;
+            border-radius: 4px;
+            padding: 3px 5px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             user-select: none;
             display: flex;
-            gap: 3px;
+            gap: 2px;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
 
-        .domino-tile-hand:active { transform: scale(0.95); }
+        .domino-tile-hand.double { background: #fef08a; border-color: #ca8a04; }
+        .domino-tile-hand.selected { border-color: #facc15; box-shadow: 0 0 8px #facc15; transform: translateY(-3px); }
 
-        .domino-tile-hand.double {
-            background: #fef08a;
-            border-color: #ca8a04;
-        }
-
-        .domino-tile-hand.selected {
-            border-color: #facc15;
-            box-shadow: 0 0 10px #facc15;
-            transform: translateY(-4px);
-        }
-
-        .end-choice-bar {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-
-        .end-btn {
-            flex: 1;
-            padding: 5px;
-            font-size: 10px;
-            background: #0284c7;
-        }
-
-        .end-btn:hover { background: #0369a1; }
+        .end-choice-bar { display: flex; gap: 4px; margin-bottom: 4px; }
+        .end-btn { flex: 1; padding: 5px; font-size: 10px; background: #0284c7; }
 
         .game-log {
-            font-size: 10px;
+            font-size: 9px;
             color: #f1f5f9;
-            height: 28px;
+            height: 24px;
             overflow-y: auto;
             background: rgba(0,0,0,0.7);
             padding: 3px 6px;
             border-radius: 4px;
-            margin-bottom: 6px;
         }
 
-        /* Room Chat Box */
-        #chat-box {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
+        #chat-box { display: flex; flex-direction: column; gap: 4px; }
         #messages {
             background: #0d0e14;
-            height: 90px;
+            height: 70px;
             border-radius: 6px;
-            padding: 6px;
+            padding: 4px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
             font-size: 11px;
         }
 
@@ -479,14 +444,13 @@
         .chat-message .author { font-weight: bold; color: #6366f1; }
         .system-message { color: #888; font-style: italic; word-break: break-word; }
 
-        .chat-input-group { display: flex; gap: 5px; }
-        .chat-input-group input { flex: 1; padding: 6px; font-size: 12px; }
-        .chat-input-group button { width: auto; padding: 0 10px; font-size: 11px; }
+        .chat-input-group { display: flex; gap: 4px; }
+        .chat-input-group input { flex: 1; padding: 5px; font-size: 11px; }
+        .chat-input-group button { width: auto; padding: 0 8px; font-size: 10px; }
 
-        /* Toast Popup */
         #toast-container {
             position: fixed;
-            bottom: 12px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
@@ -496,8 +460,8 @@
             background: #1e1b4b;
             color: #c7d2fe;
             border: 1px solid #4338ca;
-            padding: 6px 12px;
-            border-radius: 5px;
+            padding: 5px 10px;
+            border-radius: 4px;
             font-size: 11px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
@@ -505,7 +469,6 @@
 </head>
 <body>
 
-    <!-- Diagnostic Failure Monitor Bar -->
     <div id="diagnostic-bar">
         <div class="status-indicator">
             <div id="status-dot" class="dot"></div>
@@ -517,7 +480,6 @@
     <div id="lobby-container">
         <h1>Xgames Lobby & Table</h1>
 
-        <!-- Setup / Join Section -->
         <div id="setup-section">
             <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15">
             <div class="button-group">
@@ -530,22 +492,18 @@
             </div>
         </div>
 
-        <!-- Active Room Section -->
         <div id="room-section" class="hidden">
             <div id="room-header">
                 <h2>Room: <span id="current-room-code">------</span></h2>
                 <button id="leave-room-btn" class="danger-btn">Leave</button>
             </div>
 
-            <!-- Lobby UI Container (Hidden automatically when Dominoes starts) -->
             <div id="lobby-ui-group">
-                <!-- Host Controls Panel -->
                 <div id="host-panel" class="hidden" style="margin-bottom: 6px; display: flex; gap: 6px;">
                     <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">+ Add Bot</button>
                     <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">Lock Room</button>
                 </div>
 
-                <!-- Voice Controls Panel -->
                 <div id="voice-controls">
                     <div class="voice-status">
                         <span id="voice-dot" class="dot"></span>
@@ -554,7 +512,6 @@
                     <button id="mic-toggle-btn" class="voice-btn" disabled>Mute Mic</button>
                 </div>
 
-                <!-- Player List -->
                 <div id="player-list-container">
                     <div class="player-header">
                         <h3>Lobby Players</h3>
@@ -563,48 +520,48 @@
                     <ul id="player-list"></ul>
                 </div>
 
-                <!-- Ready Up / Start Game Bar -->
                 <div style="display: flex; gap: 6px; margin-bottom: 8px;">
                     <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:11px;">Toggle Ready</button>
                     <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:6px; font-size:11px;">Start Dominoes</button>
                 </div>
             </div>
 
-            <!-- VISUAL 2D DOMINOES YARD TABLE BOARD -->
+            <!-- SQUARE 4-SIDE DOMINO TABLE -->
             <div id="dominoes-game-area" class="hidden">
                 <div class="table-top-bar">
-                    <span>🀏 YARD DOMINOES TABLE</span>
+                    <span>🀏 YARD DOMINOES BOARD</span>
                     <span id="turn-indicator">Turn: Waiting...</span>
                 </div>
 
-                <!-- Opponents Seating Layout -->
-                <div id="opponents-row" class="opponents-row"></div>
+                <div class="square-table-layout">
+                    <div id="seat-top" class="player-seat seat-top">Top</div>
+                    <div id="seat-left" class="player-seat seat-left">Left</div>
 
-                <!-- Visual 2D Scrollable Board Canvas -->
-                <div id="table-chain-container">
-                    <div id="board-snake-wrap" class="board-snake-wrap">
-                        <span style="font-size:10px; color:#fde047;" id="empty-table-msg">Table empty. Slam the first tile!</span>
+                    <div id="table-board-center">
+                        <div id="snake-grid" class="snake-grid">
+                            <span style="font-size:10px; color:#fde047;" id="empty-table-msg">Table empty. Slam the first tile!</span>
+                        </div>
                     </div>
+
+                    <div id="seat-right" class="player-seat seat-right">Right</div>
+                    <div id="seat-bottom" class="player-seat seat-bottom">You</div>
                 </div>
 
                 <div class="game-log" id="game-log">Match starting...</div>
 
-                <!-- Hand & Slam Controls -->
                 <div class="my-hand-section">
                     <div class="hand-label">YOUR HAND</div>
                     <div id="hand-container" class="hand-container"></div>
 
-                    <!-- End Play Selectors -->
                     <div id="end-choice-bar" class="end-choice-bar hidden">
                         <button id="play-left-btn" class="end-btn">Slam Left (<span id="l-val">-</span>)</button>
                         <button id="play-right-btn" class="end-btn">Slam Right (<span id="r-val">-</span>)</button>
                     </div>
 
-                    <button id="pass-btn" class="secondary-btn" style="padding:5px; font-size:11px;">Pass Turn</button>
+                    <button id="pass-btn" class="secondary-btn" style="padding:4px; font-size:10px;">Pass Turn</button>
                 </div>
             </div>
 
-            <!-- Room Chat -->
             <div id="chat-box">
                 <div id="messages"></div>
                 <div class="chat-input-group">
@@ -640,7 +597,6 @@
         let botCount = 0;
         let bots = [];
 
-        // Game Engine State
         let gameActive = false;
         let myHand = [];
         let leftEnd = null;
@@ -651,7 +607,6 @@
         let playerOrder = [];
         let playerHandsCount = {};
 
-        // Web Audio Synthesizer Effects
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSlamSound() {
@@ -689,7 +644,6 @@
             } catch (e) { console.error(e); }
         }
 
-        // DOM Elements
         const statusDot = document.getElementById("status-dot");
         const statusText = document.getElementById("status-text");
         const retryBtn = document.getElementById("retry-btn");
@@ -716,12 +670,9 @@
         const micToggleBtn = document.getElementById("mic-toggle-btn");
         const lobbyUiGroup = document.getElementById("lobby-ui-group");
 
-        // Game Board DOM
         const dominoesGameArea = document.getElementById("dominoes-game-area");
         const turnIndicator = document.getElementById("turn-indicator");
-        const opponentsRow = document.getElementById("opponents-row");
-        const boardSnakeWrap = document.getElementById("board-snake-wrap");
-        const tableChainContainer = document.getElementById("table-chain-container");
+        const snakeGrid = document.getElementById("snake-grid");
         const gameLog = document.getElementById("game-log");
         const handContainer = document.getElementById("hand-container");
         const endChoiceBar = document.getElementById("end-choice-bar");
@@ -730,6 +681,11 @@
         const lVal = document.getElementById("l-val");
         const rVal = document.getElementById("r-val");
         const passBtn = document.getElementById("pass-btn");
+
+        const seatTop = document.getElementById("seat-top");
+        const seatLeft = document.getElementById("seat-left");
+        const seatRight = document.getElementById("seat-right");
+        const seatBottom = document.getElementById("seat-bottom");
 
         function showToast(msg) {
             const container = document.getElementById("toast-container");
@@ -1065,7 +1021,6 @@
                 playerHandsCount[p.id] = 7;
             });
 
-            // Hide upper lobby controls during active game play
             lobbyUiGroup.classList.add("hidden");
             dominoesGameArea.classList.remove("hidden");
 
@@ -1076,21 +1031,27 @@
             checkBotTurn();
         }
 
+        /* 4-SQUARE SEATING & LOOPING BOARD RENDER ENGINE */
         function renderTableBoard() {
-            opponentsRow.innerHTML = "";
-            playerOrder.forEach(p => {
-                if (p.id !== authUserId) {
-                    const seat = document.createElement("div");
-                    const isActive = p.id === currentTurnPlayerId;
-                    seat.className = "player-seat" + (isActive ? " active-turn" : "");
-                    seat.innerHTML = `<div>${p.name}</div><div class="seat-tiles-count">🀏 ${playerHandsCount[p.id] || 0} tiles</div>`;
-                    opponentsRow.appendChild(seat);
+            const myIndex = playerOrder.findIndex(p => p.id === authUserId);
+            
+            // Map 4 Seats Counter-Clockwise around Table
+            const seats = [seatBottom, seatLeft, seatTop, seatRight];
+            seats.forEach((s, idx) => {
+                const targetP = playerOrder[(myIndex + idx) % playerOrder.length];
+                if (targetP) {
+                    const isActive = targetP.id === currentTurnPlayerId;
+                    s.className = "player-seat " + (idx === 0 ? "seat-bottom" : idx === 1 ? "seat-left" : idx === 2 ? "seat-top" : "seat-right") + (isActive ? " active-turn" : "");
+                    s.innerHTML = `<div>${targetP.name}${idx === 0 ? " (You)" : ""}</div><div class="seat-tiles-count">🀏 ${playerHandsCount[targetP.id] || 0}</div>`;
+                } else {
+                    s.innerHTML = "<div>Empty</div>";
                 }
             });
 
-            boardSnakeWrap.innerHTML = "";
+            // Loop Board Render
+            snakeGrid.innerHTML = "";
             if (playedTilesChain.length === 0) {
-                boardSnakeWrap.innerHTML = `<span style="font-size:10px; color:#fde047;">Table empty. Slam the first tile!</span>`;
+                snakeGrid.innerHTML = `<span style="font-size:10px; color:#fde047;">Table empty. Slam the first tile!</span>`;
             } else {
                 playedTilesChain.forEach(t => {
                     const isDouble = t.vals[0] === t.vals[1];
@@ -1111,13 +1072,8 @@
                             <div class="tile-half">${t.vals[1]}</div>
                         `;
                     }
-                    boardSnakeWrap.appendChild(tileEl);
+                    snakeGrid.appendChild(tileEl);
                 });
-
-                // Auto-scroll track to show newly played tiles
-                setTimeout(() => {
-                    tableChainContainer.scrollLeft = tableChainContainer.scrollWidth;
-                }, 50);
             }
         }
 
