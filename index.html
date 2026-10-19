@@ -22,7 +22,7 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
 .panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
 .pl{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e2433;font-size:14px}
-.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}
+.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}
 .status{font-size:11px;color:#94a3b8}.status b{color:#fbbf24}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
@@ -155,7 +155,7 @@ const log = m => $('log').textContent = m;
 
 /* ---------- STATE ---------- */
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
-let lobby = [], botN = 0, isHost = false, roomStatus = 'waiting';
+let lobby = [], botN = 0, isHost = false, hostClientId = '', roomStatus = 'waiting';
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
 const byPos = p => players.find(x => x.pos === p);
@@ -163,7 +163,7 @@ const byPos = p => players.find(x => x.pos === p);
 /* ---------- SUPABASE REALTIME SYNC ---------- */
 async function syncRoomState() {
   if (!roomCode) return;
-  const stateData = { status: roomStatus, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+  const stateData = { status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
   await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: stateData, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
 }
 
@@ -185,7 +185,7 @@ function listenToRoom() {
     if (!$('roomPanel').classList.contains('hidden') || active) {
       fetchLatestState();
     }
-  }, 2500);
+  }, 2000);
 }
 
 async function fetchLatestState() {
@@ -197,6 +197,9 @@ async function fetchLatestState() {
 function handleRoomPayload(st) {
   if (!st) return;
   roomStatus = st.status || 'waiting';
+  hostClientId = st.hostClientId || hostClientId;
+  isHost = (hostClientId === myClientId);
+  
   handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
   players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
   lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
@@ -218,18 +221,18 @@ function handleRoomPayload(st) {
 /* ---------- LOBBY & SHARE ---------- */
 $('createBtn').onclick = async () => {
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  isHost = true; mySeatPos = 'S'; roomStatus = 'waiting';
-  const myName = ($('nameIn').value.trim() || 'South') + ' (Host)';
+  isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
+  const myName = ($('nameIn').value.trim() || 'South');
   
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  lobby = [{ clientId: myClientId, name: myName, isBot: false, pos: 'S' }];
+  lobby = [{ clientId: myClientId, name: myName, isBot: false, pos: 'S', isHost: true }];
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
   renderLobby();
   
   const { error } = await sb.from('game_rooms').insert([{
     room_code: roomCode,
     status: 'waiting',
-    state: { status: 'waiting', lobby, handNo: 1, sNS: 0, sWE: 0 }
+    state: { status: 'waiting', hostClientId, lobby, handNo: 1, sNS: 0, sWE: 0 }
   }]);
   
   if (error) { toast('Error creating room'); return; }
@@ -247,7 +250,10 @@ async function joinRoomByCode(code) {
   const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).single();
   if (error || !data) return toast('Room not found');
   
-  roomCode = code; isHost = false; roomStatus = data.status || 'waiting';
+  roomCode = code; roomStatus = data.status || 'waiting';
+  hostClientId = data.state.hostClientId || '';
+  isHost = (hostClientId === myClientId);
+  
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   
   let currentLobby = data.state.lobby || [];
@@ -262,7 +268,7 @@ async function joinRoomByCode(code) {
     mySeatPos = freePos;
     let nick = $('nameIn').value.trim();
     if (!nick || nick === 'Dwayne') nick = 'Guest-' + Math.floor(Math.random() * 90 + 10);
-    currentLobby.push({ clientId: myClientId, name: nick, isBot: false, pos: freePos });
+    currentLobby.push({ clientId: myClientId, name: nick, isBot: false, pos: freePos, isHost: false });
   }
   
   lobby = currentLobby;
@@ -297,32 +303,37 @@ $('leaveBtn').onclick = () => {
 };
 
 $('botBtn').onclick = () => {
+  if (!isHost) return toast('Only host can add bots');
   if (lobby.length >= 4) return toast('Room is full');
   const positions = ['S', 'W', 'N', 'E'];
   const taken = lobby.map(p => p.pos);
   const freePos = positions.find(p => !taken.includes(p));
-  lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos: freePos });
+  lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos: freePos, isHost: false });
   renderLobby(); syncRoomState();
 };
 
 function renderLobby() {
   $('plist').innerHTML = '';
   lobby.forEach((p, i) => {
+    const isPlayerHost = p.clientId === hostClientId;
     const d = document.createElement('div'); d.className = 'pl';
-    d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : '') + '">' + (p.isBot ? 'BOT' : 'PLAYER') + '</span>' +
-      (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
-    d.firstChild.textContent = p.name;
+    d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : '')) + '">' + (p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER')) + '</span>' +
+      (isHost && !isPlayerHost ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
+    d.firstChild.textContent = p.name + (p.clientId === myClientId ? ' (You)' : '');
     const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
   });
   $('pc').textContent = lobby.length;
+  $('startBtn').style.display = isHost ? 'block' : 'none';
+  $('botBtn').style.display = isHost ? 'block' : 'none';
 }
 
 $('startBtn').onclick = () => {
+  if (!isHost) return toast('Only host can start');
   const positions = ['S', 'W', 'N', 'E'];
   positions.forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) {
-      lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos });
+      lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos, isHost: false });
     }
   });
   roomStatus = 'playing';
