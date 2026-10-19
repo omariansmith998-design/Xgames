@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xgames Lobby & Dominoes</title>
+    <title>Xgames Lobby & Yard Dominoes</title>
     <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- LiveKit Web Client SDK -->
@@ -17,29 +17,29 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f0f12;
+            background-color: #0b0c10;
             color: #f0f0f5;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 10px;
+            padding: 8px;
         }
 
         /* Diagnostic Bar */
         #diagnostic-bar {
             width: 100%;
-            max-width: 440px;
-            background: #18181c;
-            border: 1px solid #2a2a32;
-            padding: 8px 14px;
+            max-width: 460px;
+            background: #12131a;
+            border: 1px solid #222530;
+            padding: 6px 12px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .status-indicator {
@@ -62,56 +62,56 @@
             background: #374151;
             color: #fff;
             border: none;
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         #lobby-container {
-            background: #18181c;
-            border: 1px solid #2a2a32;
-            padding: 16px;
+            background: #14161f;
+            border: 1px solid #232736;
+            padding: 14px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
         }
 
         h1 {
-            font-size: 20px;
+            font-size: 19px;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: #6366f1;
         }
 
         #setup-section {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .divider {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
-            margin: 4px 0;
+            margin: 2px 0;
         }
 
         .join-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #2e2e38;
-            background: #111115;
+            padding: 10px;
+            border: 1px solid #2a2f42;
+            background: #0d0e14;
             color: #fff;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
         }
 
@@ -119,13 +119,13 @@
 
         button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #4f46e5;
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: background 0.2s;
         }
@@ -133,16 +133,16 @@
         button:hover { background: #4338ca; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .secondary-btn { background: #374151; }
-        .secondary-btn:hover { background: #4b5563; }
+        .secondary-btn { background: #2d3345; }
+        .secondary-btn:hover { background: #3b4259; }
         .success-btn { background: #059669; }
         .success-btn:hover { background: #047857; }
 
         .danger-btn {
             background: #dc2626;
             width: auto;
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 4px 10px;
+            font-size: 11px;
         }
 
         .hidden { display: none !important; }
@@ -151,19 +151,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #2a2a32;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #232736;
         }
 
-        #room-header h2 { font-size: 15px; }
+        #room-header h2 { font-size: 14px; }
 
         .badge {
-            font-size: 10px;
-            padding: 2px 6px;
+            font-size: 9px;
+            padding: 2px 5px;
             border-radius: 4px;
             font-weight: bold;
-            margin-left: 4px;
+            margin-left: 3px;
         }
 
         .badge-host { background: #f59e0b; color: #000; }
@@ -173,36 +173,36 @@
 
         /* Voice Controls */
         #voice-controls {
-            background: #111115;
-            border: 1px solid #2a2a32;
-            padding: 8px 10px;
+            background: #0d0e14;
+            border: 1px solid #232736;
+            padding: 6px 8px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
         .voice-status {
-            font-size: 12px;
+            font-size: 11px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .voice-btn {
             width: auto;
-            padding: 4px 10px;
-            font-size: 11px;
+            padding: 3px 8px;
+            font-size: 10px;
             background: #059669;
         }
 
         .voice-btn.muted { background: #dc2626; }
 
         #player-list-container {
-            margin-bottom: 10px;
-            background: #111115;
-            padding: 10px;
+            margin-bottom: 8px;
+            background: #0d0e14;
+            padding: 8px;
             border-radius: 6px;
         }
 
@@ -210,23 +210,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         #player-list-container h3 {
-            font-size: 11px;
+            font-size: 10px;
             color: #888;
             text-transform: uppercase;
         }
 
-        #player-list { list-style: none; font-size: 13px; }
+        #player-list { list-style: none; font-size: 12px; }
 
         #player-list li {
-            padding: 5px 0;
+            padding: 4px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #1a1a20;
+            border-bottom: 1px solid #1a1d29;
         }
 
         #player-list li:last-child { border-bottom: none; }
@@ -234,24 +234,24 @@
         .kick-btn {
             background: #991b1b;
             color: #fff;
-            padding: 2px 6px;
-            font-size: 10px;
-            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 9px;
+            border-radius: 3px;
             cursor: pointer;
             width: auto;
-            margin-left: 4px;
+            margin-left: 3px;
         }
 
         /* ---------------------------------------------------- */
-        /* VISUAL DOMINOES TABLE BOARD (GREEN FELT STYLE)       */
+        /* REALISTIC 2D YARD DOMINO TABLE BOARD                  */
         /* ---------------------------------------------------- */
         #dominoes-game-area {
-            background: radial-gradient(circle, #14532d 0%, #064e3b 70%, #022c22 100%);
-            border: 4px solid #78350f;
+            background: radial-gradient(circle, #22150c 0%, #170d07 70%, #0a0502 100%);
+            border: 5px solid #3d2110;
             border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 12px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            padding: 8px;
+            margin-bottom: 10px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
             position: relative;
         }
 
@@ -260,92 +260,136 @@
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            color: #fef08a;
-            margin-bottom: 8px;
+            color: #fde047;
+            margin-bottom: 6px;
             font-weight: bold;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             padding: 4px 8px;
             border-radius: 4px;
+            border: 1px solid rgba(253, 224, 71, 0.2);
         }
 
-        /* Opponents Table Seating Grid */
+        /* 4-Player Table Seating */
         .opponents-row {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+            justify-content: space-around;
+            margin-bottom: 6px;
         }
 
         .player-seat {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-size: 10px;
             color: #fff;
             text-align: center;
-            min-width: 80px;
+            min-width: 75px;
         }
 
         .player-seat.active-turn {
             border-color: #facc15;
-            box-shadow: 0 0 8px #facc15;
-            background: rgba(234, 179, 8, 0.2);
+            box-shadow: 0 0 10px #facc15;
+            background: rgba(234, 179, 8, 0.25);
         }
 
         .seat-tiles-count {
-            font-size: 10px;
-            color: #fef08a;
-            margin-top: 2px;
+            font-size: 9px;
+            color: #fde047;
+            margin-top: 1px;
         }
 
-        /* Physical Domino Board Canvas Area */
+        /* 2D Scrollable Branching Board Canvas */
         #table-chain-container {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px dashed rgba(255,255,255,0.2);
-            min-height: 80px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px dashed rgba(253, 224, 71, 0.2);
+            min-height: 180px;
+            max-height: 220px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow-x: auto;
-            padding: 10px;
-            gap: 6px;
-            margin-bottom: 8px;
+            overflow: auto;
+            padding: 16px;
+            margin-bottom: 6px;
+            position: relative;
         }
 
-        .placed-tile {
-            background: #fff;
-            color: #000;
-            border: 2px solid #334155;
+        .board-snake-wrap {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 380px;
+        }
+
+        /* REALISTIC DOMINO TILE CANVAS GRAPHICS */
+        .real-tile {
+            background: #fdfbf7;
+            color: #111;
+            border: 1px solid #c7c2b8;
             border-radius: 4px;
-            padding: 4px 6px;
-            font-weight: bold;
-            font-size: 12px;
+            box-shadow: 2px 3px 6px rgba(0,0,0,0.7), inset -1px -1px 2px rgba(0,0,0,0.15);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-            min-width: 28px;
+            font-weight: bold;
+            user-select: none;
+            position: relative;
         }
 
-        .placed-tile.double {
+        /* Horizontal Tile Layout */
+        .real-tile.horiz {
+            width: 38px;
+            height: 20px;
+            flex-direction: row;
+        }
+
+        /* Vertical Tile Layout (Doubles / Crosses / Corners) */
+        .real-tile.vert {
+            width: 20px;
+            height: 38px;
+            flex-direction: column;
             background: #fef08a;
-            border-color: #ca8a04;
+            border-color: #eab308;
         }
 
-        /* Player Controls & Hand */
+        .tile-half {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tile-divider-h {
+            width: 1px;
+            height: 70%;
+            background: #94a3b8;
+        }
+
+        .tile-divider-v {
+            height: 1px;
+            width: 70%;
+            background: #ca8a04;
+        }
+
+        /* Hand & Play Panel */
         .my-hand-section {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px;
             border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .hand-label {
-            font-size: 10px;
-            color: #cbd5e1;
+            font-size: 9px;
+            color: #94a3b8;
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -353,38 +397,36 @@
         .hand-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 5px;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
-        .domino-tile {
-            background: #f8fafc;
+        .domino-tile-hand {
+            background: #fdfbf7;
             color: #0f172a;
-            border: 2px solid #94a3b8;
-            border-radius: 6px;
-            padding: 6px 8px;
+            border: 2px solid #cbd5e1;
+            border-radius: 5px;
+            padding: 4px 6px;
             font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             user-select: none;
             display: flex;
-            gap: 4px;
+            gap: 3px;
             align-items: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
             transition: transform 0.1s;
         }
 
-        .domino-tile:active {
-            transform: scale(0.95);
-        }
+        .domino-tile-hand:active { transform: scale(0.95); }
 
-        .domino-tile.double {
+        .domino-tile-hand.double {
             background: #fef08a;
-            border-color: #eab308;
+            border-color: #ca8a04;
         }
 
-        .domino-tile.selected {
+        .domino-tile-hand.selected {
             border-color: #facc15;
             box-shadow: 0 0 10px #facc15;
             transform: translateY(-4px);
@@ -392,14 +434,14 @@
 
         .end-choice-bar {
             display: flex;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 6px;
+            margin-bottom: 4px;
         }
 
         .end-btn {
             flex: 1;
-            padding: 6px;
-            font-size: 11px;
+            padding: 5px;
+            font-size: 10px;
             background: #0284c7;
         }
 
@@ -408,45 +450,45 @@
         .game-log {
             font-size: 10px;
             color: #f1f5f9;
-            height: 32px;
+            height: 28px;
             overflow-y: auto;
-            background: rgba(0,0,0,0.6);
-            padding: 4px 8px;
+            background: rgba(0,0,0,0.7);
+            padding: 3px 6px;
             border-radius: 4px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         /* Room Chat Box */
         #chat-box {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         #messages {
-            background: #111115;
-            height: 100px;
+            background: #0d0e14;
+            height: 90px;
             border-radius: 6px;
-            padding: 8px;
+            padding: 6px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            font-size: 12px;
+            gap: 3px;
+            font-size: 11px;
         }
 
         .chat-message { word-break: break-word; }
         .chat-message .author { font-weight: bold; color: #6366f1; }
         .system-message { color: #888; font-style: italic; word-break: break-word; }
 
-        .chat-input-group { display: flex; gap: 6px; }
-        .chat-input-group input { flex: 1; padding: 8px; font-size: 13px; }
-        .chat-input-group button { width: auto; padding: 0 12px; font-size: 12px; }
+        .chat-input-group { display: flex; gap: 5px; }
+        .chat-input-group input { flex: 1; padding: 6px; font-size: 12px; }
+        .chat-input-group button { width: auto; padding: 0 10px; font-size: 11px; }
 
         /* Toast Popup */
         #toast-container {
             position: fixed;
-            bottom: 15px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
@@ -456,9 +498,9 @@
             background: #1e1b4b;
             color: #c7d2fe;
             border: 1px solid #4338ca;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 11px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
     </style>
@@ -498,9 +540,9 @@
             </div>
 
             <!-- Host Controls Panel -->
-            <div id="host-panel" class="hidden" style="margin-bottom: 8px; display: flex; gap: 6px;">
-                <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:12px;">+ Add Bot</button>
-                <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:12px;">Lock Room</button>
+            <div id="host-panel" class="hidden" style="margin-bottom: 6px; display: flex; gap: 6px;">
+                <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">+ Add Bot</button>
+                <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">Lock Room</button>
             </div>
 
             <!-- Voice Controls Panel -->
@@ -516,30 +558,32 @@
             <div id="player-list-container">
                 <div class="player-header">
                     <h3>Lobby Players</h3>
-                    <span id="player-count" style="font-size: 11px; color: #888;">0</span>
+                    <span id="player-count" style="font-size: 10px; color: #888;">0</span>
                 </div>
                 <ul id="player-list"></ul>
             </div>
 
             <!-- Ready Up / Start Game Bar -->
-            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-                <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:8px; font-size:12px;">Toggle Ready</button>
-                <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:8px; font-size:12px;">Start Dominoes</button>
+            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:11px;">Toggle Ready</button>
+                <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:6px; font-size:11px;">Start Dominoes</button>
             </div>
 
-            <!-- VISUAL 2D DOMINOES BOARD -->
+            <!-- VISUAL 2D DOMINOES YARD TABLE BOARD -->
             <div id="dominoes-game-area" class="hidden">
                 <div class="table-top-bar">
-                    <span>🀏 DOMINOES TABLE</span>
+                    <span>🀏 YARD DOMINOES TABLE</span>
                     <span id="turn-indicator">Turn: Waiting...</span>
                 </div>
 
                 <!-- Opponents Seating Layout -->
                 <div id="opponents-row" class="opponents-row"></div>
 
-                <!-- Visual Table Chain Board -->
+                <!-- Visual 2D Branching Board Canvas -->
                 <div id="table-chain-container">
-                    <span style="font-size:11px; color:#a7f3d0;" id="empty-table-msg">Table empty. Slam the first tile!</span>
+                    <div id="board-snake-wrap" class="board-snake-wrap">
+                        <span style="font-size:10px; color:#fde047;" id="empty-table-msg">Table empty. Slam the first tile!</span>
+                    </div>
                 </div>
 
                 <div class="game-log" id="game-log">Match starting...</div>
@@ -551,11 +595,11 @@
 
                     <!-- End Play Selectors -->
                     <div id="end-choice-bar" class="end-choice-bar hidden">
-                        <button id="play-left-btn" class="end-btn">Play Left End (<span id="l-val">-</span>)</button>
-                        <button id="play-right-btn" class="end-btn">Play Right End (<span id="r-val">-</span>)</button>
+                        <button id="play-left-btn" class="end-btn">Slam Left (<span id="l-val">-</span>)</button>
+                        <button id="play-right-btn" class="end-btn">Slam Right (<span id="r-val">-</span>)</button>
                     </div>
 
-                    <button id="pass-btn" class="secondary-btn" style="padding:6px; font-size:12px;">Pass Turn</button>
+                    <button id="pass-btn" class="secondary-btn" style="padding:5px; font-size:11px;">Pass Turn</button>
                 </div>
             </div>
 
@@ -600,7 +644,7 @@
         let myHand = [];
         let leftEnd = null;
         let rightEnd = null;
-        let playedTilesChain = [];
+        let playedTilesChain = []; // Array of tile objects with orientation info
         let selectedTileIndex = null;
         let currentTurnPlayerId = null;
         let playerOrder = [];
@@ -636,7 +680,7 @@
         const dominoesGameArea = document.getElementById("dominoes-game-area");
         const turnIndicator = document.getElementById("turn-indicator");
         const opponentsRow = document.getElementById("opponents-row");
-        const tableChainContainer = document.getElementById("table-chain-container");
+        const boardSnakeWrap = document.getElementById("board-snake-wrap");
         const gameLog = document.getElementById("game-log");
         const handContainer = document.getElementById("hand-container");
         const endChoiceBar = document.getElementById("end-choice-bar");
@@ -652,7 +696,7 @@
             toast.className = "toast";
             toast.textContent = msg;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(() => toast.remove(), 2500);
         }
 
         function updateStatus(state, message) {
@@ -988,6 +1032,7 @@
             checkBotTurn();
         }
 
+        /* RENDERS 2D BRANCHING REALISTIC GRAPHICS BOARD */
         function renderTableBoard() {
             // Render Seating Layout
             opponentsRow.innerHTML = "";
@@ -1001,17 +1046,32 @@
                 }
             });
 
-            // Render Table Chain
-            tableChainContainer.innerHTML = "";
+            // Render 2D Board Snake
+            boardSnakeWrap.innerHTML = "";
             if (playedTilesChain.length === 0) {
-                tableChainContainer.innerHTML = `<span style="font-size:11px; color:#a7f3d0;">Table empty. Slam the first tile!</span>`;
+                boardSnakeWrap.innerHTML = `<span style="font-size:10px; color:#fde047;">Table empty. Slam the first tile!</span>`;
             } else {
                 playedTilesChain.forEach(t => {
-                    const el = document.createElement("div");
-                    const isDouble = t[0] === t[1];
-                    el.className = "placed-tile" + (isDouble ? " double" : "");
-                    el.innerHTML = `<span>${t[0]}</span><span>${t[1]}</span>`;
-                    tableChainContainer.appendChild(el);
+                    const isDouble = t.vals[0] === t.vals[1];
+                    const tileEl = document.createElement("div");
+
+                    // Render Vertical Cross for Doubles, Horizontal for Regular
+                    if (isDouble) {
+                        tileEl.className = "real-tile vert";
+                        tileEl.innerHTML = `
+                            <div class="tile-half">${t.vals[0]}</div>
+                            <div class="tile-divider-v"></div>
+                            <div class="tile-half">${t.vals[1]}</div>
+                        `;
+                    } else {
+                        tileEl.className = "real-tile horiz";
+                        tileEl.innerHTML = `
+                            <div class="tile-half">${t.vals[0]}</div>
+                            <div class="tile-divider-h"></div>
+                            <div class="tile-half">${t.vals[1]}</div>
+                        `;
+                    }
+                    boardSnakeWrap.appendChild(tileEl);
                 });
             }
         }
@@ -1024,7 +1084,7 @@
                 const el = document.createElement("div");
                 const isDouble = tile[0] === tile[1];
                 const isSelected = selectedTileIndex === index;
-                el.className = "domino-tile" + (isDouble ? " double" : "") + (isSelected ? " selected" : "");
+                el.className = "domino-tile-hand" + (isDouble ? " double" : "") + (isSelected ? " selected" : "");
                 el.textContent = `[${tile[0]}|${tile[1]}]`;
                 el.onclick = () => selectHandTile(index, tile);
                 handContainer.appendChild(el);
@@ -1040,7 +1100,6 @@
             selectedTileIndex = index;
             renderHand();
 
-            // Check playable options
             if (leftEnd === null && rightEnd === null) {
                 playTileDirect(index, tile, "first");
             } else {
@@ -1064,18 +1123,30 @@
         }
 
         async function playTileDirect(handIndex, tile, side) {
+            let orientedVals = [...tile];
+
             if (side === "first") {
                 leftEnd = tile[0];
                 rightEnd = tile[1];
-                playedTilesChain.push(tile);
+                playedTilesChain.push({ vals: orientedVals });
             } else if (side === "left") {
-                if (tile[0] === leftEnd) leftEnd = tile[1];
-                else leftEnd = tile[0];
-                playedTilesChain.unshift(tile);
+                if (tile[0] === leftEnd) {
+                    orientedVals = [tile[1], tile[0]];
+                    leftEnd = tile[1];
+                } else {
+                    orientedVals = [tile[0], tile[1]];
+                    leftEnd = tile[0];
+                }
+                playedTilesChain.unshift({ vals: orientedVals });
             } else if (side === "right") {
-                if (tile[0] === rightEnd) rightEnd = tile[1];
-                else rightEnd = tile[0];
-                playedTilesChain.push(tile);
+                if (tile[0] === rightEnd) {
+                    orientedVals = [tile[0], tile[1]];
+                    rightEnd = tile[1];
+                } else {
+                    orientedVals = [tile[1], tile[0]];
+                    rightEnd = tile[0];
+                }
+                playedTilesChain.push({ vals: orientedVals });
             }
 
             myHand.splice(handIndex, 1);
@@ -1112,10 +1183,10 @@
             renderHand();
             updateTurnDisplay();
 
-            logGame(`${payload.playerName} slammed [${payload.tile[0]}|${payload.tile[1]}]!`);
+            logGame(`💥 ${payload.playerName} slammed [${payload.tile[0]}|${payload.tile[1]}]!`);
 
             if (payload.handCount === 0) {
-                logGame(`🎉 ${payload.playerName} wins the round!`);
+                logGame(`🎉 ${payload.playerName} wins the match!`);
                 showToast(`${payload.playerName} DOMINOES!`);
                 gameActive = false;
                 return;
@@ -1194,18 +1265,30 @@
 
                 if (playableIndex !== -1) {
                     const tile = b.hand.splice(playableIndex, 1)[0];
+                    let orientedVals = [...tile];
+
                     if (playSide === "first") {
                         leftEnd = tile[0];
                         rightEnd = tile[1];
-                        playedTilesChain.push(tile);
+                        playedTilesChain.push({ vals: orientedVals });
                     } else if (playSide === "left") {
-                        if (tile[0] === leftEnd) leftEnd = tile[1];
-                        else leftEnd = tile[0];
-                        playedTilesChain.unshift(tile);
+                        if (tile[0] === leftEnd) {
+                            orientedVals = [tile[1], tile[0]];
+                            leftEnd = tile[1];
+                        } else {
+                            orientedVals = [tile[0], tile[1]];
+                            leftEnd = tile[0];
+                        }
+                        playedTilesChain.unshift({ vals: orientedVals });
                     } else if (playSide === "right") {
-                        if (tile[0] === rightEnd) rightEnd = tile[1];
-                        else rightEnd = tile[0];
-                        playedTilesChain.push(tile);
+                        if (tile[0] === rightEnd) {
+                            orientedVals = [tile[0], tile[1]];
+                            rightEnd = tile[1];
+                        } else {
+                            orientedVals = [tile[1], tile[0]];
+                            rightEnd = tile[0];
+                        }
+                        playedTilesChain.push({ vals: orientedVals });
                     }
 
                     const botPayload = {
