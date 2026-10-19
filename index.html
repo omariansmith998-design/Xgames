@@ -21,11 +21,11 @@
             align-items: center;
             justify-content: flex-start;
             min-height: 100vh;
-            padding: 8px;
+            padding: 6px;
             user-select: none;
         }
 
-        /* Top Xgames Universal Navigation Bar */
+        /* Universal Xgames Navigation Header */
         #xgames-nav {
             width: 100%;
             max-width: 460px;
@@ -41,7 +41,7 @@
         }
 
         .xgames-logo {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 900;
             letter-spacing: 1px;
             color: #6366f1;
@@ -50,9 +50,7 @@
             gap: 6px;
         }
 
-        .xgames-logo span {
-            color: #f43f5e;
-        }
+        .xgames-logo span { color: #f43f5e; }
 
         .hub-btn {
             background: #2563eb;
@@ -71,14 +69,14 @@
         #app-container {
             background: #14161f;
             border: 1px solid #232736;
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
             width: 100%;
             max-width: 460px;
         }
 
-        /* Arcade Game Selector Cards */
+        /* Arcade Hub Selector */
         .arcade-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -96,28 +94,14 @@
             transition: transform 0.15s, border-color 0.15s;
         }
 
-        .game-card:hover {
-            transform: translateY(-2px);
-            border-color: #6366f1;
-        }
-
         .game-card.active {
             border-color: #10b981;
             background: #132720;
         }
 
-        .game-card h3 {
-            font-size: 13px;
-            color: #fff;
-            margin-bottom: 4px;
-        }
+        .game-card h3 { font-size: 13px; color: #fff; margin-bottom: 4px; }
+        .game-card p { font-size: 10px; color: #888; }
 
-        .game-card p {
-            font-size: 10px;
-            color: #888;
-        }
-
-        /* Buttons & Forms */
         input {
             width: 100%;
             padding: 10px;
@@ -147,9 +131,7 @@
 
         button:hover { background: #4338ca; }
         .secondary-btn { background: #2d3345; }
-        .secondary-btn:hover { background: #3b4259; }
         .success-btn { background: #059669; }
-        .success-btn:hover { background: #047857; }
 
         .hidden { display: none !important; }
 
@@ -163,30 +145,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
 
-        .team-score {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
+        .team-score { display: flex; align-items: center; gap: 6px; }
         .score-pill {
             background: #312e81;
             color: #c7d2fe;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        /* 4-SIDE SQUARE DOMINO TABLE */
+        /* 4-SIDE DOMINO TABLE BOARD */
         #dominoes-game-area {
             background: radial-gradient(circle, #2b170c 0%, #1a0d06 70%, #0c0502 100%);
             border: 6px solid #4a2813;
             border-radius: 12px;
-            padding: 8px;
+            padding: 6px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
@@ -206,80 +183,83 @@
             border: 1px solid rgba(253, 224, 71, 0.2);
         }
 
+        /* Outer Frame Seating Grid */
         .square-table-layout {
             display: grid;
-            grid-template-columns: 75px 1fr 75px;
+            grid-template-columns: 50px 1fr 50px;
             grid-template-rows: auto 1fr auto;
-            gap: 4px;
+            gap: 2px;
             align-items: center;
             justify-items: center;
-            min-height: 270px;
+            min-height: 290px;
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
-            padding: 6px;
+            padding: 4px;
             border: 1px dashed rgba(253, 224, 71, 0.15);
+            position: relative;
         }
 
-        .seat-top { grid-column: 2; grid-row: 1; }
-        .seat-left { grid-column: 1; grid-row: 2; z-index: 10; }
-        .seat-right { grid-column: 3; grid-row: 2; z-index: 10; }
-        .seat-bottom { grid-column: 2; grid-row: 3; }
+        .seat-top { grid-column: 2; grid-row: 1; z-index: 20; }
+        .seat-left { grid-column: 1; grid-row: 2; z-index: 20; }
+        .seat-right { grid-column: 3; grid-row: 2; z-index: 20; }
+        .seat-bottom { grid-column: 2; grid-row: 3; z-index: 20; }
 
         .player-seat {
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 3px 6px;
-            border-radius: 5px;
-            font-size: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3px;
+            border-radius: 6px;
+            font-size: 9px;
             color: #fff;
             text-align: center;
             width: 100%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
         }
 
         .player-seat.active-turn {
             border-color: #facc15;
             box-shadow: 0 0 10px #facc15;
-            background: rgba(234, 179, 8, 0.25);
+            background: rgba(234, 179, 8, 0.3);
         }
 
-        .seat-tiles-count {
-            font-size: 9px;
-            color: #fde047;
-        }
+        .seat-tiles-count { font-size: 8px; color: #fde047; }
 
+        /* Board Canvas Center Area */
         #table-board-center {
             grid-column: 1 / span 3;
-            grid-row: 2;
+            grid-row: 1 / span 3;
             width: 100%;
-            height: 200px;
+            height: 240px;
             position: relative;
             overflow: hidden;
+            z-index: 5;
         }
 
-        /* Domino Tile Graphics */
+        /* Domino Tile Styling & Orientations */
         .real-tile {
             position: absolute;
             background: #fdfbf7;
             color: #111;
             border: 1px solid #c7c2b8;
             border-radius: 3px;
-            box-shadow: 1px 2px 4px rgba(0,0,0,0.6);
+            box-shadow: 1px 2px 4px rgba(0,0,0,0.7);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             transition: all 0.2s ease-in-out;
+            z-index: 10;
         }
 
         .real-tile.horiz {
-            width: 28px;
-            height: 15px;
+            width: 26px;
+            height: 14px;
             flex-direction: row;
         }
 
         .real-tile.vert {
-            width: 15px;
-            height: 28px;
+            width: 14px;
+            height: 26px;
             flex-direction: column;
             background: #fef08a;
             border-color: #ca8a04;
@@ -290,7 +270,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 9px;
+            font-size: 8px;
             width: 100%;
             height: 100%;
         }
@@ -298,7 +278,25 @@
         .tile-divider-h { width: 1px; height: 70%; background: #94a3b8; }
         .tile-divider-v { height: 1px; width: 70%; background: #ca8a04; }
 
-        /* Hand & Controls */
+        /* Open-End Indicator Badges */
+        .end-badge {
+            position: absolute;
+            background: #10b981;
+            color: #fff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 6px #10b981;
+            z-index: 15;
+            transform: translateY(-16px);
+        }
+
+        /* Hand & Interactive Controls */
         .my-hand-section {
             background: rgba(0, 0, 0, 0.5);
             padding: 6px;
@@ -374,7 +372,6 @@
 </head>
 <body>
 
-    <!-- Universal Xgames Header Bar -->
     <div id="xgames-nav">
         <div class="xgames-logo">🎮 XGAMES <span>ARCADE</span></div>
         <button id="return-hub-btn" class="hub-btn">Main Arcade Hub</button>
@@ -383,7 +380,7 @@
     <div id="app-container">
         <!-- ARCADE HUB VIEW -->
         <div id="hub-view">
-            <h2 style="font-size:16px; margin-bottom:6px; color:#c7d2fe;">Select an Xgames Title</h2>
+            <h2 style="font-size:15px; margin-bottom:6px; color:#c7d2fe;">Select an Xgames Title</h2>
             <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15" value="Dwayne">
             
             <div class="arcade-grid">
@@ -393,7 +390,7 @@
                 </div>
                 <div class="game-card" style="opacity: 0.5; cursor: not-allowed;">
                     <h3>🎯 More Games</h3>
-                    <p>Coming Soon to Xgames</p>
+                    <p>Coming Soon</p>
                 </div>
             </div>
 
@@ -427,7 +424,7 @@
                     <div id="seat-left" class="player-seat seat-left">West</div>
 
                     <div id="table-board-center">
-                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:85px;">
+                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:100px;">
                             Pose [6-6] to start Hand 1!
                         </div>
                     </div>
@@ -512,7 +509,6 @@
         let selectedTileIndex = null;
         let handActive = false;
 
-        // Views & Controls
         const hubView = document.getElementById("hub-view");
         const dominoesView = document.getElementById("dominoes-view");
         const launchGameBtn = document.getElementById("launch-game-btn");
@@ -635,6 +631,7 @@
             handCountLbl.textContent = `HAND ${handNumber}`;
         }
 
+        /* 2D SNAKE RENDER ENGINE WITH CONTINUOUS CORNER TILES */
         function renderTableBoard() {
             const seats = { 'N': seatTop, 'W': seatLeft, 'S': seatBottom, 'E': seatRight };
             POSITIONS.forEach(pos => {
@@ -646,59 +643,76 @@
 
             tableBoardCenter.innerHTML = "";
             if (!centerTile) {
-                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:85px;">Table empty. Posing tile to start!</div>`;
+                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:100px;">Table empty. Posing tile to start!</div>`;
                 return;
             }
 
-            const cX = tableBoardCenter.clientWidth / 2 - 14;
-            const cY = tableBoardCenter.clientHeight / 2 - 14;
-            const boundX = 100;
-            const stepX = 30;
-            const stepY = 24;
+            const cX = tableBoardCenter.clientWidth / 2 - 13;
+            const cY = tableBoardCenter.clientHeight / 2 - 13;
+            const boundX = 85; // Bounds set to stay inside side player tags
+            const stepX = 28;
+            const stepY = 22;
 
+            // 1. Center Tile (Spinner)
             renderTileElement(centerTile, cX, cY);
 
+            // 2. Left Branch Render Logic
             let currX = cX;
             let currY = cY;
             let hDir = -1;
 
-            leftBranchTiles.forEach(t => {
+            leftBranchTiles.forEach((t, i) => {
                 if (currX <= cX - boundX && hDir === -1) {
                     currY += stepY;
                     hDir = 1;
+                    renderTileElement(t, currX, currY, true); // Corner vertical connection
                 } else if (currX >= cX + boundX && hDir === 1) {
                     currY += stepY;
                     hDir = -1;
+                    renderTileElement(t, currX, currY, true); // Corner vertical connection
                 } else {
                     currX += (hDir * stepX);
+                    renderTileElement(t, currX, currY);
                 }
-                renderTileElement(t, currX, currY);
+
+                // Append open end badge for left branch on final tile
+                if (i === leftBranchTiles.length - 1) {
+                    renderEndBadge('L', currX, currY);
+                }
             });
 
+            // 3. Right Branch Render Logic
             currX = cX;
             currY = cY;
             hDir = 1;
 
-            rightBranchTiles.forEach(t => {
+            rightBranchTiles.forEach((t, i) => {
                 if (currX >= cX + boundX && hDir === 1) {
                     currY += stepY;
                     hDir = -1;
+                    renderTileElement(t, currX, currY, true); // Corner vertical connection
                 } else if (currX <= cX - boundX && hDir === -1) {
                     currY += stepY;
                     hDir = 1;
+                    renderTileElement(t, currX, currY, true); // Corner vertical connection
                 } else {
                     currX += (hDir * stepX);
+                    renderTileElement(t, currX, currY);
                 }
-                renderTileElement(t, currX, currY);
+
+                // Append open end badge for right branch on final tile
+                if (i === rightBranchTiles.length - 1) {
+                    renderEndBadge('R', currX, currY);
+                }
             });
         }
 
-        function renderTileElement(tile, x, y) {
+        function renderTileElement(tile, x, y, isCorner = false) {
             const tileEl = document.createElement("div");
             tileEl.style.left = `${x}px`;
             tileEl.style.top = `${y}px`;
 
-            if (tile.is_double) {
+            if (tile.is_double || isCorner) {
                 tileEl.className = "real-tile vert";
                 tileEl.innerHTML = `<div class="tile-half">${tile.left_pip}</div><div class="tile-divider-v"></div><div class="tile-half">${tile.right_pip}</div>`;
             } else {
@@ -706,6 +720,15 @@
                 tileEl.innerHTML = `<div class="tile-half">${tile.left_pip}</div><div class="tile-divider-h"></div><div class="tile-half">${tile.right_pip}</div>`;
             }
             tableBoardCenter.appendChild(tileEl);
+        }
+
+        function renderEndBadge(label, x, y) {
+            const badge = document.createElement("div");
+            badge.className = "end-badge";
+            badge.style.left = `${x + 6}px`;
+            badge.style.top = `${y}px`;
+            badge.textContent = label;
+            tableBoardCenter.appendChild(badge);
         }
 
         function renderHand() {
