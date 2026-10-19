@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,10 +19,58 @@
             background-color: #0f0f12;
             color: #f0f0f5;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             padding: 15px;
+        }
+
+        /* Diagnostic Failure Monitor Bar */
+        #diagnostic-bar {
+            width: 100%;
+            max-width: 380px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1c1c24;
+            border: 1px solid #2a2a35;
+            transition: all 0.3s ease;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #eab308; /* Default Pending/Yellow */
+        }
+
+        .status-dot.online { background-color: #10b981; }
+        .status-dot.offline { background-color: #ef4444; }
+
+        #diagnostic-text {
+            color: #9ca3af;
+        }
+
+        #retry-btn {
+            background: #374151;
+            color: #fff;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
         }
 
         #lobby-container {
@@ -60,6 +109,7 @@
             gap: 10px;
         }
 
+        /* Prevent iOS zoom on tap with 16px */
         input {
             width: 100%;
             padding: 12px;
@@ -97,6 +147,22 @@
             cursor: not-allowed;
         }
 
+        .btn-secondary {
+            background: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: #059669;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
         .danger-btn {
             background: #dc2626;
             width: auto;
@@ -116,13 +182,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             padding-bottom: 10px;
             border-bottom: 1px solid #2a2a32;
         }
 
         #room-header h2 {
-            font-size: 16px;
+            font-size: 15px;
+        }
+
+        /* Host Controls & Actions Bar */
+        #host-controls-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            background: #111115;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #2a2a32;
+        }
+
+        #host-controls-bar button {
+            padding: 8px;
+            font-size: 12px;
         }
 
         #player-list-container {
@@ -135,18 +217,67 @@
         #player-list-container h3 {
             font-size: 12px;
             color: #888;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
         }
 
         #player-list {
             list-style: none;
             font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        #player-list li {
-            padding: 4px 0;
-            color: #10b981;
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #18181c;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #22222a;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-host {
+            background: #fbbf24;
+            color: #000;
+        }
+
+        .badge-ready {
+            background: #059669;
+            color: #fff;
+        }
+
+        .badge-not-ready {
+            background: #4b5563;
+            color: #d1d5db;
+        }
+
+        .kick-btn {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
         }
 
         #chat-box {
@@ -157,7 +288,7 @@
 
         #messages {
             background: #111115;
-            height: 180px;
+            height: 160px;
             border-radius: 6px;
             padding: 10px;
             overflow-y: auto;
@@ -195,9 +326,41 @@
             width: auto;
             padding: 0 16px;
         }
+
+        /* Toast Popup Notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2563eb;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        #toast.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Health Check & Failure Detection Bar -->
+    <div id="diagnostic-bar">
+        <div class="status-pill">
+            <div id="status-dot" class="status-dot"></div>
+            <span id="diagnostic-text">Connecting to Supabase...</span>
+        </div>
+        <button id="retry-btn" class="hidden">Retry</button>
+    </div>
+
     <div id="lobby-container">
         <h1>Xgames Lobby</h1>
 
@@ -221,9 +384,22 @@
                 <button id="leave-room-btn" class="danger-btn">Leave</button>
             </div>
 
+            <!-- Host Actions (Shown if player is host) -->
+            <div id="host-controls-bar" class="hidden">
+                <button id="lock-room-btn" class="btn-secondary">Lock Room</button>
+            </div>
+
             <div id="player-list-container">
-                <h3>Players</h3>
+                <h3>
+                    <span>Players</span>
+                    <span id="player-count">0</span>
+                </h3>
                 <ul id="player-list"></ul>
+            </div>
+
+            <!-- Ready Up Action -->
+            <div style="margin-bottom: 12px;">
+                <button id="ready-btn" class="btn-success">Ready Up</button>
             </div>
 
             <div id="chat-box">
@@ -236,6 +412,8 @@
         </div>
     </div>
 
+    <div id="toast">Notification</div>
+
     <script>
         const SUPABASE_URL = "https://vlrscrzwqjkresgvcygh.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_8p4urYQqT6YqV3YNkS9qyA_z19pF0mH";
@@ -246,8 +424,13 @@
         const CODE_LENGTH = 6;
         const CODE_PREFIX = "XG-";
         const MAX_MESSAGE_LENGTH = 300;
+        const DISCONNECT_GRACE_PERIOD_MS = 45000; // 45 seconds grace window for mobile app-switches
 
         let authUserId = null;
+        let isHost = false;
+        let isLocked = false;
+        let isReady = false;
+        let reconnectTimer = null;
 
         document.addEventListener("DOMContentLoaded", async () => {
             const usernameInput = document.getElementById("username-input");
@@ -260,31 +443,70 @@
             const currentRoomCode = document.getElementById("current-room-code");
             const leaveRoomBtn = document.getElementById("leave-room-btn");
             const playerList = document.getElementById("player-list");
+            const playerCount = document.getElementById("player-count");
+
+            const hostControlsBar = document.getElementById("host-controls-bar");
+            const lockRoomBtn = document.getElementById("lock-room-btn");
+            const readyBtn = document.getElementById("ready-btn");
 
             const messageInput = document.getElementById("message-input");
             const sendMessageBtn = document.getElementById("send-message-btn");
             const messages = document.getElementById("messages");
 
+            const diagnosticText = document.getElementById("diagnostic-text");
+            const statusDot = document.getElementById("status-dot");
+            const retryBtn = document.getElementById("retry-btn");
+            const toast = document.getElementById("toast");
+
             let currentUser = "";
             let activeRoom = null;
             let roomChannel = null;
 
-            // Initialize Anonymous Auth Session
-            try {
-                const { data: sessionData } = await supabaseClient.auth.getSession();
-                if (sessionData && sessionData.session) {
-                    authUserId = sessionData.session.user.id;
-                } else {
-                    const { data: signInData, error: signInError } = await supabaseClient.auth.signInAnonymously();
-                    if (signInError) throw signInError;
-                    authUserId = signInData.user.id;
+            // --- Failure Detection & Auth Startup ---
+            async function initAuth() {
+                updateHealthStatus("connecting", "Signing in anonymously...");
+                try {
+                    const { data: sessionData } = await supabaseClient.auth.getSession();
+                    if (sessionData && sessionData.session) {
+                        authUserId = sessionData.session.user.id;
+                    } else {
+                        const { data: signInData, error: signInError } = await supabaseClient.auth.signInAnonymously();
+                        if (signInError) throw signInError;
+                        authUserId = signInData.user.id;
+                    }
+
+                    updateHealthStatus("online", "Connected & Authenticated");
+                    createRoomBtn.disabled = false;
+                    joinRoomBtn.disabled = false;
+                    retryBtn.classList.add("hidden");
+                } catch (err) {
+                    console.error("Auth Startup Error:", err);
+                    updateHealthStatus("offline", "Auth Failed: Check Supabase settings");
+                    retryBtn.classList.remove("hidden");
+                    showToast("Authentication failed. Retry when ready.");
                 }
-                // Unlock buttons after auth completes
-                createRoomBtn.disabled = false;
-                joinRoomBtn.disabled = false;
-            } catch (err) {
-                console.error("Auth Error:", err);
-                alert("Sign-in failed: " + (err.message || "Ensure Anonymous Auth is enabled in Supabase settings."));
+            }
+
+            retryBtn.addEventListener("click", () => {
+                if (activeRoom) {
+                    subscribeToRoom(activeRoom);
+                } else {
+                    initAuth();
+                }
+            });
+
+            await initAuth();
+
+            // --- Diagnostics & Toasts ---
+            function updateHealthStatus(state, text) {
+                diagnosticText.textContent = text;
+                statusDot.className = "status-dot " + (state === "online" ? "online" : state === "offline" ? "offline" : "");
+            }
+
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add("show");
+                setTimeout(() => toast.classList.remove("show"), 3000);
             }
 
             function setBusy(busy) {
@@ -306,12 +528,13 @@
                 return code;
             }
 
+            // --- Supabase Room Operations ---
             async function createRoomInSupabase() {
                 for (let attempt = 0; attempt < 5; attempt++) {
                     const code = generateRoomCode();
                     const { error } = await supabaseClient
                         .from('rooms')
-                        .insert([{ code: code }]);
+                        .insert([{ code: code, host_id: authUserId, is_locked: false }]);
 
                     if (!error) return code;
                     if (error.code !== "23505") {
@@ -322,10 +545,10 @@
                 return null;
             }
 
-            async function checkRoomExists(code) {
+            async function fetchRoomDetails(code) {
                 const { data, error } = await supabaseClient
                     .from('rooms')
-                    .select('code')
+                    .select('code, host_id, is_locked')
                     .eq('code', code)
                     .maybeSingle();
 
@@ -333,14 +556,18 @@
                     console.error("Error checking room:", error);
                     return null;
                 }
-                return !!data;
+                return data;
             }
 
+            // --- Realtime & Presence Synchronization ---
             function subscribeToRoom(code) {
+                updateHealthStatus("connecting", `Joining ${code}...`);
+
                 roomChannel = supabaseClient.channel(`room_${code}`, {
                     config: { presence: { key: authUserId } }
                 });
 
+                // Chat Messages
                 roomChannel.on('broadcast', { event: 'message' }, (payload) => {
                     const data = payload && payload.payload;
                     if (!data) return;
@@ -350,37 +577,131 @@
                     );
                 });
 
+                // Host Controls: Lock/Kick Broadcasts
+                roomChannel.on('broadcast', { event: 'room_state' }, (payload) => {
+                    const data = payload && payload.payload;
+                    if (!data) return;
+                    if (data.type === 'kick' && data.targetId === authUserId) {
+                        showToast("You were kicked by the host.");
+                        leaveRoom();
+                    } else if (data.type === 'lock_update') {
+                        isLocked = data.isLocked;
+                        updateLockUI();
+                    }
+                });
+
+                // Player List Sync
                 roomChannel.on('presence', { event: 'sync' }, () => {
                     updatePlayerList(roomChannel.presenceState());
                 });
 
                 roomChannel.subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
-                        await roomChannel.track({ user: currentUser, id: authUserId });
+                        updateHealthStatus("online", `In Room: ${code}`);
+                        retryBtn.classList.add("hidden");
+                        if (reconnectTimer) clearTimeout(reconnectTimer);
+
+                        await roomChannel.track({
+                            user: currentUser,
+                            id: authUserId,
+                            isHost: isHost,
+                            isReady: isReady
+                        });
                     } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                        addSystemMessage("Connection problem. Try leaving and rejoining.");
+                        updateHealthStatus("offline", "Reconnecting...");
+                        retryBtn.classList.remove("hidden");
+                        scheduleAutoReconnect(code);
                     }
                 });
+            }
+
+            // Mobile Screen Lock & Disconnect Grace Window
+            function scheduleAutoReconnect(code) {
+                if (reconnectTimer) clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(() => {
+                    showToast("Connection lost. Returning to main menu.");
+                    leaveRoom();
+                }, DISCONNECT_GRACE_PERIOD_MS);
             }
 
             function updatePlayerList(presenceState) {
                 playerList.innerHTML = "";
+                let count = 0;
+
                 Object.keys(presenceState).forEach(key => {
                     const playerData = presenceState[key][0];
                     if (playerData && playerData.user) {
+                        count++;
                         const li = document.createElement("li");
-                        const isMe = key === authUserId;
-                        li.textContent = `● ${String(playerData.user).slice(0, 15)}${isMe ? " (You)" : ""}`;
+                        li.className = "player-row";
+
+                        const infoDiv = document.createElement("div");
+                        infoDiv.className = "player-info";
+
+                        const nameSpan = document.createElement("span");
+                        const isMe = playerData.id === authUserId;
+                        nameSpan.textContent = String(playerData.user).slice(0, 15) + (isMe ? " (You)" : "");
+                        infoDiv.appendChild(nameSpan);
+
+                        if (playerData.isHost) {
+                            const hostBadge = document.createElement("span");
+                            hostBadge.className = "badge badge-host";
+                            hostBadge.textContent = "Host";
+                            infoDiv.appendChild(hostBadge);
+                        }
+
+                        const readyBadge = document.createElement("span");
+                        readyBadge.className = "badge " + (playerData.isReady ? "badge-ready" : "badge-not-ready");
+                        readyBadge.textContent = playerData.isReady ? "Ready" : "Not Ready";
+                        infoDiv.appendChild(readyBadge);
+
+                        li.appendChild(infoDiv);
+
+                        // If Host, render Kick button for other players
+                        if (isHost && playerData.id !== authUserId) {
+                            const kickBtn = document.createElement("button");
+                            kickBtn.className = "kick-btn";
+                            kickBtn.textContent = "Kick";
+                            kickBtn.onclick = () => kickPlayer(playerData.id, playerData.user);
+                            li.appendChild(kickBtn);
+                        }
+
                         playerList.appendChild(li);
                     }
                 });
+
+                playerCount.textContent = count;
             }
 
+            function updateLockUI() {
+                lockRoomBtn.textContent = isLocked ? "Unlock Room" : "Lock Room";
+                lockRoomBtn.className = isLocked ? "btn-success" : "btn-secondary";
+            }
+
+            async function kickPlayer(targetId, targetName) {
+                if (!isHost || !roomChannel) return;
+                await roomChannel.send({
+                    type: 'broadcast',
+                    event: 'room_state',
+                    payload: { type: 'kick', targetId: targetId }
+                });
+                showToast(`Kicked ${targetName}`);
+            }
+
+            // --- UI Transitions ---
             function enterRoomUI(code) {
                 activeRoom = code;
                 currentRoomCode.textContent = code;
                 setupSection.classList.add("hidden");
                 roomSection.classList.remove("hidden");
+
+                if (isHost) {
+                    hostControlsBar.classList.remove("hidden");
+                    updateLockUI();
+                } else {
+                    hostControlsBar.classList.add("hidden");
+                }
+
                 subscribeToRoom(code);
                 addSystemMessage(`Welcome to room ${code}, ${currentUser}!`);
             }
@@ -407,10 +728,11 @@
                 messages.scrollTop = messages.scrollHeight;
             }
 
+            // --- Button Listeners ---
             createRoomBtn.addEventListener("click", async () => {
                 const name = usernameInput.value.trim();
                 if (!name) {
-                    alert("Please enter a nickname first.");
+                    showToast("Please enter a nickname first.");
                     return;
                 }
 
@@ -420,9 +742,10 @@
 
                 if (newCode) {
                     currentUser = name;
+                    isHost = true;
                     enterRoomUI(newCode);
                 } else {
-                    alert("Failed to create room. Please check database policies.");
+                    showToast("Failed to create room. Check database policies.");
                 }
             });
 
@@ -431,42 +754,92 @@
                 const code = normalizeCode(roomCodeInput.value);
 
                 if (!name) {
-                    alert("Please enter a nickname first.");
+                    showToast("Please enter a nickname first.");
                     return;
                 }
                 if (!code || code === CODE_PREFIX) {
-                    alert("Please enter a valid room code.");
+                    showToast("Please enter a valid room code.");
                     return;
                 }
 
                 setBusy(true);
-                const exists = await checkRoomExists(code);
+                const roomData = await fetchRoomDetails(code);
                 setBusy(false);
 
-                if (exists === null) {
-                    alert("Couldn't reach the server. Check your connection.");
+                if (roomData === null) {
+                    showToast("Couldn't reach server. Retry connection.");
                     return;
                 }
-                if (!exists) {
-                    alert("Room does not exist! Please check the code.");
+                if (!roomData) {
+                    showToast("Room does not exist!");
+                    return;
+                }
+                if (roomData.is_locked) {
+                    showToast("This room is locked by the host.");
                     return;
                 }
 
                 currentUser = name;
+                isHost = (roomData.host_id === authUserId);
+                isLocked = roomData.is_locked;
                 enterRoomUI(code);
             });
 
-            leaveRoomBtn.addEventListener("click", async () => {
+            lockRoomBtn.addEventListener("click", async () => {
+                if (!isHost || !activeRoom) return;
+                isLocked = !isLocked;
+
+                // Update Database State
+                await supabaseClient
+                    .from('rooms')
+                    .update({ is_locked: isLocked })
+                    .eq('code', activeRoom);
+
+                // Broadcast to Room
+                await roomChannel.send({
+                    type: 'broadcast',
+                    event: 'room_state',
+                    payload: { type: 'lock_update', isLocked: isLocked }
+                });
+
+                updateLockUI();
+                showToast(isLocked ? "Room Locked" : "Room Unlocked");
+            });
+
+            readyBtn.addEventListener("click", async () => {
+                if (!roomChannel) return;
+                isReady = !isReady;
+                readyBtn.textContent = isReady ? "Unready" : "Ready Up";
+                readyBtn.className = isReady ? "btn-secondary" : "btn-success";
+
+                await roomChannel.track({
+                    user: currentUser,
+                    id: authUserId,
+                    isHost: isHost,
+                    isReady: isReady
+                });
+            });
+
+            async function leaveRoom() {
+                if (reconnectTimer) clearTimeout(reconnectTimer);
                 if (roomChannel) {
                     await supabaseClient.removeChannel(roomChannel);
                     roomChannel = null;
                 }
                 activeRoom = null;
+                isHost = false;
+                isReady = false;
+                isLocked = false;
+                readyBtn.textContent = "Ready Up";
+                readyBtn.className = "btn-success";
                 messages.innerHTML = "";
                 playerList.innerHTML = "";
                 roomSection.classList.add("hidden");
                 setupSection.classList.remove("hidden");
-            });
+                updateHealthStatus("online", "Connected & Authenticated");
+            }
+
+            leaveRoomBtn.addEventListener("click", leaveRoom);
 
             async function sendMessage() {
                 const text = messageInput.value.trim().slice(0, MAX_MESSAGE_LENGTH);
@@ -490,3 +863,4 @@
     </script>
 </body>
 </html>
+```
