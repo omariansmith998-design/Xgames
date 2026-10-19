@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xgames Arcade - Yard Dominoes Six-Love</title>
+    <title>Xgames Arcade - Jamaican Yard Dominoes (Six Love)</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0b0c10;
+            background-color: #08090d;
             color: #f0f0f5;
             display: flex;
             flex-direction: column;
@@ -23,9 +23,10 @@
             min-height: 100vh;
             padding: 6px;
             user-select: none;
+            overflow-x: hidden;
         }
 
-        /* Xgames Navigation Header */
+        /* Top Xgames Universal Navigation Bar */
         #xgames-nav {
             width: 100%;
             max-width: 460px;
@@ -36,7 +37,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
@@ -61,22 +62,22 @@
         }
 
         #app-container {
-            background: #14161f;
+            background: #12141d;
             border: 1px solid #232736;
-            padding: 10px;
+            padding: 8px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
             width: 100%;
             max-width: 460px;
         }
 
-        /* Status & Lobby System */
+        /* Diagnostic Status Bar */
         #diagnostic-bar {
-            background: #0d0e14;
-            border: 1px solid #232736;
+            background: #0b0c12;
+            border: 1px solid #1f2330;
             padding: 4px 8px;
             border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -119,7 +120,6 @@
         button:hover { background: #4338ca; }
         .secondary-btn { background: #2d3345; }
         .success-btn { background: #059669; }
-        .danger-btn { background: #dc2626; width: auto; padding: 3px 8px; font-size: 10px; }
 
         .hidden { display: none !important; }
 
@@ -150,37 +150,87 @@
         .badge-host { background: #f59e0b; color: #000; }
         .badge-bot { background: #8b5cf6; color: #fff; }
 
-        /* Six Love Scoreboard */
+        /* Tournament Scoreboard */
         #match-scoreboard {
-            background: #0d0e14;
-            border: 1px solid #232736;
-            padding: 6px 10px;
+            background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+            border: 2px solid #4338ca;
+            padding: 6px 12px;
             border-radius: 8px;
             margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
-            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .team-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .team-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #93c5fd;
+            letter-spacing: 0.5px;
         }
 
         .score-pill {
             background: #312e81;
-            color: #c7d2fe;
-            padding: 2px 8px;
+            color: #fef08a;
+            border: 1px solid #facc15;
+            padding: 2px 10px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: 900;
+            margin-top: 2px;
         }
 
-        /* 4-SIDE SQUARE DOMINO TABLE */
+        .match-info-center {
+            text-align: center;
+        }
+
+        .hand-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #facc15;
+            text-transform: uppercase;
+        }
+
+        .six-love-badge {
+            font-size: 8px;
+            background: #dc2626;
+            color: #fff;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 2px;
+            display: inline-block;
+        }
+
+        /* Screen Shake Animation */
+        .shake-screen {
+            animation: slamShake 0.25s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes slamShake {
+            10%, 90% { transform: translate3d(-2px, -1px, 0); }
+            20%, 80% { transform: translate3d(3px, 2px, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, -3px, 0); }
+            40%, 60% { transform: translate3d(4px, 3px, 0); }
+        }
+
+        /* 4-Side Square Table Layout */
         #dominoes-game-area {
-            background: radial-gradient(circle, #2b170c 0%, #1a0d06 70%, #0c0502 100%);
-            border: 5px solid #4a2813;
+            background: radial-gradient(circle, #3a2012 0%, #1f0f08 70%, #0c0502 100%);
+            border: 6px solid #5a3118;
             border-radius: 12px;
-            padding: 6px;
+            padding: 4px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
 
         .table-top-bar {
@@ -195,43 +245,43 @@
             border-radius: 4px;
         }
 
-        /* Outer Frame Seating Grid */
         .square-table-layout {
             position: relative;
             width: 100%;
-            height: 250px;
-            background: rgba(0,0,0,0.3);
+            height: 270px;
+            background: rgba(0,0,0,0.25);
             border-radius: 8px;
             border: 1px dashed rgba(253, 224, 71, 0.15);
             overflow: hidden;
         }
 
-        /* Compact Non-Overlapping Corner Seats */
+        /* Compact Player Corner Badges */
         .player-seat {
             position: absolute;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(10, 10, 15, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
             font-size: 9px;
             color: #fff;
             text-align: center;
             z-index: 20;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.8);
+            min-width: 70px;
         }
 
-        .seat-top { top: 4px; left: 50%; transform: translateX(-50%); }
-        .seat-bottom { bottom: 4px; left: 50%; transform: translateX(-50%); }
-        .seat-left { left: 4px; top: 50%; transform: translateY(-50%); }
-        .seat-right { right: 4px; top: 50%; transform: translateY(-50%); }
+        .seat-top { top: 6px; left: 50%; transform: translateX(-50%); }
+        .seat-bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
+        .seat-left { left: 6px; top: 50%; transform: translateY(-50%); }
+        .seat-right { right: 6px; top: 50%; transform: translateY(-50%); }
 
         .player-seat.active-turn {
             border-color: #facc15;
-            box-shadow: 0 0 10px #facc15;
-            background: rgba(234, 179, 8, 0.3);
+            box-shadow: 0 0 12px #facc15;
+            background: rgba(234, 179, 8, 0.35);
         }
 
-        .seat-tiles-count { font-size: 8px; color: #fde047; }
+        .seat-tiles-count { font-size: 8px; color: #fde047; font-weight: bold; }
 
         /* Board Center Canvas Area */
         #table-board-center {
@@ -243,63 +293,80 @@
             z-index: 5;
         }
 
-        /* Domino Tile Graphics */
-        .real-tile {
+        /* REALISTIC 3D DOMINO TILES */
+        .3d-tile {
             position: absolute;
-            background: #fdfbf7;
-            color: #111;
-            border: 1px solid #c7c2b8;
-            border-radius: 3px;
-            box-shadow: 1px 2px 4px rgba(0,0,0,0.7);
+            background: linear-gradient(145deg, #ffffff 0%, #f1efe9 60%, #e2ded4 100%);
+            border: 1px solid #b8b3a8;
+            border-radius: 4px;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
             z-index: 10;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        .real-tile.horiz {
-            width: 26px;
-            height: 14px;
+        .3d-tile.horiz {
+            width: 32px;
+            height: 18px;
             flex-direction: row;
         }
 
-        .real-tile.vert {
-            width: 14px;
-            height: 26px;
+        .3d-tile.vert {
+            width: 18px;
+            height: 32px;
             flex-direction: column;
-            background: #fef08a;
+            background: linear-gradient(145deg, #fffbeb 0%, #fef08a 60%, #fde047 100%);
             border-color: #ca8a04;
         }
 
-        .tile-half {
+        .tile-divider-h { width: 1px; height: 75%; background: #94a3b8; }
+        .tile-divider-v { height: 1px; width: 75%; background: #ca8a04; }
+
+        /* 3x3 Grid Pip Engine */
+        .pip-grid {
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
             width: 100%;
             height: 100%;
+            padding: 2px;
         }
 
-        .tile-divider-h { width: 1px; height: 70%; background: #94a3b8; }
-        .tile-divider-v { height: 1px; width: 70%; background: #ca8a04; }
+        .pip {
+            width: 3px;
+            height: 3px;
+            background-color: #111827;
+            border-radius: 50%;
+            justify-self: center;
+            align-self: center;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.6);
+        }
 
+        /* Open-End Indicator Badges */
         .end-badge {
             position: absolute;
             background: #10b981;
             color: #fff;
             border-radius: 50%;
-            width: 14px;
-            height: 14px;
+            width: 15px;
+            height: 15px;
             font-size: 8px;
-            font-weight: bold;
+            font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 6px #10b981;
+            box-shadow: 0 0 8px #10b981;
             z-index: 15;
-            transform: translateY(-16px);
+            transform: translateY(-18px);
+            animation: pulseGlow 1.2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { transform: translateY(-18px) scale(0.95); box-shadow: 0 0 4px #10b981; }
+            to { transform: translateY(-18px) scale(1.1); box-shadow: 0 0 10px #10b981; }
         }
 
         /* Hand Section */
@@ -321,28 +388,29 @@
         .hand-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 5px;
             justify-content: center;
             margin-bottom: 4px;
         }
 
         .domino-tile-hand {
-            background: #fdfbf7;
+            background: linear-gradient(145deg, #ffffff 0%, #f3f0e6 100%);
             color: #0f172a;
             border: 2px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 3px 5px;
-            font-weight: bold;
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-weight: 800;
             font-size: 11px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+            transition: transform 0.15s, border-color 0.15s;
         }
 
-        .domino-tile-hand.double { background: #fef08a; border-color: #ca8a04; }
-        .domino-tile-hand.selected { border-color: #facc15; box-shadow: 0 0 8px #facc15; transform: translateY(-3px); }
+        .domino-tile-hand.double { background: linear-gradient(145deg, #fef9c3 0%, #fef08a 100%); border-color: #ca8a04; }
+        .domino-tile-hand.selected { border-color: #facc15; box-shadow: 0 0 10px #facc15; transform: translateY(-4px); }
 
         .end-choice-bar { display: flex; gap: 4px; margin-bottom: 4px; }
-        .end-btn { flex: 1; padding: 5px; font-size: 10px; background: #0284c7; }
+        .end-btn { flex: 1; padding: 6px; font-size: 10px; background: #0284c7; font-weight: bold; }
 
         .game-log {
             font-size: 9px;
@@ -369,6 +437,7 @@
             padding: 5px 10px;
             border-radius: 4px;
             font-size: 11px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
     </style>
 </head>
@@ -413,15 +482,25 @@
 
         <!-- DOMINOES GAME BOARD VIEW -->
         <div id="dominoes-view" class="hidden">
+            <!-- Tournament Scoreboard -->
             <div id="match-scoreboard">
-                <div>TEAM N/S: <span id="score-ns" class="score-pill">0</span></div>
-                <div style="font-size: 9px; color: #888;" id="hand-count-lbl">HAND 1 (Pose [6-6])</div>
-                <div>TEAM E/W: <span id="score-we" class="score-pill">0</span></div>
+                <div class="team-box">
+                    <span class="team-label">TEAM N/S</span>
+                    <span id="score-ns" class="score-pill">0</span>
+                </div>
+                <div class="match-info-center">
+                    <div class="hand-title" id="hand-count-lbl">HAND 1</div>
+                    <span class="six-love-badge">SIX LOVE BLOCK</span>
+                </div>
+                <div class="team-box">
+                    <span class="team-label">TEAM E/W</span>
+                    <span id="score-we" class="score-pill">0</span>
+                </div>
             </div>
 
             <div id="dominoes-game-area">
                 <div class="table-top-bar">
-                    <span>🀏 JAMAICAN SIX-LOVE BOARD</span>
+                    <span>🀏 JAMAICAN YARD TABLE</span>
                     <span id="turn-indicator">Turn: Waiting...</span>
                 </div>
 
@@ -430,7 +509,7 @@
                     <div id="seat-left" class="player-seat seat-left">West</div>
 
                     <div id="table-board-center">
-                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:110px;">
+                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:120px; font-weight:bold;">
                             Pose [6-6] to start Hand 1!
                         </div>
                     </div>
@@ -450,7 +529,7 @@
                         <button id="play-right-btn" class="end-btn">Slam Right (<span id="r-val">-</span>)</button>
                     </div>
 
-                    <button id="pass-btn" class="secondary-btn hidden" style="padding:4px; font-size:10px;">Pass Turn</button>
+                    <button id="pass-btn" class="secondary-btn hidden" style="padding:4px; font-size:10px; font-weight:bold;">Knock Table (Pass)</button>
                 </div>
             </div>
         </div>
@@ -459,26 +538,82 @@
     <div id="toast-container"></div>
 
     <script>
+        // ==========================================
+        // WEB AUDIO SYNTHESIZER ENGINE
+        // ==========================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function playSlamSound() {
+        function playTileClack() {
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.12);
-                gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.12);
+                osc.stop(audioCtx.currentTime + 0.05);
             } catch (e) { console.error(e); }
         }
 
-        function playWinSound() {
+        function playSlamImpact() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                // Low impact boom
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(160, audioCtx.currentTime);
+                osc1.frequency.exponentialRampToValueAtTime(25, audioCtx.currentTime + 0.2);
+                gain1.gain.setValueAtTime(0.9, audioCtx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start();
+                osc1.stop(audioCtx.currentTime + 0.2);
+
+                // Wood click snap
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'square';
+                osc2.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc2.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.06);
+                gain2.gain.setValueAtTime(0.7, audioCtx.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start();
+                osc2.stop(audioCtx.currentTime + 0.06);
+
+                triggerScreenShake();
+            } catch (e) { console.error(e); }
+        }
+
+        function playKnockPass() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                [0, 0.08].forEach(delay => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime + delay);
+                    osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + delay + 0.04);
+                    gain.gain.setValueAtTime(0.6, audioCtx.currentTime + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.04);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + delay);
+                    osc.stop(audioCtx.currentTime + delay + 0.04);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function playWinFanfare() {
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 const notes = [261.63, 329.63, 392.00, 523.25];
@@ -487,7 +622,7 @@
                     const gain = audioCtx.createGain();
                     osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
                     gain.gain.setValueAtTime(0.3, audioCtx.currentTime + idx * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.01, idx * 0.1 + 0.25);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.25);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(audioCtx.currentTime + idx * 0.1);
@@ -496,6 +631,17 @@
             } catch (e) { console.error(e); }
         }
 
+        function triggerScreenShake() {
+            const container = document.getElementById("app-container");
+            container.classList.remove("shake-screen");
+            void container.offsetWidth; // Force reflow
+            container.classList.add("shake-screen");
+            setTimeout(() => container.classList.remove("shake-screen"), 250);
+        }
+
+        // ==========================================
+        // GAME STATE & CONSTANTS
+        // ==========================================
         const POSITIONS = ['N', 'W', 'S', 'E'];
         const TURN_NEXT = { 'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N' };
 
@@ -520,6 +666,7 @@
         let selectedTileIndex = null;
         let handActive = false;
 
+        // UI References
         const lobbyView = document.getElementById("lobby-view");
         const dominoesView = document.getElementById("dominoes-view");
         const createRoomBtn = document.getElementById("create-room-btn");
@@ -573,16 +720,13 @@
             lobbyPlayers = [{ id: 'host_me', name: name + " (You)", isBot: false }];
             roomLobbyPanel.classList.remove("hidden");
             renderLobbyPlayers();
-            showToast(`Room ${currentRoomCode} Created! Share code to invite.`);
+            showToast(`Room ${currentRoomCode} Created!`);
         });
 
         joinRoomBtn.addEventListener("click", () => {
             const code = joinCodeInput.value.trim().toUpperCase();
             const name = usernameInput.value.trim() || "Guest";
-            if (!code) {
-                showToast("Enter a valid Room Code!");
-                return;
-            }
+            if (!code) { showToast("Enter Room Code!"); return; }
             currentRoomCode = code;
             isHost = false;
             roomCodeDisplay.textContent = `Room: ${currentRoomCode}`;
@@ -593,10 +737,7 @@
         });
 
         addBotBtn.addEventListener("click", () => {
-            if (lobbyPlayers.length >= 4) {
-                showToast("Room full (Max 4 players)!");
-                return;
-            }
+            if (lobbyPlayers.length >= 4) { showToast("Room Full (4 Players)!"); return; }
             botCounter++;
             lobbyPlayers.push({ id: `bot_${botCounter}`, name: `XBot-${botCounter}`, isBot: true });
             renderLobbyPlayers();
@@ -604,7 +745,7 @@
 
         function renderLobbyPlayers() {
             playerList.innerHTML = "";
-            lobbyPlayers.forEach((p, idx) => {
+            lobbyPlayers.forEach((p) => {
                 const li = document.createElement("li");
                 li.innerHTML = `<span>${p.name}</span><span class="badge ${p.isBot ? 'badge-bot' : 'badge-host'}">${p.isBot ? 'BOT' : 'PLAYER'}</span>`;
                 playerList.appendChild(li);
@@ -612,10 +753,7 @@
         }
 
         startGameBtn.addEventListener("click", () => {
-            if (lobbyPlayers.length < 4) {
-                showToast("Need 4 players/bots to start Six-Love dominoes!");
-                return;
-            }
+            if (lobbyPlayers.length < 4) { showToast("Need 4 players/bots to start!"); return; }
             lobbyView.classList.add("hidden");
             dominoesView.classList.remove("hidden");
             scoreNS = 0;
@@ -697,6 +835,9 @@
             handCountLbl.textContent = `HAND ${handNumber}`;
         }
 
+        // ==========================================
+        // SNAKE PATHING & 3D TILE RENDER ENGINE
+        // ==========================================
         function renderTableBoard() {
             const seats = { 'N': seatTop, 'W': seatLeft, 'S': seatBottom, 'E': seatRight };
             POSITIONS.forEach(pos => {
@@ -708,34 +849,33 @@
 
             tableBoardCenter.innerHTML = "";
             if (!centerTile) {
-                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:110px;">Table empty. Posing tile to start!</div>`;
+                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:120px; font-weight:bold;">Table empty. Posing tile to start!</div>`;
                 return;
             }
 
-            const cX = tableBoardCenter.clientWidth / 2 - 13;
-            const cY = tableBoardCenter.clientHeight / 2 - 13;
-            const boundX = 80;
-            const stepX = 28;
-            const stepY = 22;
+            const cX = tableBoardCenter.clientWidth / 2 - 16;
+            const cY = tableBoardCenter.clientHeight / 2 - 12;
+            const BOUND_X = 85; 
+            const STEP_X = 34;
+            const STEP_Y = 24;
 
-            renderTileElement(centerTile, cX, cY);
+            // 1. Center Spinner
+            render3dTile(centerTile, cX, cY);
 
+            // 2. Left Branch Continuous Snake Pathing
             let currX = cX;
             let currY = cY;
-            let hDir = -1;
+            let dx = -1; // Heading Left
 
             leftBranchTiles.forEach((t, i) => {
-                if (currX <= cX - boundX && hDir === -1) {
-                    currY += stepY;
-                    hDir = 1;
-                    renderTileElement(t, currX, currY, true);
-                } else if (currX >= cX + boundX && hDir === 1) {
-                    currY += stepY;
-                    hDir = -1;
-                    renderTileElement(t, currX, currY, true);
+                if ((dx === -1 && currX <= cX - BOUND_X) || (dx === 1 && currX >= cX + BOUND_X)) {
+                    // Turn 90° Downward
+                    currY += STEP_Y;
+                    dx = -dx; // Invert horizontal vector
+                    render3dTile(t, currX, currY, true); // Corner vertical segment
                 } else {
-                    currX += (hDir * stepX);
-                    renderTileElement(t, currX, currY);
+                    currX += (dx * STEP_X);
+                    render3dTile(t, currX, currY, false);
                 }
 
                 if (i === leftBranchTiles.length - 1) {
@@ -743,22 +883,20 @@
                 }
             });
 
+            // 3. Right Branch Continuous Snake Pathing
             currX = cX;
             currY = cY;
-            hDir = 1;
+            dx = 1; // Heading Right
 
             rightBranchTiles.forEach((t, i) => {
-                if (currX >= cX + boundX && hDir === 1) {
-                    currY += stepY;
-                    hDir = -1;
-                    renderTileElement(t, currX, currY, true);
-                } else if (currX <= cX - boundX && hDir === -1) {
-                    currY += stepY;
-                    hDir = 1;
-                    renderTileElement(t, currX, currY, true);
+                if ((dx === 1 && currX >= cX + BOUND_X) || (dx === -1 && currX <= cX - BOUND_X)) {
+                    // Turn 90° Downward
+                    currY += STEP_Y;
+                    dx = -dx; // Invert horizontal vector
+                    render3dTile(t, currX, currY, true); // Corner vertical segment
                 } else {
-                    currX += (hDir * stepX);
-                    renderTileElement(t, currX, currY);
+                    currX += (dx * STEP_X);
+                    render3dTile(t, currX, currY, false);
                 }
 
                 if (i === rightBranchTiles.length - 1) {
@@ -767,25 +905,58 @@
             });
         }
 
-        function renderTileElement(tile, x, y, isCorner = false) {
+        function render3dTile(tile, x, y, isVerticalSegment = false) {
             const tileEl = document.createElement("div");
             tileEl.style.left = `${x}px`;
             tileEl.style.top = `${y}px`;
 
-            if (tile.is_double || isCorner) {
-                tileEl.className = "real-tile vert";
-                tileEl.innerHTML = `<div class="tile-half">${tile.left_pip}</div><div class="tile-divider-v"></div><div class="tile-half">${tile.right_pip}</div>`;
-            } else {
-                tileEl.className = "real-tile horiz";
-                tileEl.innerHTML = `<div class="tile-half">${tile.left_pip}</div><div class="tile-divider-h"></div><div class="tile-half">${tile.right_pip}</div>`;
-            }
+            const isVert = tile.is_double ? !isVerticalSegment : isVerticalSegment;
+            tileEl.className = `3d-tile ${isVert ? 'vert' : 'horiz'}`;
+
+            tileEl.appendChild(createPipGrid(tile.left_pip));
+            
+            const divider = document.createElement("div");
+            divider.className = isVert ? "tile-divider-v" : "tile-divider-h";
+            tileEl.appendChild(divider);
+
+            tileEl.appendChild(createPipGrid(tile.right_pip));
+
             tableBoardCenter.appendChild(tileEl);
+        }
+
+        // 3x3 Pip Renderer
+        function createPipGrid(val) {
+            const grid = document.createElement("div");
+            grid.className = "pip-grid";
+            
+            // Pip Position Mapping Matrix (1 to 9)
+            const pipMaps = {
+                0: [],
+                1: [5],
+                2: [1, 9],
+                3: [1, 5, 9],
+                4: [1, 3, 7, 9],
+                5: [1, 3, 5, 7, 9],
+                6: [1, 3, 4, 6, 7, 9]
+            };
+
+            const activePips = pipMaps[val] || [];
+            for (let pos = 1; pos <= 9; pos++) {
+                const cell = document.createElement("div");
+                if (activePips.includes(pos)) {
+                    const pip = document.createElement("div");
+                    pip.className = "pip";
+                    cell.appendChild(pip);
+                }
+                grid.appendChild(cell);
+            }
+            return grid;
         }
 
         function renderEndBadge(label, x, y) {
             const badge = document.createElement("div");
             badge.className = "end-badge";
-            badge.style.left = `${x + 6}px`;
+            badge.style.left = `${x + 8}px`;
             badge.style.top = `${y}px`;
             badge.textContent = label;
             tableBoardCenter.appendChild(badge);
@@ -892,7 +1063,13 @@
                 rightBranchTiles.push(playTile);
             }
 
-            playSlamSound();
+            // Trigger Audio & Feel Feedback
+            if (tile.is_double || player.hand.length === 0) {
+                playSlamImpact(); // Double or Win Slam
+            } else {
+                playTileClack();  // Standard Clack
+            }
+
             logGame(`💥 ${player.name} slammed [${tile.left_pip}|${tile.right_pip}]!`);
 
             if (player.hand.length === 0) {
@@ -911,6 +1088,7 @@
         function executePass() {
             const player = getPlayerByPos(currentTurn);
             consecutivePasses++;
+            playKnockPass(); // Knuckle Table Knock Audio
             logGame(`✋ ${player.name} passed!`);
 
             if (consecutivePasses >= 4) {
@@ -992,7 +1170,7 @@
         }
 
         function handleHandWin(winnerPos, reason) {
-            playWinSound();
+            playWinFanfare();
             handActive = false;
             lastWinnerPos = winnerPos;
 
