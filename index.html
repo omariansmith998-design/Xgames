@@ -16,13 +16,13 @@ body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
 button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#334155}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
-input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px;outline:0;text-transform:none}
+input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0;text-transform:none}
 input:focus{border-color:#6366f1}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
 .panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
 .pl{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e2433;font-size:14px}
-.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}
+.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}.tag.you{background:#059669;color:#fff}
 .status{font-size:11px;color:#94a3b8}.status b{color:#fbbf24}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
@@ -45,6 +45,7 @@ canvas#board{display:block;width:100%;height:auto}
 .mic-dot{width:8px;height:8px;border-radius:50%;background:#64748b;transition:all .2s}
 .mic-dot.active{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+.profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 </style>
 </head>
 <body>
@@ -57,31 +58,46 @@ canvas#board{display:block;width:100%;height:auto}
 <div class="card stack">
   <div class="panel row between status"><span id="syncLabel">Connecting...</span><b id="roomBadge">No room yet</b></div>
 
-  <!-- LOBBY -->
+  <!-- PROFILE SETUP MODAL -->
+  <div id="profileBox" class="profile-card stack hidden">
+    <h2>Set Up Your Player Profile</h2>
+    <input id="profileNameIn" placeholder="Enter nickname (e.g. Omarian, Tav, Louis)" maxlength="15">
+    <button class="green" id="saveProfileBtn">Save Profile & Continue</button>
+  </div>
+
+  <!-- LOBBY MAIN -->
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
-      <h2>Pick a name and a room</h2>
-      <input id="nameIn" placeholder="Your nickname" maxlength="15" value="Dwayne">
+      <div class="row between">
+        <h2>Your Nickname: <b id="myNickDisplay" style="color:#fbbf24">Player</b></h2>
+        <button id="editProfileBtn" style="padding:4px 8px;font-size:11px">Edit Profile</button>
+      </div>
       <div class="two">
-        <button class="green" id="createBtn">+ Create room</button>
+        <button class="green" id="createBtn">+ Create Room</button>
         <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
       </div>
     </div>
+
+    <!-- ROOM LOBBY PANEL -->
     <div id="roomPanel" class="panel hidden">
-      <div class="lbl">Room code</div>
+      <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-XXXXX</div>
       <div class="two" style="margin:8px 0">
         <button class="blue" id="shareBtn">🔗 Share / Invite</button>
-        <button class="purple" id="copyBtn">Copy code</button>
+        <button class="purple" id="copyBtn">Copy Code</button>
       </div>
-      <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave room</button>
-      <div class="row between" style="margin-bottom:4px"><b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b><button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add bot</button></div>
+      <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave Room / Arcade Hub</button>
+      <div class="row between" style="margin-bottom:4px">
+        <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b>
+        <button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add Bot</button>
+      </div>
       <div id="plist"></div>
       <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
+      <div id="guestWaitMsg" class="lbl hidden" style="color:#fbbf24;margin-top:10px">Waiting for the Host to start the match...</div>
     </div>
   </div>
 
-  <!-- GAME -->
+  <!-- GAME BOARD VIEW -->
   <div id="game" class="stack hidden">
     <div class="voice-bar">
       <div class="voice-status">
@@ -121,11 +137,14 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let roomSubscription = null, lobbyPollInterval = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
 let micActive = false;
 
-let myClientId = sessionStorage.getItem('xg_client_id');
+/* PERMANENT DEVICE IDENTITY */
+let myClientId = localStorage.getItem('xg_perm_client_id');
 if (!myClientId) {
-  myClientId = 'cid_' + Math.random().toString(36).slice(2, 9);
-  sessionStorage.setItem('xg_client_id', myClientId);
+  myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
+  localStorage.setItem('xg_perm_client_id', myClientId);
 }
+
+let myNickname = localStorage.getItem('xg_perm_nickname') || '';
 
 /* ---------- AUDIO ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -159,6 +178,40 @@ let lobby = [], botN = 0, isHost = false, hostClientId = '', roomStatus = 'waiti
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
 const byPos = p => players.find(x => x.pos === p);
+
+/* ---------- PROFILE CONTROLLER ---------- */
+function initProfile() {
+  if (!myNickname) {
+    $('homeBox').classList.add('hidden');
+    $('profileBox').classList.remove('hidden');
+  } else {
+    $('myNickDisplay').textContent = myNickname;
+    $('profileBox').classList.add('hidden');
+    $('homeBox').classList.remove('hidden');
+  }
+}
+
+$('saveProfileBtn').onclick = () => {
+  const inputVal = $('profileNameIn').value.trim();
+  if (!inputVal) return toast('Please enter a nickname');
+  myNickname = inputVal;
+  localStorage.setItem('xg_perm_nickname', myNickname);
+  $('myNickDisplay').textContent = myNickname;
+  $('profileBox').classList.add('hidden');
+  $('homeBox').classList.remove('hidden');
+  toast('Profile saved!');
+  
+  // Resume pending room join if URL link present
+  const params = new URLSearchParams(window.location.search);
+  const roomParam = params.get('room');
+  if (roomParam) joinRoomByCode(roomParam.toUpperCase());
+};
+
+$('editProfileBtn').onclick = () => {
+  $('profileNameIn').value = myNickname;
+  $('homeBox').classList.add('hidden');
+  $('profileBox').classList.remove('hidden');
+};
 
 /* ---------- SUPABASE REALTIME SYNC ---------- */
 async function syncRoomState() {
@@ -218,14 +271,15 @@ function handleRoomPayload(st) {
   refresh();
 }
 
-/* ---------- LOBBY & SHARE ---------- */
+/* ---------- LOBBY CONTROLLER ---------- */
 $('createBtn').onclick = async () => {
+  if (!myNickname) return initProfile();
+  
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
-  const myName = ($('nameIn').value.trim() || 'South');
   
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  lobby = [{ clientId: myClientId, name: myName, isBot: false, pos: 'S', isHost: true }];
+  lobby = [{ clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true }];
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
   renderLobby();
   
@@ -241,12 +295,15 @@ $('createBtn').onclick = async () => {
 };
 
 $('joinBtn').onclick = async () => {
+  if (!myNickname) return initProfile();
   const code = $('codeIn').value.trim().toUpperCase();
   if (!code) return toast('Enter a room code');
   joinRoomByCode(code);
 };
 
 async function joinRoomByCode(code) {
+  if (!myNickname) return initProfile();
+  
   const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).single();
   if (error || !data) return toast('Room not found');
   
@@ -266,9 +323,7 @@ async function joinRoomByCode(code) {
     mySeatPos = existingPlayer.pos;
   } else {
     mySeatPos = freePos;
-    let nick = $('nameIn').value.trim();
-    if (!nick || nick === 'Dwayne') nick = 'Guest-' + Math.floor(Math.random() * 90 + 10);
-    currentLobby.push({ clientId: myClientId, name: nick, isBot: false, pos: freePos, isHost: false });
+    currentLobby.push({ clientId: myClientId, name: myNickname, isBot: false, pos: freePos, isHost: false });
   }
   
   lobby = currentLobby;
@@ -300,6 +355,17 @@ $('leaveBtn').onclick = () => {
   lobby = []; roomCode = ''; $('roomBadge').textContent = 'No room yet';
   if (lobbyPollInterval) clearInterval(lobbyPollInterval);
   $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
+  // Clear URL room parameter when returning to Arcade Hub
+  window.history.replaceState({}, document.title, window.location.pathname);
+};
+
+$('hubBtn').onclick = () => {
+  epoch++; active = false; 
+  if (lobbyPollInterval) clearInterval(lobbyPollInterval);
+  $('game').classList.add('hidden');
+  $('roomPanel').classList.add('hidden');
+  $('homeBox').classList.remove('hidden');
+  window.history.replaceState({}, document.title, window.location.pathname);
 };
 
 $('botBtn').onclick = () => {
@@ -316,16 +382,22 @@ function renderLobby() {
   $('plist').innerHTML = '';
   lobby.forEach((p, i) => {
     const isPlayerHost = p.clientId === hostClientId;
+    const isMe = p.clientId === myClientId;
     const d = document.createElement('div'); d.className = 'pl';
-    d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : '')) + '">' + (p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER')) + '</span>' +
-      (isHost && !isPlayerHost ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
-    d.firstChild.textContent = p.name + (p.clientId === myClientId ? ' (You)' : '');
+    d.innerHTML = '<span></span><span>' +
+      '<span class="tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : '')) + '">' + (p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER')) + '</span>' +
+      (isMe ? ' <span class="tag you">YOU</span>' : '') +
+      (isHost && !isPlayerHost ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + 
+      '</span>';
+    d.firstChild.textContent = p.name;
     const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
   });
+  
   $('pc').textContent = lobby.length;
-  $('startBtn').style.display = isHost ? 'block' : 'none';
-  $('botBtn').style.display = isHost ? 'block' : 'none';
+  $('startBtn').classList.toggle('hidden', !isHost);
+  $('botBtn').classList.toggle('hidden', !isHost);
+  $('guestWaitMsg').classList.toggle('hidden', isHost);
 }
 
 $('startBtn').onclick = () => {
@@ -381,9 +453,10 @@ function updateMicUI(active) {
 }
 
 window.addEventListener('load', () => {
+  initProfile();
   const params = new URLSearchParams(window.location.search);
   const roomParam = params.get('room');
-  if (roomParam) {
+  if (roomParam && myNickname) {
     $('codeIn').value = roomParam;
     joinRoomByCode(roomParam.toUpperCase());
   }
@@ -594,7 +667,7 @@ const SEATS = {
 function drawSeat(pos) {
   const p = byPos(pos); if (!p) return;
   const s = SEATS[pos], act = pos === turn && active;
-  const nm = p.name.replace(' (Host)', '').replace(' (You)', ''), n = p.hand ? p.hand.length : 0;
+  const nm = p.name, n = p.hand ? p.hand.length : 0;
   rr(ctx, s.x, s.y, s.w, s.h, 9);
   ctx.fillStyle = act ? '#4a3510' : 'rgba(0,0,0,.55)'; ctx.fill();
   ctx.lineWidth = act ? 2 : 1; ctx.strokeStyle = act ? '#facc15' : '#3a2a14'; ctx.stroke();
@@ -639,7 +712,6 @@ function refresh() {
   $('againBtn').classList.toggle('hidden', !matchOver);
 }
 
-$('hubBtn').onclick = () => { epoch++; active = false; $('game').classList.add('hidden'); $('lobby').classList.remove('hidden'); };
 $('againBtn').onclick = newMatch;
 </script>
 </body>
