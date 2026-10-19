@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xgames Arcade & Yard Dominoes</title>
+    <title>Xgames Arcade - Yard Dominoes Six-Love</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -25,7 +25,7 @@
             user-select: none;
         }
 
-        /* Universal Xgames Navigation Header */
+        /* Xgames Navigation Header */
         #xgames-nav {
             width: 100%;
             max-width: 460px;
@@ -45,9 +45,6 @@
             font-weight: 900;
             letter-spacing: 1px;
             color: #6366f1;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .xgames-logo span { color: #f43f5e; }
@@ -61,10 +58,7 @@
             font-size: 11px;
             font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
         }
-
-        .hub-btn:hover { background: #1d4ed8; }
 
         #app-container {
             background: #14161f;
@@ -76,66 +70,87 @@
             max-width: 460px;
         }
 
-        /* Arcade Hub Selector */
-        .arcade-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+        /* Status & Lobby System */
+        #diagnostic-bar {
+            background: #0d0e14;
+            border: 1px solid #232736;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
         }
 
-        .game-card {
-            background: #1e2230;
-            border: 1px solid #2e3448;
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.15s, border-color 0.15s;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            display: inline-block;
+            margin-right: 4px;
         }
-
-        .game-card.active {
-            border-color: #10b981;
-            background: #132720;
-        }
-
-        .game-card h3 { font-size: 13px; color: #fff; margin-bottom: 4px; }
-        .game-card p { font-size: 10px; color: #888; }
 
         input {
             width: 100%;
-            padding: 10px;
+            padding: 9px;
             border: 1px solid #2a2f42;
             background: #0d0e14;
             color: #fff;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
             margin-bottom: 8px;
         }
 
-        input:focus { border-color: #6366f1; }
-
         button {
             width: 100%;
-            padding: 10px;
+            padding: 9px;
             background: #4f46e5;
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         button:hover { background: #4338ca; }
         .secondary-btn { background: #2d3345; }
         .success-btn { background: #059669; }
+        .danger-btn { background: #dc2626; width: auto; padding: 3px 8px; font-size: 10px; }
 
         .hidden { display: none !important; }
 
-        /* Six Love Scoreboard Header */
+        /* Lobby Player List */
+        #player-list {
+            list-style: none;
+            margin: 8px 0;
+            background: #0d0e14;
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        #player-list li {
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            border-bottom: 1px solid #1f2330;
+        }
+
+        .badge {
+            font-size: 8px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .badge-host { background: #f59e0b; color: #000; }
+        .badge-bot { background: #8b5cf6; color: #fff; }
+
+        /* Six Love Scoreboard */
         #match-scoreboard {
             background: #0d0e14;
             border: 1px solid #232736;
@@ -149,7 +164,6 @@
             font-weight: bold;
         }
 
-        .team-score { display: flex; align-items: center; gap: 6px; }
         .score-pill {
             background: #312e81;
             color: #c7d2fe;
@@ -158,13 +172,12 @@
             font-size: 12px;
         }
 
-        /* 4-SIDE DOMINO TABLE BOARD */
+        /* 4-SIDE SQUARE DOMINO TABLE */
         #dominoes-game-area {
             background: radial-gradient(circle, #2b170c 0%, #1a0d06 70%, #0c0502 100%);
-            border: 6px solid #4a2813;
+            border: 5px solid #4a2813;
             border-radius: 12px;
             padding: 6px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -174,47 +187,43 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            font-size: 10px;
             color: #fde047;
             font-weight: bold;
             background: rgba(0, 0, 0, 0.6);
             padding: 4px 8px;
             border-radius: 4px;
-            border: 1px solid rgba(253, 224, 71, 0.2);
         }
 
         /* Outer Frame Seating Grid */
         .square-table-layout {
-            display: grid;
-            grid-template-columns: 50px 1fr 50px;
-            grid-template-rows: auto 1fr auto;
-            gap: 2px;
-            align-items: center;
-            justify-items: center;
-            min-height: 290px;
+            position: relative;
+            width: 100%;
+            height: 250px;
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
-            padding: 4px;
             border: 1px dashed rgba(253, 224, 71, 0.15);
-            position: relative;
+            overflow: hidden;
         }
 
-        .seat-top { grid-column: 2; grid-row: 1; z-index: 20; }
-        .seat-left { grid-column: 1; grid-row: 2; z-index: 20; }
-        .seat-right { grid-column: 3; grid-row: 2; z-index: 20; }
-        .seat-bottom { grid-column: 2; grid-row: 3; z-index: 20; }
-
+        /* Compact Non-Overlapping Corner Seats */
         .player-seat {
-            background: rgba(0, 0, 0, 0.9);
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 3px;
-            border-radius: 6px;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-size: 9px;
             color: #fff;
             text-align: center;
-            width: 100%;
+            z-index: 20;
             box-shadow: 0 2px 6px rgba(0,0,0,0.8);
         }
+
+        .seat-top { top: 4px; left: 50%; transform: translateX(-50%); }
+        .seat-bottom { bottom: 4px; left: 50%; transform: translateX(-50%); }
+        .seat-left { left: 4px; top: 50%; transform: translateY(-50%); }
+        .seat-right { right: 4px; top: 50%; transform: translateY(-50%); }
 
         .player-seat.active-turn {
             border-color: #facc15;
@@ -224,18 +233,17 @@
 
         .seat-tiles-count { font-size: 8px; color: #fde047; }
 
-        /* Board Canvas Center Area */
+        /* Board Center Canvas Area */
         #table-board-center {
-            grid-column: 1 / span 3;
-            grid-row: 1 / span 3;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 240px;
-            position: relative;
-            overflow: hidden;
+            height: 100%;
             z-index: 5;
         }
 
-        /* Domino Tile Styling & Orientations */
+        /* Domino Tile Graphics */
         .real-tile {
             position: absolute;
             background: #fdfbf7;
@@ -247,7 +255,6 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            transition: all 0.2s ease-in-out;
             z-index: 10;
         }
 
@@ -278,7 +285,6 @@
         .tile-divider-h { width: 1px; height: 70%; background: #94a3b8; }
         .tile-divider-v { height: 1px; width: 70%; background: #ca8a04; }
 
-        /* Open-End Indicator Badges */
         .end-badge {
             position: absolute;
             background: #10b981;
@@ -296,7 +302,7 @@
             transform: translateY(-16px);
         }
 
-        /* Hand & Interactive Controls */
+        /* Hand Section */
         .my-hand-section {
             background: rgba(0, 0, 0, 0.5);
             padding: 6px;
@@ -317,7 +323,7 @@
             flex-wrap: wrap;
             gap: 4px;
             justify-content: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .domino-tile-hand {
@@ -329,9 +335,6 @@
             font-weight: bold;
             font-size: 11px;
             cursor: pointer;
-            display: flex;
-            gap: 2px;
-            align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
 
@@ -344,7 +347,7 @@
         .game-log {
             font-size: 9px;
             color: #f1f5f9;
-            height: 24px;
+            height: 22px;
             overflow-y: auto;
             background: rgba(0,0,0,0.7);
             padding: 3px 6px;
@@ -366,7 +369,6 @@
             padding: 5px 10px;
             border-radius: 4px;
             font-size: 11px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -378,39 +380,43 @@
     </div>
 
     <div id="app-container">
-        <!-- ARCADE HUB VIEW -->
-        <div id="hub-view">
-            <h2 style="font-size:15px; margin-bottom:6px; color:#c7d2fe;">Select an Xgames Title</h2>
+        <!-- DIAGNOSTIC BAR -->
+        <div id="diagnostic-bar">
+            <div><span class="status-dot"></span><span id="network-status">Connected</span></div>
+            <div id="room-code-display">Room: Off-Line</div>
+        </div>
+
+        <!-- MULTIPLAYER LOBBY HUB -->
+        <div id="lobby-view">
             <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15" value="Dwayne">
             
-            <div class="arcade-grid">
-                <div class="game-card active" id="select-dominoes-card">
-                    <h3>🀏 Yard Dominoes</h3>
-                    <p>4-Player Six Love Block Style</p>
-                </div>
-                <div class="game-card" style="opacity: 0.5; cursor: not-allowed;">
-                    <h3>🎯 More Games</h3>
-                    <p>Coming Soon</p>
-                </div>
+            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                <button id="create-room-btn" class="success-btn">Create Room</button>
             </div>
 
-            <div style="margin-top: 14px;">
-                <button id="launch-game-btn" class="success-btn">Launch Yard Dominoes</button>
+            <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+                <input type="text" id="join-code-input" placeholder="Enter Room Code (e.g. XG-AB12)" style="margin:0;">
+                <button id="join-room-btn" class="secondary-btn" style="width: auto;">Join</button>
+            </div>
+
+            <div id="room-lobby-panel" class="hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <h3 style="font-size:12px; color:#c7d2fe;">Room Players</h3>
+                    <button id="add-bot-btn" class="secondary-btn" style="width:auto; padding:3px 8px; font-size:10px;">+ Add Bot</button>
+                </div>
+
+                <ul id="player-list"></ul>
+
+                <button id="start-game-btn" class="success-btn" style="margin-top:6px;">Start Yard Dominoes</button>
             </div>
         </div>
 
-        <!-- DOMINOES GAME MODULE VIEW -->
+        <!-- DOMINOES GAME BOARD VIEW -->
         <div id="dominoes-view" class="hidden">
             <div id="match-scoreboard">
-                <div class="team-score">
-                    <span>TEAM N/S:</span>
-                    <span id="score-ns" class="score-pill">0</span>
-                </div>
-                <div style="font-size: 10px; color: #888;" id="hand-count-lbl">HAND 1 (Pose [6-6])</div>
-                <div class="team-score">
-                    <span>TEAM E/W:</span>
-                    <span id="score-we" class="score-pill">0</span>
-                </div>
+                <div>TEAM N/S: <span id="score-ns" class="score-pill">0</span></div>
+                <div style="font-size: 9px; color: #888;" id="hand-count-lbl">HAND 1 (Pose [6-6])</div>
+                <div>TEAM E/W: <span id="score-we" class="score-pill">0</span></div>
             </div>
 
             <div id="dominoes-game-area">
@@ -420,11 +426,11 @@
                 </div>
 
                 <div class="square-table-layout">
-                    <div id="seat-top" class="player-seat seat-top">North (Partner)</div>
+                    <div id="seat-top" class="player-seat seat-top">North</div>
                     <div id="seat-left" class="player-seat seat-left">West</div>
 
                     <div id="table-board-center">
-                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:100px;">
+                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:110px;">
                             Pose [6-6] to start Hand 1!
                         </div>
                     </div>
@@ -493,6 +499,11 @@
         const POSITIONS = ['N', 'W', 'S', 'E'];
         const TURN_NEXT = { 'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N' };
 
+        let currentRoomCode = null;
+        let isHost = false;
+        let lobbyPlayers = [];
+        let botCounter = 0;
+
         let handNumber = 1;
         let scoreNS = 0;
         let scoreWE = 0;
@@ -509,9 +520,16 @@
         let selectedTileIndex = null;
         let handActive = false;
 
-        const hubView = document.getElementById("hub-view");
+        const lobbyView = document.getElementById("lobby-view");
         const dominoesView = document.getElementById("dominoes-view");
-        const launchGameBtn = document.getElementById("launch-game-btn");
+        const createRoomBtn = document.getElementById("create-room-btn");
+        const joinRoomBtn = document.getElementById("join-room-btn");
+        const joinCodeInput = document.getElementById("join-code-input");
+        const roomLobbyPanel = document.getElementById("room-lobby-panel");
+        const addBotBtn = document.getElementById("add-bot-btn");
+        const playerList = document.getElementById("player-list");
+        const startGameBtn = document.getElementById("start-game-btn");
+        const roomCodeDisplay = document.getElementById("room-code-display");
         const returnHubBtn = document.getElementById("return-hub-btn");
         const usernameInput = document.getElementById("username-input");
 
@@ -546,6 +564,73 @@
 
         function logGame(msg) { gameLog.textContent = msg; }
 
+        createRoomBtn.addEventListener("click", () => {
+            const name = usernameInput.value.trim() || "South";
+            currentRoomCode = "XG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+            isHost = true;
+            roomCodeDisplay.textContent = `Room: ${currentRoomCode}`;
+
+            lobbyPlayers = [{ id: 'host_me', name: name + " (You)", isBot: false }];
+            roomLobbyPanel.classList.remove("hidden");
+            renderLobbyPlayers();
+            showToast(`Room ${currentRoomCode} Created! Share code to invite.`);
+        });
+
+        joinRoomBtn.addEventListener("click", () => {
+            const code = joinCodeInput.value.trim().toUpperCase();
+            const name = usernameInput.value.trim() || "Guest";
+            if (!code) {
+                showToast("Enter a valid Room Code!");
+                return;
+            }
+            currentRoomCode = code;
+            isHost = false;
+            roomCodeDisplay.textContent = `Room: ${currentRoomCode}`;
+            lobbyPlayers = [{ id: 'me', name: name + " (You)", isBot: false }];
+            roomLobbyPanel.classList.remove("hidden");
+            renderLobbyPlayers();
+            showToast(`Joined Room ${currentRoomCode}`);
+        });
+
+        addBotBtn.addEventListener("click", () => {
+            if (lobbyPlayers.length >= 4) {
+                showToast("Room full (Max 4 players)!");
+                return;
+            }
+            botCounter++;
+            lobbyPlayers.push({ id: `bot_${botCounter}`, name: `XBot-${botCounter}`, isBot: true });
+            renderLobbyPlayers();
+        });
+
+        function renderLobbyPlayers() {
+            playerList.innerHTML = "";
+            lobbyPlayers.forEach((p, idx) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span>${p.name}</span><span class="badge ${p.isBot ? 'badge-bot' : 'badge-host'}">${p.isBot ? 'BOT' : 'PLAYER'}</span>`;
+                playerList.appendChild(li);
+            });
+        }
+
+        startGameBtn.addEventListener("click", () => {
+            if (lobbyPlayers.length < 4) {
+                showToast("Need 4 players/bots to start Six-Love dominoes!");
+                return;
+            }
+            lobbyView.classList.add("hidden");
+            dominoesView.classList.remove("hidden");
+            scoreNS = 0;
+            scoreWE = 0;
+            handNumber = 1;
+            lastWinnerPos = null;
+            initNewHand();
+        });
+
+        returnHubBtn.addEventListener("click", () => {
+            handActive = false;
+            dominoesView.classList.add("hidden");
+            lobbyView.classList.remove("hidden");
+        });
+
         function generateFullSet() {
             const tiles = [];
             for (let i = 0; i <= 6; i++) {
@@ -561,33 +646,14 @@
             return tiles.sort(() => Math.random() - 0.5);
         }
 
-        launchGameBtn.addEventListener("click", () => {
-            hubView.classList.add("hidden");
-            dominoesView.classList.remove("hidden");
-
-            scoreNS = 0;
-            scoreWE = 0;
-            handNumber = 1;
-            lastWinnerPos = null;
-
-            initNewHand();
-        });
-
-        returnHubBtn.addEventListener("click", () => {
-            handActive = false;
-            dominoesView.classList.add("hidden");
-            hubView.classList.remove("hidden");
-        });
-
         function initNewHand() {
             const deck = generateFullSet();
-            const playerName = usernameInput.value.trim() || "South";
 
             players = [
-                { id: 'p_N', name: 'North (Partner)', pos: 'N', hand: deck.slice(0, 7), is_ai: true },
-                { id: 'p_W', name: 'West', pos: 'W', hand: deck.slice(7, 14), is_ai: true },
-                { id: 'p_S', name: playerName, pos: 'S', hand: deck.slice(14, 21), is_ai: false },
-                { id: 'p_E', name: 'East', pos: 'E', hand: deck.slice(21, 28), is_ai: true }
+                { id: lobbyPlayers[0].id, name: lobbyPlayers[0].name, pos: 'S', hand: deck.slice(0, 7), is_ai: lobbyPlayers[0].isBot },
+                { id: lobbyPlayers[1].id, name: lobbyPlayers[1].name, pos: 'W', hand: deck.slice(7, 14), is_ai: lobbyPlayers[1].isBot },
+                { id: lobbyPlayers[2].id, name: lobbyPlayers[2].name, pos: 'N', hand: deck.slice(14, 21), is_ai: lobbyPlayers[2].isBot },
+                { id: lobbyPlayers[3].id, name: lobbyPlayers[3].name, pos: 'E', hand: deck.slice(21, 28), is_ai: lobbyPlayers[3].isBot }
             ];
 
             leftEnd = null;
@@ -631,32 +697,29 @@
             handCountLbl.textContent = `HAND ${handNumber}`;
         }
 
-        /* 2D SNAKE RENDER ENGINE WITH CONTINUOUS CORNER TILES */
         function renderTableBoard() {
             const seats = { 'N': seatTop, 'W': seatLeft, 'S': seatBottom, 'E': seatRight };
             POSITIONS.forEach(pos => {
                 const p = getPlayerByPos(pos);
                 const isActive = pos === currentTurn;
                 seats[pos].className = `player-seat seat-${pos === 'N' ? 'top' : pos === 'W' ? 'left' : pos === 'S' ? 'bottom' : 'right'}${isActive ? ' active-turn' : ''}`;
-                seats[pos].innerHTML = `<div>${p.name}</div><div class="seat-tiles-count">🀏 ${p.hand.length} tiles</div>`;
+                seats[pos].innerHTML = `<div>${p.name}</div><div class="seat-tiles-count">🀏 ${p.hand.length}</div>`;
             });
 
             tableBoardCenter.innerHTML = "";
             if (!centerTile) {
-                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:100px;">Table empty. Posing tile to start!</div>`;
+                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:110px;">Table empty. Posing tile to start!</div>`;
                 return;
             }
 
             const cX = tableBoardCenter.clientWidth / 2 - 13;
             const cY = tableBoardCenter.clientHeight / 2 - 13;
-            const boundX = 85; // Bounds set to stay inside side player tags
+            const boundX = 80;
             const stepX = 28;
             const stepY = 22;
 
-            // 1. Center Tile (Spinner)
             renderTileElement(centerTile, cX, cY);
 
-            // 2. Left Branch Render Logic
             let currX = cX;
             let currY = cY;
             let hDir = -1;
@@ -665,23 +728,21 @@
                 if (currX <= cX - boundX && hDir === -1) {
                     currY += stepY;
                     hDir = 1;
-                    renderTileElement(t, currX, currY, true); // Corner vertical connection
+                    renderTileElement(t, currX, currY, true);
                 } else if (currX >= cX + boundX && hDir === 1) {
                     currY += stepY;
                     hDir = -1;
-                    renderTileElement(t, currX, currY, true); // Corner vertical connection
+                    renderTileElement(t, currX, currY, true);
                 } else {
                     currX += (hDir * stepX);
                     renderTileElement(t, currX, currY);
                 }
 
-                // Append open end badge for left branch on final tile
                 if (i === leftBranchTiles.length - 1) {
                     renderEndBadge('L', currX, currY);
                 }
             });
 
-            // 3. Right Branch Render Logic
             currX = cX;
             currY = cY;
             hDir = 1;
@@ -690,17 +751,16 @@
                 if (currX >= cX + boundX && hDir === 1) {
                     currY += stepY;
                     hDir = -1;
-                    renderTileElement(t, currX, currY, true); // Corner vertical connection
+                    renderTileElement(t, currX, currY, true);
                 } else if (currX <= cX - boundX && hDir === -1) {
                     currY += stepY;
                     hDir = 1;
-                    renderTileElement(t, currX, currY, true); // Corner vertical connection
+                    renderTileElement(t, currX, currY, true);
                 } else {
                     currX += (hDir * stepX);
                     renderTileElement(t, currX, currY);
                 }
 
-                // Append open end badge for right branch on final tile
                 if (i === rightBranchTiles.length - 1) {
                     renderEndBadge('R', currX, currY);
                 }
@@ -735,8 +795,10 @@
             handContainer.innerHTML = "";
             endChoiceBar.classList.add("hidden");
 
-            const myHand = getPlayerByPos('S').hand;
-            myHand.forEach((tile, index) => {
+            const myPlayer = getPlayerByPos('S');
+            if (!myPlayer) return;
+
+            myPlayer.hand.forEach((tile, index) => {
                 const el = document.createElement("div");
                 const isSelected = selectedTileIndex === index;
                 el.className = `domino-tile-hand${tile.is_double ? " double" : ""}${isSelected ? " selected" : ""}`;
@@ -746,7 +808,7 @@
             });
 
             if (currentTurn === 'S' && handActive && centerTile !== null) {
-                const hasMove = myHand.some(t => isValidMove(t));
+                const hasMove = myPlayer.hand.some(t => isValidMove(t));
                 if (!hasMove) passBtn.classList.remove("hidden");
                 else passBtn.classList.add("hidden");
             } else {
