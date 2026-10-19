@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Xgames Arcade - Yard Dominoes (Six Love)</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#07080c;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -13,7 +15,7 @@ body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,
 .hidden{display:none!important}
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
 button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#334155}
-button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}
+button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
 input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:9px;padding:10px;outline:0;text-transform:none}
 input:focus{border-color:#6366f1}
 h2{margin:0;font-size:13px;color:#a5b4fc}
@@ -25,11 +27,11 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
-.wrap{border:6px solid #5a3a1a;border-radius:16px;overflow:hidden;background:#120a04}
+.wrap{border:6px solid #5a3a1a;border-radius:16px;overflow:hidden;background:#120a04;position:relative}
 canvas#board{display:block;width:100%;height:auto}
 .shake{animation:shake .25s both}
 @keyframes shake{20%,80%{transform:translate(-3px,-2px)}40%,60%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}}
-#log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:9px;font-size:13px;color:#e2e8f0}
+#log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:13px;color:#e2e8f0;text-align:center}
 .hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:42px}
 .hand canvas{width:64px;height:36px;cursor:pointer;transition:transform .12s,opacity .12s}
 .hand canvas.sel{transform:translateY(-5px)}.hand canvas.dim{opacity:.4}
@@ -38,6 +40,7 @@ canvas#board{display:block;width:100%;height:auto}
 .codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
+.voice-bar{display:flex;align-items:center;justify-content:space-between;background:#1e1b4b;padding:6px 12px;border-radius:8px;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -48,7 +51,7 @@ canvas#board{display:block;width:100%;height:auto}
 </div>
 
 <div class="card stack">
-  <div class="panel row between status"><span>Practice mode (offline)</span><b id="roomBadge">No room yet</b></div>
+  <div class="panel row between status"><span id="syncLabel">Connecting...</span><b id="roomBadge">No room yet</b></div>
 
   <!-- LOBBY -->
   <div id="lobby" class="stack">
@@ -67,23 +70,25 @@ canvas#board{display:block;width:100%;height:auto}
         <button class="blue" id="copyBtn">Copy code</button>
         <button id="leaveBtn">Leave room</button>
       </div>
-      <div class="status" style="margin-bottom:10px">Practice mode: other people can't join yet. Fill the seats with bots.</div>
       <div class="row between" style="margin-bottom:4px"><b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b><button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add bot</button></div>
       <div id="plist"></div>
       <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
-      <div class="status" style="margin-top:6px">Empty seats are filled with bots.</div>
     </div>
   </div>
 
   <!-- GAME -->
   <div id="game" class="stack hidden">
+    <div class="voice-bar">
+      <span style="font-size:11px;font-weight:700;color:#a5b4fc">🎙️ Yard Voice</span>
+      <button id="micBtn" class="red" style="padding:4px 8px;font-size:11px">Mute Mic</button>
+    </div>
     <div class="score">
       <div>N/S<span class="pill" id="sNS">0</span></div>
       <div class="mid"><span id="handLbl">Hand 1</span><i>Six love</i></div>
       <div>E/W<span class="pill" id="sWE">0</span></div>
     </div>
     <div class="wrap" id="wrap"><canvas id="board" width="800" height="860"></canvas></div>
-    <div id="log"></div>
+    <div id="log">Connecting to room...</div>
     <div class="panel">
       <div class="lbl" id="turnLbl">Your hand</div>
       <div class="hand" id="hand"></div>
@@ -99,6 +104,14 @@ canvas#board{display:block;width:100%;height:auto}
 <div id="toast"></div>
 
 <script>
+/* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
+const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
+const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
+
+const sb = supabase.createClient(SB_URL, SB_KEY);
+let roomSubscription = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
+
 /* ---------- AUDIO ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
 function tone(f1, f2, d, type, vol, delay = 0) {
@@ -126,36 +139,71 @@ function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on
 const log = m => $('log').textContent = m;
 
 /* ---------- STATE ---------- */
-const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' }; // counter-clockwise
+const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 let lobby = [], botN = 0, isHost = false;
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
 const byPos = p => players.find(x => x.pos === p);
 
-/* ---------- LOBBY ---------- */
-let roomCode = '';
-$('createBtn').onclick = () => {
+/* ---------- SUPABASE REALTIME SYNC ---------- */
+async function syncRoomState() {
+  if (!roomCode) return;
+  const stateData = { handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+  await sb.from('game_rooms').upsert({ room_code: roomCode, state: stateData, updated_at: new Date() }, { onConflict: 'room_code' });
+}
+
+function listenToRoom() {
+  if (roomSubscription) roomSubscription.unsubscribe();
+  roomSubscription = sb.channel('room_' + roomCode)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
+      const st = payload.new.state;
+      if (!st) return;
+      handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
+      players = st.players || []; turn = st.turn; L = st.L; R = st.R; center = st.center;
+      lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
+      if (st.lobby) { lobby = st.lobby; renderLobby(); }
+      refresh();
+    }).subscribe();
+}
+
+/* ---------- LOBBY & VOICE ---------- */
+$('createBtn').onclick = async () => {
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  isHost = true; $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (You)', isBot: false }];
+  isHost = true; mySeatPos = 'S';
+  $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
+  lobby = [{ name: ($('nameIn').value.trim() || 'South') + ' (You)', isBot: false, pos: 'S' }];
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby(); toast('Room created');
+  renderLobby(); toast('Room ' + roomCode + ' created!');
+  listenToRoom(); await syncRoomState(); initVoice();
 };
-// Honest for now: nobody else can reach this page's rooms until it is connected to the online lobby
-$('joinBtn').onclick = () => toast("Joining friends' rooms isn't live yet. Create a room and add bots.");
-$('copyBtn').onclick = () => {
-  const done = () => toast('Code copied');
-  if (navigator.clipboard) navigator.clipboard.writeText(roomCode).then(done, () => toast(roomCode));
-  else toast(roomCode);
+
+$('joinBtn').onclick = async () => {
+  const code = $('codeIn').value.trim().toUpperCase();
+  if (!code) return toast('Enter a room code');
+  const { data } = await sb.from('game_rooms').select('state').eq('room_code', code).single();
+  if (!data) return toast('Room not found');
+  roomCode = code; isHost = false;
+  $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
+  const currentLobby = data.state.lobby || [];
+  const positions = ['S', 'W', 'N', 'E'];
+  const taken = currentLobby.map(p => p.pos);
+  const freePos = positions.find(p => !taken.includes(p)) || 'W';
+  mySeatPos = freePos;
+  lobby = currentLobby;
+  lobby.push({ name: ($('nameIn').value.trim() || 'Player') + ' (You)', isBot: false, pos: freePos });
+  $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
+  renderLobby(); listenToRoom(); await syncRoomState(); initVoice();
 };
-$('leaveBtn').onclick = () => {
-  lobby = []; roomCode = ''; botN = 0; $('roomBadge').textContent = 'No room yet';
-  $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
-};
+
 $('botBtn').onclick = () => {
   if (lobby.length >= 4) return toast('Room is full');
-  lobby.push({ name: 'XBot-' + (++botN), isBot: true }); renderLobby();
+  const positions = ['S', 'W', 'N', 'E'];
+  const taken = lobby.map(p => p.pos);
+  const freePos = positions.find(p => !taken.includes(p));
+  lobby.push({ name: 'XBot-' + (++botN), isBot: true, pos: freePos });
+  renderLobby(); syncRoomState();
 };
+
 function renderLobby() {
   $('plist').innerHTML = '';
   lobby.forEach((p, i) => {
@@ -163,23 +211,35 @@ function renderLobby() {
     d.innerHTML = '<span></span><span><span class="tag' + (p.isBot ? ' bot' : '') + '">' + (p.isBot ? 'BOT' : 'PLAYER') + '</span>' +
       (isHost && i > 0 ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + '</span>';
     d.firstChild.textContent = p.name;
-    const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); };
+    const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
   });
   $('pc').textContent = lobby.length;
 }
-$('startBtn').onclick = () => {
-  while (lobby.length < 4) lobby.push({ name: 'XBot-' + (++botN), isBot: true });
-  renderLobby(); newMatch();
-};
-$('hubBtn').onclick = () => { epoch++; active = false; $('game').classList.add('hidden'); $('lobby').classList.remove('hidden'); };
-$('againBtn').onclick = newMatch;
 
-function newMatch() {
-  $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
-  sNS = 0; sWE = 0; handNo = 1; lastWin = null; matchOver = false;
-  newHand();
+$('startBtn').onclick = () => {
+  const positions = ['S', 'W', 'N', 'E'];
+  positions.forEach(pos => {
+    if (!lobby.some(p => p.pos === pos)) lobby.push({ name: 'XBot-' + (++botN), isBot: true, pos });
+  });
+  newMatch();
+};
+
+async function initVoice() {
+  try {
+    if (!window.LivekitClient) return;
+    livekitRoom = new LivekitClient.Room();
+    await livekitRoom.connect(LIVEKIT_URL, 'demo-token');
+    await livekitRoom.localParticipant.enableMicrophone();
+  } catch (e) { console.log('Voice preview mode'); }
 }
+$('micBtn').onclick = () => {
+  if (!livekitRoom) return;
+  const enabled = livekitRoom.localParticipant.isMicrophoneEnabled;
+  livekitRoom.localParticipant.setMicrophoneEnabled(!enabled);
+  $('micBtn').textContent = enabled ? 'Unmute Mic' : 'Mute Mic';
+  $('micBtn').className = enabled ? 'green' : 'red';
+};
 
 /* ---------- GAME CORE ---------- */
 function fullSet() {
@@ -188,10 +248,20 @@ function fullSet() {
   for (let i = t.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [t[i], t[j]] = [t[j], t[i]]; }
   return t;
 }
+
+function newMatch() {
+  $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
+  sNS = 0; sWE = 0; handNo = 1; lastWin = null; matchOver = false;
+  newHand();
+}
+
 function newHand() {
   epoch++;
   const deck = fullSet();
-  players = ['S', 'W', 'N', 'E'].map((pos, i) => ({ name: lobby[i].name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: lobby[i].isBot }));
+  players = ['S', 'W', 'N', 'E'].map((pos, i) => {
+    const playerObj = lobby.find(l => l.pos === pos) || { name: 'XBot-' + i, isBot: true };
+    return { name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
+  });
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
   needD6 = lastWin === null;
   if (needD6) {
@@ -200,12 +270,14 @@ function newHand() {
   } else {
     turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.');
   }
-  refresh(); maybeAi();
+  refresh(); syncRoomState(); maybeAi();
 }
+
 function isValid(t) {
   if (!center) return needD6 ? (t.a === 6 && t.b === 6) : true;
   return t.a === L || t.b === L || t.a === R || t.b === R;
 }
+
 function play(i, side) {
   const p = byPos(turn), t = p.hand.splice(i, 1)[0]; passes = 0;
   if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
@@ -216,16 +288,20 @@ function play(i, side) {
   if (!p.hand.length) return win(p.pos, p.name + ' went out!');
   next();
 }
+
 function pass() {
   const p = byPos(turn); passes++; knock(); log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
   next();
 }
-function next() { turn = NEXT[turn]; refresh(); maybeAi(); }
+
+function next() { turn = NEXT[turn]; refresh(); syncRoomState(); maybeAi(); }
+
 function maybeAi() {
   const e = epoch;
   if (active && byPos(turn).ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
 }
+
 function aiTurn() {
   const p = byPos(turn), opts = [];
   p.hand.forEach((t, i) => {
@@ -240,16 +316,18 @@ function aiTurn() {
   opts.sort((x, y) => y.w - x.w + (Math.random() - .5) * 3);
   play(opts[0].i, opts[0].side);
 }
+
 function blocked() {
   let ns = 0, we = 0;
   players.forEach(p => { const s = p.hand.reduce((a, t) => a + t.a + t.b, 0); (p.pos === 'N' || p.pos === 'S') ? ns += s : we += s; });
   if (ns < we) win('S', 'Blocked! N/S win (' + ns + ' vs ' + we + ' pips)');
   else if (we < ns) win('E', 'Blocked! E/W win (' + we + ' vs ' + ns + ' pips)');
   else {
-    active = false; log('🤝 Blocked and tied. Replaying the hand.'); const e = epoch;
+    active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
     setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
   }
 }
+
 function win(pos, why) {
   fanfare(); active = false; lastWin = pos;
   const ns = pos === 'N' || pos === 'S';
@@ -258,17 +336,17 @@ function win(pos, why) {
   log('🎉 ' + why);
   if (sNS >= 6 || sWE >= 6) {
     matchOver = true; log('🏆 Match over: Team ' + (sNS >= 6 ? 'N/S' : 'E/W') + ' wins six love!');
-    refresh(); return;
+    refresh(); syncRoomState(); return;
   }
-  refresh(); const e = epoch;
+  refresh(); syncRoomState(); const e = epoch;
   setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
 }
 
 /* ---------- HAND UI ---------- */
 let selIdx = null;
 function selectTile(i) {
-  if (!active || turn !== 'S') return toast('Not your turn');
-  const t = byPos('S').hand[i];
+  if (!active || turn !== mySeatPos) return toast('Not your turn');
+  const t = byPos(mySeatPos).hand[i];
   if (!isValid(t)) return toast(!center && needD6 ? 'Hand 1 must start with [6|6]' : "That tile doesn't fit");
   if (!center) return play(i, 'first');
   const ml = t.a === L || t.b === L, mr = t.a === R || t.b === R;
@@ -279,12 +357,12 @@ function selectTile(i) {
     renderHand();
   } else play(i, ml ? 'left' : 'right');
 }
-$('passBtn').onclick = () => { if (active && turn === 'S') pass(); };
+$('passBtn').onclick = () => { if (active && turn === mySeatPos) pass(); };
 
 function renderHand() {
   const box = $('hand'); box.innerHTML = '';
-  const me = byPos('S'); if (!me) return;
-  const mine = active && turn === 'S';
+  const me = byPos(mySeatPos); if (!me) return;
+  const mine = active && turn === mySeatPos;
   me.hand.forEach((t, i) => {
     const c = document.createElement('canvas'); c.width = 128; c.height = 72;
     const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
@@ -301,9 +379,6 @@ function renderHand() {
 
 /* ---------- CANVAS ENGINE ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
-// CORNER = width of the vertical turn tile. PITCH = distance between rows (a turn tile is 40 long, so
-// 36 lets it overlap both rows by 12 and read as one connected chain).
-// MARGIN keeps the chain clear of the W and E seats at the sides. CY is the centre row of the chain.
 const W = 400, H = 430, PITCH = 36, MARGIN = 44, CORNER = 20, CY = 218;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
@@ -317,8 +392,6 @@ function pips(c, x, y, w, h, n, s) {
     c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.9 * s, 0, 7); c.fill();
   });
 }
-// Draws a 40x20 tile centred on (x,y). Left half = a, right half = b. vert rotates 90deg clockwise,
-// so with vert the "a" half ends up on top and the "b" half on the bottom.
 function drawTile(c, x, y, a, b, vert, s) {
   s = s || 1; const w = 40 * s, h = 20 * s, dbl = a === b;
   c.save(); c.translate(x, y); if (vert) c.rotate(Math.PI / 2);
@@ -330,13 +403,9 @@ function drawTile(c, x, y, a, b, vert, s) {
   pips(c, -w / 2, -h / 2, w / 2, h, a, s); pips(c, 0, -h / 2, w / 2, h, b, s);
   c.restore();
 }
-// Lays one branch out as a snake. Tiles run along a row; when the next tile would run out of room, that
-// tile becomes a vertical TURN tile past the end of the row, and the branch continues on the next row
-// in the opposite direction. rowDir +1 = next row is below, -1 = above.
-// Returns the placed tiles plus the cursor (x, y, dir) = where the NEXT tile will attach.
 function layout(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0; const out = [];
-  const limitR = W - MARGIN - CORNER, limitL = MARGIN + CORNER; // always leaves room for a turn tile
+  const limitR = W - MARGIN - CORNER, limitL = MARGIN + CORNER;
   tiles.forEach(t => {
     const ew = t.d ? 20 : 40;
     const fits = dir > 0 ? x + ew <= limitR : x - ew >= limitL;
@@ -350,32 +419,24 @@ function layout(tiles, startX, y0, dir, rowDir) {
   });
   return { out, x, y, dir };
 }
-// Draw one laid-out tile so the half touching the previous tile always carries the matching number.
-// o.t.a = the end that touches the previous tile, o.t.b = the open end.
 function drawLinked(o) {
   if (o.corner) {
-    // Vertical: "a" is drawn on top. Going down, the previous row is above (a on top).
-    // Going up, the previous row is below, so flip the halves.
     const top = o.rowDir > 0 ? o.t.a : o.t.b, bottom = o.rowDir > 0 ? o.t.b : o.t.a;
     drawTile(ctx, o.cx, o.cy, top, bottom, true, 1);
   } else {
-    // Doubles stand crosswise to the line (vert = true for doubles)
     drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1);
   }
 }
-// Small muted tag in the open slot at the end of each branch, e.g. "L 6" = left end needs a 6
 function endTag(x, y, dir, txt) {
   const w = 26, h = 13;
   let cx = x + dir * (w / 2 + 3);
-  cx = Math.min(W - MARGIN - w / 2, Math.max(MARGIN + w / 2, cx)); // stay clear of the side seats
+  cx = Math.min(W - MARGIN - w / 2, Math.max(MARGIN + w / 2, cx));
   rr(ctx, cx - w / 2, y - h / 2, w, h, 6);
   ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill();
   ctx.lineWidth = 1; ctx.strokeStyle = '#7c5a1c'; ctx.stroke();
   ctx.fillStyle = '#fcd34d'; ctx.font = '700 8px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(txt, cx, y + .5);
 }
-// Seats sit around the table like real players: partner N across from you (S at the bottom),
-// W on the left, E on the right. Turns go counter-clockwise: S, E, N, W.
 const SEATS = {
   N: { x: 145, y: 6, w: 110, h: 32, horiz: true },
   S: { x: 145, y: 392, w: 110, h: 32, horiz: true },
@@ -385,59 +446,53 @@ const SEATS = {
 function drawSeat(pos) {
   const p = byPos(pos); if (!p) return;
   const s = SEATS[pos], act = pos === turn && active;
-  const nm = p.name.replace(' (You)', ''), n = p.hand.length;
+  const nm = p.name.replace(' (You)', ''), n = p.hand ? p.hand.length : 0;
   rr(ctx, s.x, s.y, s.w, s.h, 9);
   ctx.fillStyle = act ? '#4a3510' : 'rgba(0,0,0,.55)'; ctx.fill();
   ctx.lineWidth = act ? 2 : 1; ctx.strokeStyle = act ? '#facc15' : '#3a2a14'; ctx.stroke();
-
-  // avatar circle with the first letter of the name
   const ax = s.horiz ? s.x + 17 : s.x + s.w / 2, ay = s.horiz ? s.y + s.h / 2 : s.y + 17;
   ctx.beginPath(); ctx.arc(ax, ay, 11, 0, 7); ctx.fillStyle = p.ai ? '#581c87' : '#b45309'; ctx.fill();
   ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
   ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui'; ctx.fillText(nm.charAt(0).toUpperCase(), ax, ay + .5);
-
   const count = n + (n === 1 ? ' tile' : ' tiles');
   if (s.horiz) {
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#fff'; ctx.font = '700 10px system-ui'; ctx.fillText(nm.slice(0, 9) + (pos === 'S' ? ' ★' : ''), s.x + 33, s.y + 12);
+    ctx.fillStyle = '#fff'; ctx.font = '700 10px system-ui'; ctx.fillText(nm.slice(0, 9) + (pos === mySeatPos ? ' ★' : ''), s.x + 33, s.y + 12);
     ctx.fillStyle = '#fbbf24'; ctx.font = '600 9px system-ui'; ctx.fillText(count, s.x + 33, s.y + 24);
   } else {
     ctx.fillStyle = '#fff'; ctx.font = '700 8px system-ui'; ctx.fillText(nm.slice(0, 6), s.x + s.w / 2, s.y + 38);
     ctx.fillStyle = '#fbbf24'; ctx.font = '600 9px system-ui'; ctx.fillText(count, s.x + s.w / 2, s.y + 54);
   }
 }
-
 function drawBoard() {
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1d1108'); g.addColorStop(1, '#0d0703');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
-  // seats around the table (outside the chain area, so they can never overlap it)
   ['N', 'W', 'E', 'S'].forEach(drawSeat);
-
   if (!center) {
     ctx.fillStyle = '#fcd34d'; ctx.font = '700 13px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY + 4); return;
   }
   const cx = W / 2, cy = CY, cw = center.d ? 20 : 40;
   const lay = layout(lb, cx - cw / 2, cy, -1, -1), ray = layout(rb, cx + cw / 2, cy, 1, 1);
-
   drawTile(ctx, cx, cy, center.a, center.b, center.d, 1);
   lay.out.forEach(drawLinked);
   ray.out.forEach(drawLinked);
-
-  // Muted tags sit in the open slot at each end and show which number that end needs
   endTag(lay.x, lay.y, lay.dir, 'L ' + L);
   endTag(ray.x, ray.y, ray.dir, 'R ' + R);
 }
 
 /* ---------- REFRESH ---------- */
 function refresh() {
+  $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Practice';
   $('sNS').textContent = sNS; $('sWE').textContent = sWE; $('handLbl').textContent = 'Hand ' + handNo;
-  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === 'S' && active ? 'Your turn' : 'Turn: ' + (byPos(turn) ? byPos(turn).name : ''));
+  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (byPos(turn) ? byPos(turn).name : ''));
   selIdx = null; drawBoard(); renderHand();
   $('againBtn').classList.toggle('hidden', !matchOver);
 }
+
+$('hubBtn').onclick = () => { epoch++; active = false; $('game').classList.add('hidden'); $('lobby').classList.remove('hidden'); };
+$('againBtn').onclick = newMatch;
 </script>
 </body>
 </html>
