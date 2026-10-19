@@ -1,330 +1,90 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xgames Arcade - Jamaican Yard Dominoes (Six Love)</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Xgames Arcade - Yard Dominoes (Six Love)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #08090d;
-            color: #f0f0f5;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #07080c;
+            color: #f1f5f9;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            min-height: 100vh;
-            padding: 6px;
-            user-select: none;
+            padding: 8px;
             overflow-x: hidden;
         }
 
-        /* Top Xgames Universal Navigation Bar */
-        #xgames-nav {
-            width: 100%;
-            max-width: 460px;
-            background: #12131c;
-            border: 1px solid #232736;
-            border-radius: 10px;
-            padding: 8px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-
-        .xgames-logo {
-            font-size: 15px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #6366f1;
-        }
-
-        .xgames-logo span { color: #f43f5e; }
-
-        .hub-btn {
-            background: #2563eb;
-            color: #fff;
-            border: none;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        #app-container {
-            background: #12141d;
-            border: 1px solid #232736;
-            padding: 8px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
-            width: 100%;
-            max-width: 460px;
-        }
-
-        /* Diagnostic Status Bar */
-        #diagnostic-bar {
-            background: #0b0c12;
-            border: 1px solid #1f2330;
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            display: inline-block;
-            margin-right: 4px;
-        }
-
-        input {
-            width: 100%;
-            padding: 9px;
-            border: 1px solid #2a2f42;
-            background: #0d0e14;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 13px;
-            outline: none;
-            margin-bottom: 8px;
-        }
-
-        button {
-            width: 100%;
-            padding: 9px;
-            background: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        button:hover { background: #4338ca; }
-        .secondary-btn { background: #2d3345; }
-        .success-btn { background: #059669; }
-
-        .hidden { display: none !important; }
-
-        /* Lobby Player List */
-        #player-list {
-            list-style: none;
-            margin: 8px 0;
-            background: #0d0e14;
-            padding: 6px;
-            border-radius: 6px;
-        }
-
-        #player-list li {
-            padding: 4px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 11px;
-            border-bottom: 1px solid #1f2330;
-        }
-
-        .badge {
-            font-size: 8px;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-weight: bold;
-        }
-        .badge-host { background: #f59e0b; color: #000; }
-        .badge-bot { background: #8b5cf6; color: #fff; }
-
-        /* Tournament Scoreboard */
-        #match-scoreboard {
-            background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
-            border: 2px solid #4338ca;
-            padding: 6px 12px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        .team-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .team-label {
-            font-size: 10px;
-            font-weight: 800;
-            color: #93c5fd;
-            letter-spacing: 0.5px;
-        }
-
-        .score-pill {
-            background: #312e81;
-            color: #fef08a;
-            border: 1px solid #facc15;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 900;
-            margin-top: 2px;
-        }
-
-        .match-info-center {
-            text-align: center;
-        }
-
-        .hand-title {
-            font-size: 11px;
-            font-weight: 800;
-            color: #facc15;
-            text-transform: uppercase;
-        }
-
-        .six-love-badge {
-            font-size: 8px;
-            background: #dc2626;
-            color: #fff;
-            padding: 1px 5px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-top: 2px;
-            display: inline-block;
-        }
-
-        /* Screen Shake Animation */
-        .shake-screen {
+        /* Screen Shake Animation on Heavy Slams */
+        .shake-impact {
             animation: slamShake 0.25s cubic-bezier(.36,.07,.19,.97) both;
         }
 
         @keyframes slamShake {
-            10%, 90% { transform: translate3d(-2px, -1px, 0); }
-            20%, 80% { transform: translate3d(3px, 2px, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, -3px, 0); }
-            40%, 60% { transform: translate3d(4px, 3px, 0); }
+            10%, 90% { transform: translate3d(-3px, -2px, 0); }
+            20%, 80% { transform: translate3d(4px, 3px, 0); }
+            30%, 50%, 70% { transform: translate3d(-5px, -4px, 0); }
+            40%, 60% { transform: translate3d(5px, 4px, 0); }
         }
 
-        /* 4-Side Square Table Layout */
-        #dominoes-game-area {
-            background: radial-gradient(circle, #3a2012 0%, #1f0f08 70%, #0c0502 100%);
-            border: 6px solid #5a3118;
-            border-radius: 12px;
-            padding: 4px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 6px 16px rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        /* Pulsing Glow for Open End Markers */
+        @keyframes endPulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 6px #10b981; }
+            100% { transform: scale(1.15); box-shadow: 0 0 14px #10b981, 0 0 20px #34d399; }
         }
 
-        .table-top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 10px;
-            color: #fde047;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 4px 8px;
-            border-radius: 4px;
+        .pulse-end {
+            animation: endPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
         }
 
-        .square-table-layout {
-            position: relative;
-            width: 100%;
-            height: 270px;
-            background: rgba(0,0,0,0.25);
-            border-radius: 8px;
-            border: 1px dashed rgba(253, 224, 71, 0.15);
-            overflow: hidden;
-        }
-
-        /* Compact Player Corner Badges */
-        .player-seat {
+        /* Pure CSS 3D Domino Tile Styling */
+        .domino-3d {
             position: absolute;
-            background: rgba(10, 10, 15, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 9px;
-            color: #fff;
-            text-align: center;
-            z-index: 20;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.8);
-            min-width: 70px;
-        }
-
-        .seat-top { top: 6px; left: 50%; transform: translateX(-50%); }
-        .seat-bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
-        .seat-left { left: 6px; top: 50%; transform: translateY(-50%); }
-        .seat-right { right: 6px; top: 50%; transform: translateY(-50%); }
-
-        .player-seat.active-turn {
-            border-color: #facc15;
-            box-shadow: 0 0 12px #facc15;
-            background: rgba(234, 179, 8, 0.35);
-        }
-
-        .seat-tiles-count { font-size: 8px; color: #fde047; font-weight: bold; }
-
-        /* Board Center Canvas Area */
-        #table-board-center {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-        }
-
-        /* REALISTIC 3D DOMINO TILES */
-        .3d-tile {
-            position: absolute;
-            background: linear-gradient(145deg, #ffffff 0%, #f1efe9 60%, #e2ded4 100%);
-            border: 1px solid #b8b3a8;
-            border-radius: 4px;
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.9);
+            background: linear-gradient(145deg, #ffffff 0%, #f4f1e8 55%, #e5e0d3 100%);
+            border: 1px solid #b3ad9e;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
-            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            opacity: 1 !important;
+            visibility: visible !important;
+            transition: transform 0.15s ease-out;
         }
 
-        .3d-tile.horiz {
-            width: 32px;
-            height: 18px;
+        .domino-3d.horiz {
+            width: 36px;
+            height: 20px;
             flex-direction: row;
         }
 
-        .3d-tile.vert {
-            width: 18px;
-            height: 32px;
+        .domino-3d.vert {
+            width: 20px;
+            height: 36px;
             flex-direction: column;
-            background: linear-gradient(145deg, #fffbeb 0%, #fef08a 60%, #fde047 100%);
+            background: linear-gradient(145deg, #fffde8 0%, #fef08a 60%, #facc15 100%);
             border-color: #ca8a04;
         }
 
-        .tile-divider-h { width: 1px; height: 75%; background: #94a3b8; }
-        .tile-divider-v { height: 1px; width: 75%; background: #ca8a04; }
+        .divider-h { width: 1px; height: 80%; background: #94a3b8; }
+        .divider-v { height: 1px; width: 80%; background: #ca8a04; }
 
-        /* 3x3 Grid Pip Engine */
+        /* 3x3 Pip Matrix Engine */
         .pip-grid {
             flex: 1;
             display: grid;
@@ -335,161 +95,128 @@
             padding: 2px;
         }
 
-        .pip {
-            width: 3px;
-            height: 3px;
-            background-color: #111827;
+        .pip-dot {
+            width: 3.5px;
+            height: 3.5px;
+            background-color: #0f172a;
             border-radius: 50%;
             justify-self: center;
             align-self: center;
-            box-shadow: inset 0 1px 1px rgba(0,0,0,0.6);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.8);
         }
 
-        /* Open-End Indicator Badges */
-        .end-badge {
-            position: absolute;
-            background: #10b981;
-            color: #fff;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            font-size: 8px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 8px #10b981;
-            z-index: 15;
-            transform: translateY(-18px);
-            animation: pulseGlow 1.2s infinite alternate;
-        }
-
-        @keyframes pulseGlow {
-            from { transform: translateY(-18px) scale(0.95); box-shadow: 0 0 4px #10b981; }
-            to { transform: translateY(-18px) scale(1.1); box-shadow: 0 0 10px #10b981; }
-        }
-
-        /* Hand Section */
-        .my-hand-section {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 6px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .hand-label {
-            font-size: 9px;
-            color: #94a3b8;
-            text-align: center;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        .hand-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: center;
-            margin-bottom: 4px;
-        }
-
-        .domino-tile-hand {
+        /* Hand Interactive Tile */
+        .hand-tile {
             background: linear-gradient(145deg, #ffffff 0%, #f3f0e6 100%);
             color: #0f172a;
             border: 2px solid #cbd5e1;
-            border-radius: 5px;
+            border-radius: 6px;
             padding: 4px 6px;
-            font-weight: 800;
-            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
             cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
-            transition: transform 0.15s, border-color 0.15s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transition: all 0.15s ease-out;
         }
 
-        .domino-tile-hand.double { background: linear-gradient(145deg, #fef9c3 0%, #fef08a 100%); border-color: #ca8a04; }
-        .domino-tile-hand.selected { border-color: #facc15; box-shadow: 0 0 10px #facc15; transform: translateY(-4px); }
-
-        .end-choice-bar { display: flex; gap: 4px; margin-bottom: 4px; }
-        .end-btn { flex: 1; padding: 6px; font-size: 10px; background: #0284c7; font-weight: bold; }
-
-        .game-log {
-            font-size: 9px;
-            color: #f1f5f9;
-            height: 22px;
-            overflow-y: auto;
-            background: rgba(0,0,0,0.7);
-            padding: 3px 6px;
-            border-radius: 4px;
+        .hand-tile.double {
+            background: linear-gradient(145deg, #fef9c3 0%, #fef08a 100%);
+            border-color: #eab308;
         }
 
-        #toast-container {
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
+        .hand-tile.selected {
+            border-color: #facc15;
+            box-shadow: 0 0 12px #facc15;
+            transform: translateY(-5px);
         }
 
-        .toast {
-            background: #1e1b4b;
-            color: #c7d2fe;
-            border: 1px solid #4338ca;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        .mini-half {
+            width: 14px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div id="xgames-nav">
-        <div class="xgames-logo">🎮 XGAMES <span>ARCADE</span></div>
-        <button id="return-hub-btn" class="hub-btn">Main Arcade Hub</button>
+    <!-- XGAMES NAV BAR -->
+    <div class="w-full max-w-[460px] bg-[#11131f] border border-[#23273a] rounded-xl p-2.5 mb-2 flex justify-between items-center shadow-lg">
+        <div class="text-sm font-black tracking-wider text-indigo-400 flex items-center gap-1.5">
+            🎮 XGAMES <span class="text-rose-500">ARCADE</span>
+        </div>
+        <button id="nav-hub-btn" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-lg transition">
+            Main Arcade Hub
+        </button>
     </div>
 
-    <div id="app-container">
-        <!-- DIAGNOSTIC BAR -->
-        <div id="diagnostic-bar">
-            <div><span class="status-dot"></span><span id="network-status">Connected</span></div>
-            <div id="room-code-display">Room: Off-Line</div>
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" class="w-full max-w-[460px] bg-[#141724] border border-[#23273a] rounded-2xl p-2.5 shadow-2xl flex flex-direction-column gap-2">
+
+        <!-- STATUS DIAGNOSTIC BAR -->
+        <div class="bg-[#0b0c12] border border-[#1f2433] rounded-lg px-3 py-1.5 text-[10px] flex justify-between items-center text-slate-400">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                <span id="network-status" class="font-semibold text-slate-300">Online Sync Ready</span>
+            </div>
+            <div id="room-code-badge" class="font-bold text-amber-400">Room: Off-Line</div>
         </div>
 
-        <!-- MULTIPLAYER LOBBY HUB -->
-        <div id="lobby-view">
-            <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15" value="Dwayne">
+        <!-- VIEW 1: ARCADE LOBBY & ROOM SELECTOR -->
+        <div id="lobby-view" class="flex flex-col gap-2.5">
+            <h2 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">Select Player Identity & Room</h2>
             
-            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                <button id="create-room-btn" class="success-btn">Create Room</button>
+            <input type="text" id="username-input" placeholder="Enter Your Nickname" maxlength="15" value="Dwayne"
+                class="w-full bg-[#0b0c12] border border-[#2a3045] rounded-lg p-2.5 text-xs text-white outline-none focus:border-indigo-500 transition">
+
+            <div class="grid grid-cols-2 gap-2">
+                <button id="create-room-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs p-2.5 rounded-lg transition shadow-md">
+                    + Create Room
+                </button>
+                <div class="flex gap-1">
+                    <input type="text" id="join-code-input" placeholder="Code (XG-XXXX)" maxlength="10"
+                        class="w-full bg-[#0b0c12] border border-[#2a3045] rounded-lg p-2 text-[11px] text-white outline-none uppercase">
+                    <button id="join-room-btn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs px-3 rounded-lg transition">
+                        Join
+                    </button>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 4px; margin-bottom: 8px;">
-                <input type="text" id="join-code-input" placeholder="Enter Room Code (e.g. XG-AB12)" style="margin:0;">
-                <button id="join-room-btn" class="secondary-btn" style="width: auto;">Join</button>
-            </div>
-
-            <div id="room-lobby-panel" class="hidden">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <h3 style="font-size:12px; color:#c7d2fe;">Room Players</h3>
-                    <button id="add-bot-btn" class="secondary-btn" style="width:auto; padding:3px 8px; font-size:10px;">+ Add Bot</button>
+            <!-- ROOM PANEL (ONCE CREATED OR JOINED) -->
+            <div id="room-lobby-panel" class="hidden bg-[#0b0c12] border border-[#23273a] rounded-xl p-3 flex flex-col gap-2">
+                <div class="flex justify-between items-center pb-1 border-b border-slate-800">
+                    <span class="text-xs font-extrabold text-amber-400">Lobby Players (<span id="player-count">1</span>/4)</span>
+                    <button id="add-bot-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md transition">
+                        + Add Bot
+                    </button>
                 </div>
 
-                <ul id="player-list"></ul>
+                <ul id="player-list" class="space-y-1 my-1"></ul>
 
-                <button id="start-game-btn" class="success-btn" style="margin-top:6px;">Start Yard Dominoes</button>
+                <button id="start-game-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-2.5 rounded-lg transition shadow-lg">
+                    SLAM YARD DOMINOES 🀏
+                </button>
             </div>
         </div>
 
-        <!-- DOMINOES GAME BOARD VIEW -->
-        <div id="dominoes-view" class="hidden">
-            <!-- Tournament Scoreboard -->
-            <div id="match-scoreboard">
+        <!-- VIEW 2: JAMAICAN DOMINOES TABLE GAME AREA -->
+        <div id="dominoes-view" class="hidden flex flex-col gap-2">
+            
+            <!-- SIX LOVE MATCH SCOREBOARD -->
+            <div id="match-scoreboard" class="w-full">
                 <div class="team-box">
                     <span class="team-label">TEAM N/S</span>
                     <span id="score-ns" class="score-pill">0</span>
                 </div>
                 <div class="match-info-center">
-                    <div class="hand-title" id="hand-count-lbl">HAND 1</div>
+                    <div id="hand-count-lbl" class="hand-title">HAND 1</div>
                     <span class="six-love-badge">SIX LOVE BLOCK</span>
                 </div>
                 <div class="team-box">
@@ -498,18 +225,22 @@
                 </div>
             </div>
 
-            <div id="dominoes-game-area">
+            <!-- SQUARE 4-SIDE TABLE BOARD -->
+            <div id="dominoes-game-area" class="w-full">
                 <div class="table-top-bar">
-                    <span>🀏 JAMAICAN YARD TABLE</span>
-                    <span id="turn-indicator">Turn: Waiting...</span>
+                    <span class="tracking-wider">🀏 JAMAICAN YARD TABLE</span>
+                    <span id="turn-indicator" class="text-emerald-400">Turn: Waiting...</span>
                 </div>
 
+                <!-- TABLE CANVAS FRAME WITH OUTER CORNER BADGES -->
                 <div class="square-table-layout">
+                    <!-- OUTER NON-OVERLAPPING PLAYER SEATS (Z-INDEX 30) -->
                     <div id="seat-top" class="player-seat seat-top">North</div>
                     <div id="seat-left" class="player-seat seat-left">West</div>
 
+                    <!-- CENTER CANVAS ENGINE (Z-INDEX 5) -->
                     <div id="table-board-center">
-                        <div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:120px; font-weight:bold;">
+                        <div id="empty-table-msg" class="text-[10px] text-amber-300 font-bold text-center pt-[115px]">
                             Pose [6-6] to start Hand 1!
                         </div>
                     </div>
@@ -518,21 +249,28 @@
                     <div id="seat-bottom" class="player-seat seat-bottom">South (You)</div>
                 </div>
 
-                <div class="game-log" id="game-log">Match started. Counter-clockwise play.</div>
+                <!-- GAME ACTION LOG -->
+                <div id="game-log" class="game-log">Match initialized. Counter-clockwise rotation active.</div>
 
+                <!-- PLAYER HAND & CONTROLS SECTION -->
                 <div class="my-hand-section">
                     <div class="hand-label">YOUR HAND (SOUTH)</div>
-                    <div id="hand-container" class="hand-container"></div>
+                    <div id="hand-container" class="hand-container min-h-[38px]"></div>
 
+                    <!-- DUAL END CHOICE BUTTONS -->
                     <div id="end-choice-bar" class="end-choice-bar hidden">
-                        <button id="play-left-btn" class="end-btn">Slam Left (<span id="l-val">-</span>)</button>
-                        <button id="play-right-btn" class="end-btn">Slam Right (<span id="r-val">-</span>)</button>
+                        <button id="play-left-btn" class="end-btn rounded-lg text-white">Slam Left (<span id="l-val">-</span>)</button>
+                        <button id="play-right-btn" class="end-btn rounded-lg text-white">Slam Right (<span id="r-val">-</span>)</button>
                     </div>
 
-                    <button id="pass-btn" class="secondary-btn hidden" style="padding:4px; font-size:10px; font-weight:bold;">Knock Table (Pass)</button>
+                    <!-- TABLE KNOCK PASS BUTTON -->
+                    <button id="pass-btn" class="hidden w-full bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs p-1.5 rounded-lg border border-amber-500/30 transition">
+                        ✊ Knock Table (Pass Turn)
+                    </button>
                 </div>
             </div>
         </div>
+
     </div>
 
     <div id="toast-container"></div>
@@ -549,8 +287,8 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(450, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.05);
+                osc.frequency.setValueAtTime(480, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.05);
                 gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
                 osc.connect(gain);
@@ -564,25 +302,25 @@
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 
-                // Low impact boom
+                // Deep low boom
                 const osc1 = audioCtx.createOscillator();
                 const gain1 = audioCtx.createGain();
                 osc1.type = 'triangle';
-                osc1.frequency.setValueAtTime(160, audioCtx.currentTime);
-                osc1.frequency.exponentialRampToValueAtTime(25, audioCtx.currentTime + 0.2);
-                gain1.gain.setValueAtTime(0.9, audioCtx.currentTime);
-                gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc1.frequency.setValueAtTime(180, audioCtx.currentTime);
+                osc1.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.22);
+                gain1.gain.setValueAtTime(1.0, audioCtx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.22);
                 osc1.connect(gain1);
                 gain1.connect(audioCtx.destination);
                 osc1.start();
-                osc1.stop(audioCtx.currentTime + 0.2);
+                osc1.stop(audioCtx.currentTime + 0.22);
 
                 // Wood click snap
                 const osc2 = audioCtx.createOscillator();
                 const gain2 = audioCtx.createGain();
                 osc2.type = 'square';
-                osc2.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc2.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.06);
+                osc2.frequency.setValueAtTime(650, audioCtx.currentTime);
+                osc2.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.06);
                 gain2.gain.setValueAtTime(0.7, audioCtx.currentTime);
                 gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
                 osc2.connect(gain2);
@@ -597,11 +335,11 @@
         function playKnockPass() {
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                [0, 0.08].forEach(delay => {
+                [0, 0.09].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(220, audioCtx.currentTime + delay);
+                    osc.frequency.setValueAtTime(240, audioCtx.currentTime + delay);
                     osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + delay + 0.04);
                     gain.gain.setValueAtTime(0.6, audioCtx.currentTime + delay);
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.04);
@@ -616,31 +354,31 @@
         function playWinFanfare() {
             try {
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                const notes = [261.63, 329.63, 392.00, 523.25];
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25];
                 notes.forEach((freq, idx) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + idx * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.25);
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.09);
+                    gain.gain.setValueAtTime(0.35, audioCtx.currentTime + idx * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.09 + 0.3);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc.start(audioCtx.currentTime + idx * 0.1);
-                    osc.stop(audioCtx.currentTime + idx * 0.1 + 0.25);
+                    osc.start(audioCtx.currentTime + idx * 0.09);
+                    osc.stop(audioCtx.currentTime + idx * 0.09 + 0.3);
                 });
             } catch (e) { console.error(e); }
         }
 
         function triggerScreenShake() {
             const container = document.getElementById("app-container");
-            container.classList.remove("shake-screen");
+            container.classList.remove("shake-impact");
             void container.offsetWidth; // Force reflow
-            container.classList.add("shake-screen");
-            setTimeout(() => container.classList.remove("shake-screen"), 250);
+            container.classList.add("shake-impact");
+            setTimeout(() => container.classList.remove("shake-impact"), 250);
         }
 
         // ==========================================
-        // GAME STATE & CONSTANTS
+        // STATE MACHINE & CONSTANTS
         // ==========================================
         const POSITIONS = ['N', 'W', 'S', 'E'];
         const TURN_NEXT = { 'N': 'W', 'W': 'S', 'S': 'E', 'E': 'N' };
@@ -675,9 +413,10 @@
         const roomLobbyPanel = document.getElementById("room-lobby-panel");
         const addBotBtn = document.getElementById("add-bot-btn");
         const playerList = document.getElementById("player-list");
+        const playerCount = document.getElementById("player-count");
         const startGameBtn = document.getElementById("start-game-btn");
-        const roomCodeDisplay = document.getElementById("room-code-display");
-        const returnHubBtn = document.getElementById("return-hub-btn");
+        const roomCodeBadge = document.getElementById("room-code-badge");
+        const navHubBtn = document.getElementById("nav-hub-btn");
         const usernameInput = document.getElementById("username-input");
 
         const scoreNsLbl = document.getElementById("score-ns");
@@ -715,7 +454,7 @@
             const name = usernameInput.value.trim() || "South";
             currentRoomCode = "XG-" + Math.random().toString(36).substring(2, 7).toUpperCase();
             isHost = true;
-            roomCodeDisplay.textContent = `Room: ${currentRoomCode}`;
+            roomCodeBadge.textContent = `Room: ${currentRoomCode}`;
 
             lobbyPlayers = [{ id: 'host_me', name: name + " (You)", isBot: false }];
             roomLobbyPanel.classList.remove("hidden");
@@ -729,7 +468,7 @@
             if (!code) { showToast("Enter Room Code!"); return; }
             currentRoomCode = code;
             isHost = false;
-            roomCodeDisplay.textContent = `Room: ${currentRoomCode}`;
+            roomCodeBadge.textContent = `Room: ${currentRoomCode}`;
             lobbyPlayers = [{ id: 'me', name: name + " (You)", isBot: false }];
             roomLobbyPanel.classList.remove("hidden");
             renderLobbyPlayers();
@@ -745,12 +484,23 @@
 
         function renderLobbyPlayers() {
             playerList.innerHTML = "";
-            lobbyPlayers.forEach((p) => {
+            lobbyPlayers.forEach((p, idx) => {
                 const li = document.createElement("li");
-                li.innerHTML = `<span>${p.name}</span><span class="badge ${p.isBot ? 'badge-bot' : 'badge-host'}">${p.isBot ? 'BOT' : 'PLAYER'}</span>`;
+                li.className = "flex justify-between items-center text-xs py-1 border-b border-slate-800";
+                li.innerHTML = `<span class="text-slate-200 font-semibold">${p.name}</span>
+                    <div class="flex items-center gap-1">
+                        <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${p.isBot ? 'bg-purple-900 text-purple-200' : 'bg-amber-500 text-black'}">${p.isBot ? 'BOT' : 'PLAYER'}</span>
+                        ${isHost && idx > 0 ? `<button onclick="removeLobbyPlayer(${idx})" class="text-rose-400 hover:text-rose-300 ml-1 font-bold">×</button>` : ''}
+                    </div>`;
                 playerList.appendChild(li);
             });
+            playerCount.textContent = lobbyPlayers.length;
         }
+
+        window.removeLobbyPlayer = function(index) {
+            lobbyPlayers.splice(index, 1);
+            renderLobbyPlayers();
+        };
 
         startGameBtn.addEventListener("click", () => {
             if (lobbyPlayers.length < 4) { showToast("Need 4 players/bots to start!"); return; }
@@ -763,7 +513,7 @@
             initNewHand();
         });
 
-        returnHubBtn.addEventListener("click", () => {
+        navHubBtn.addEventListener("click", () => {
             handActive = false;
             dominoesView.classList.add("hidden");
             lobbyView.classList.remove("hidden");
@@ -836,7 +586,7 @@
         }
 
         // ==========================================
-        // SNAKE PATHING & 3D TILE RENDER ENGINE
+        // BULLETPROOF EMERGENCY 2D RENDER ENGINE
         // ==========================================
         function renderTableBoard() {
             const seats = { 'N': seatTop, 'W': seatLeft, 'S': seatBottom, 'E': seatRight };
@@ -849,30 +599,35 @@
 
             tableBoardCenter.innerHTML = "";
             if (!centerTile) {
-                tableBoardCenter.innerHTML = `<div id="empty-table-msg" style="font-size:10px; color:#fde047; text-align:center; padding-top:120px; font-weight:bold;">Table empty. Posing tile to start!</div>`;
+                tableBoardCenter.innerHTML = `<div id="empty-table-msg" class="text-[10px] text-amber-300 font-bold text-center pt-[115px]">Table empty. Posing tile to start!</div>`;
                 return;
             }
 
-            const cX = tableBoardCenter.clientWidth / 2 - 16;
-            const cY = tableBoardCenter.clientHeight / 2 - 12;
-            const BOUND_X = 85; 
-            const STEP_X = 34;
-            const STEP_Y = 24;
+            // Safe Absolute Center Calculation
+            const bounds = tableBoardCenter.getBoundingClientRect();
+            const width = bounds.width || 400;
+            const height = bounds.height || 270;
 
-            // 1. Center Spinner
-            render3dTile(centerTile, cX, cY);
+            const cX = Math.floor(width / 2) - 18;
+            const cY = Math.floor(height / 2) - 10;
 
-            // 2. Left Branch Continuous Snake Pathing
+            const STEP_X = 38;
+            const STEP_Y = 26;
+            const BOUND_X = 100;
+
+            // 1. Render Opening Spinner Center Tile
+            render3dTile(centerTile, cX, cY, false);
+
+            // 2. Left Branch Pathing
             let currX = cX;
             let currY = cY;
-            let dx = -1; // Heading Left
+            let dx = -1;
 
             leftBranchTiles.forEach((t, i) => {
                 if ((dx === -1 && currX <= cX - BOUND_X) || (dx === 1 && currX >= cX + BOUND_X)) {
-                    // Turn 90° Downward
                     currY += STEP_Y;
-                    dx = -dx; // Invert horizontal vector
-                    render3dTile(t, currX, currY, true); // Corner vertical segment
+                    dx = -dx; // Reverse horizontal vector
+                    render3dTile(t, currX, currY, true); // Corner vertical
                 } else {
                     currX += (dx * STEP_X);
                     render3dTile(t, currX, currY, false);
@@ -883,17 +638,16 @@
                 }
             });
 
-            // 3. Right Branch Continuous Snake Pathing
+            // 3. Right Branch Pathing
             currX = cX;
             currY = cY;
-            dx = 1; // Heading Right
+            dx = 1;
 
             rightBranchTiles.forEach((t, i) => {
                 if ((dx === 1 && currX >= cX + BOUND_X) || (dx === -1 && currX <= cX - BOUND_X)) {
-                    // Turn 90° Downward
                     currY += STEP_Y;
-                    dx = -dx; // Invert horizontal vector
-                    render3dTile(t, currX, currY, true); // Corner vertical segment
+                    dx = -dx; // Reverse horizontal vector
+                    render3dTile(t, currX, currY, true); // Corner vertical
                 } else {
                     currX += (dx * STEP_X);
                     render3dTile(t, currX, currY, false);
@@ -905,18 +659,23 @@
             });
         }
 
-        function render3dTile(tile, x, y, isVerticalSegment = false) {
+        // Render Individual Pure Dot Tile
+        function render3dTile(tile, rawX, rawY, isVerticalSegment = false) {
+            // Fail-Safe Coordinate Check
+            const x = (isNaN(rawX) || rawX === null) ? 180 : rawX;
+            const y = (isNaN(rawY) || rawY === null) ? 120 : rawY;
+
             const tileEl = document.createElement("div");
             tileEl.style.left = `${x}px`;
             tileEl.style.top = `${y}px`;
 
             const isVert = tile.is_double ? !isVerticalSegment : isVerticalSegment;
-            tileEl.className = `3d-tile ${isVert ? 'vert' : 'horiz'}`;
+            tileEl.className = `domino-3d ${isVert ? 'vert' : 'horiz'}`;
 
             tileEl.appendChild(createPipGrid(tile.left_pip));
             
             const divider = document.createElement("div");
-            divider.className = isVert ? "tile-divider-v" : "tile-divider-h";
+            divider.className = isVert ? "divider-v" : "divider-h";
             tileEl.appendChild(divider);
 
             tileEl.appendChild(createPipGrid(tile.right_pip));
@@ -924,12 +683,11 @@
             tableBoardCenter.appendChild(tileEl);
         }
 
-        // 3x3 Pip Renderer
+        // 3x3 Dot Pip Renderer Matrix
         function createPipGrid(val) {
             const grid = document.createElement("div");
             grid.className = "pip-grid";
             
-            // Pip Position Mapping Matrix (1 to 9)
             const pipMaps = {
                 0: [],
                 1: [5],
@@ -943,9 +701,13 @@
             const activePips = pipMaps[val] || [];
             for (let pos = 1; pos <= 9; pos++) {
                 const cell = document.createElement("div");
+                cell.style.display = "flex";
+                cell.style.alignItems = "center";
+                cell.style.justifyContent = "center";
+
                 if (activePips.includes(pos)) {
                     const pip = document.createElement("div");
-                    pip.className = "pip";
+                    pip.className = "pip-dot";
                     cell.appendChild(pip);
                 }
                 grid.appendChild(cell);
@@ -955,9 +717,9 @@
 
         function renderEndBadge(label, x, y) {
             const badge = document.createElement("div");
-            badge.className = "end-badge";
-            badge.style.left = `${x + 8}px`;
-            badge.style.top = `${y}px`;
+            badge.className = "absolute bg-emerald-500 text-white rounded-full w-4 h-4 text-[9px] font-black flex items-center justify-center pulse-end z-20";
+            badge.style.left = `${x + 10}px`;
+            badge.style.top = `${y - 10}px`;
             badge.textContent = label;
             tableBoardCenter.appendChild(badge);
         }
@@ -972,8 +734,26 @@
             myPlayer.hand.forEach((tile, index) => {
                 const el = document.createElement("div");
                 const isSelected = selectedTileIndex === index;
-                el.className = `domino-tile-hand${tile.is_double ? " double" : ""}${isSelected ? " selected" : ""}`;
-                el.textContent = `[${tile.left_pip}|${tile.right_pip}]`;
+                el.className = `hand-tile${tile.is_double ? " double" : ""}${isSelected ? " selected" : ""}`;
+                
+                // Mini Pip Hand Graphics
+                const leftMini = document.createElement("div");
+                leftMini.className = "mini-half";
+                leftMini.appendChild(createPipGrid(tile.left_pip));
+
+                const divider = document.createElement("div");
+                divider.style.width = "1px";
+                divider.style.height = "14px";
+                divider.style.backgroundColor = tile.is_double ? "#ca8a04" : "#94a3b8";
+
+                const rightMini = document.createElement("div");
+                rightMini.className = "mini-half";
+                rightMini.appendChild(createPipGrid(tile.right_pip));
+
+                el.appendChild(leftMini);
+                el.appendChild(divider);
+                el.appendChild(rightMini);
+
                 el.onclick = () => selectHandTile(index, tile);
                 handContainer.appendChild(el);
             });
@@ -1004,9 +784,9 @@
 
             if (!isValidMove(tile)) {
                 if (handNumber === 1 && !centerTile) {
-                    showToast("Hand 1 Pose MUST be the Double-Six [6-6]!");
+                    showToast("Hand 1 Pose MUST be Double-Six [6-6]!");
                 } else {
-                    showToast("Tile doesn't fit table open ends!");
+                    showToast("Tile doesn't fit table ends!");
                 }
                 return;
             }
@@ -1063,11 +843,10 @@
                 rightBranchTiles.push(playTile);
             }
 
-            // Trigger Audio & Feel Feedback
             if (tile.is_double || player.hand.length === 0) {
-                playSlamImpact(); // Double or Win Slam
+                playSlamImpact();
             } else {
-                playTileClack();  // Standard Clack
+                playTileClack();
             }
 
             logGame(`💥 ${player.name} slammed [${tile.left_pip}|${tile.right_pip}]!`);
@@ -1088,8 +867,8 @@
         function executePass() {
             const player = getPlayerByPos(currentTurn);
             consecutivePasses++;
-            playKnockPass(); // Knuckle Table Knock Audio
-            logGame(`✋ ${player.name} passed!`);
+            playKnockPass();
+            logGame(`✋ ${player.name} knocked the table (passed).`);
 
             if (consecutivePasses >= 4) {
                 handleBlockedGame();
@@ -1176,15 +955,16 @@
 
             const isNSWinner = (winnerPos === 'N' || winnerPos === 'S');
 
+            // Six Love Break / Score Reset Mechanics
             if (isNSWinner) {
                 if (scoreWE > 0 && scoreNS === 0) {
-                    showToast("BREAK! Score reset to 0-0!");
+                    showToast("BREAK! Match reset to 0-0!");
                     scoreWE = 0;
                 }
                 scoreNS++;
             } else {
                 if (scoreNS > 0 && scoreWE === 0) {
-                    showToast("BREAK! Score reset to 0-0!");
+                    showToast("BREAK! Match reset to 0-0!");
                     scoreNS = 0;
                 }
                 scoreWE++;
@@ -1208,6 +988,11 @@
                 initNewHand();
             }, 3500);
         }
+
+        window.addEventListener('resize', () => {
+            if (handActive) renderTableBoard();
+        });
     </script>
 </body>
 </html>
+```
