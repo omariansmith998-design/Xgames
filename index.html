@@ -24,7 +24,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 12px;
+            padding: 10px;
         }
 
         /* Diagnostic Bar */
@@ -71,7 +71,7 @@
         #lobby-container {
             background: #18181c;
             border: 1px solid #2a2a32;
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             width: 100%;
@@ -79,9 +79,9 @@
         }
 
         h1 {
-            font-size: 22px;
+            font-size: 20px;
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             color: #6366f1;
         }
 
@@ -115,9 +115,7 @@
             outline: none;
         }
 
-        input:focus {
-            border-color: #6366f1;
-        }
+        input:focus { border-color: #6366f1; }
 
         button {
             width: 100%;
@@ -132,30 +130,13 @@
             transition: background 0.2s;
         }
 
-        button:hover {
-            background: #4338ca;
-        }
+        button:hover { background: #4338ca; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .secondary-btn {
-            background: #374151;
-        }
-
-        .secondary-btn:hover {
-            background: #4b5563;
-        }
-
-        .success-btn {
-            background: #059669;
-        }
-
-        .success-btn:hover {
-            background: #047857;
-        }
+        .secondary-btn { background: #374151; }
+        .secondary-btn:hover { background: #4b5563; }
+        .success-btn { background: #059669; }
+        .success-btn:hover { background: #047857; }
 
         .danger-btn {
             background: #dc2626;
@@ -164,26 +145,18 @@
             font-size: 12px;
         }
 
-        .danger-btn:hover {
-            background: #b91c1c;
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
         #room-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #2a2a32;
         }
 
-        #room-header h2 {
-            font-size: 16px;
-        }
+        #room-header h2 { font-size: 15px; }
 
         .badge {
             font-size: 10px;
@@ -202,9 +175,9 @@
         #voice-controls {
             background: #111115;
             border: 1px solid #2a2a32;
-            padding: 10px;
+            padding: 8px 10px;
             border-radius: 6px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -219,17 +192,15 @@
 
         .voice-btn {
             width: auto;
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 4px 10px;
+            font-size: 11px;
             background: #059669;
         }
 
-        .voice-btn.muted {
-            background: #dc2626;
-        }
+        .voice-btn.muted { background: #dc2626; }
 
         #player-list-container {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             background: #111115;
             padding: 10px;
             border-radius: 6px;
@@ -243,27 +214,22 @@
         }
 
         #player-list-container h3 {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
             text-transform: uppercase;
         }
 
-        #player-list {
-            list-style: none;
-            font-size: 14px;
-        }
+        #player-list { list-style: none; font-size: 13px; }
 
         #player-list li {
-            padding: 6px 0;
+            padding: 5px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #1a1a20;
         }
 
-        #player-list li:last-child {
-            border-bottom: none;
-        }
+        #player-list li:last-child { border-bottom: none; }
 
         .kick-btn {
             background: #991b1b;
@@ -276,71 +242,120 @@
             margin-left: 4px;
         }
 
-        #chat-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        #messages {
-            background: #111115;
-            height: 120px;
-            border-radius: 6px;
-            padding: 10px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 13px;
-        }
-
-        .chat-message { word-break: break-word; }
-        .chat-message .author { font-weight: bold; color: #6366f1; }
-        .system-message { color: #888; font-style: italic; word-break: break-word; }
-
-        .chat-input-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input-group input { flex: 1; }
-        .chat-input-group button { width: auto; padding: 0 16px; }
-
-        /* Dominoes Game Board (Phase 4) */
+        /* ---------------------------------------------------- */
+        /* VISUAL DOMINOES TABLE BOARD (GREEN FELT STYLE)       */
+        /* ---------------------------------------------------- */
         #dominoes-game-area {
-            background: #0d131a;
-            border: 1px solid #1e293b;
-            border-radius: 8px;
-            padding: 12px;
+            background: radial-gradient(circle, #14532d 0%, #064e3b 70%, #022c22 100%);
+            border: 4px solid #78350f;
+            border-radius: 12px;
+            padding: 10px;
             margin-bottom: 12px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            position: relative;
         }
 
-        .game-status-bar {
+        .table-top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
-            color: #38bdf8;
-            margin-bottom: 10px;
+            font-size: 11px;
+            color: #fef08a;
+            margin-bottom: 8px;
             font-weight: bold;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 8px;
+            border-radius: 4px;
         }
 
-        .table-ends-display {
-            background: #1e293b;
-            padding: 8px;
+        /* Opponents Table Seating Grid */
+        .opponents-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .player-seat {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 8px;
             border-radius: 6px;
+            font-size: 11px;
+            color: #fff;
             text-align: center;
-            font-size: 13px;
-            margin-bottom: 10px;
-            color: #e2e8f0;
+            min-width: 80px;
+        }
+
+        .player-seat.active-turn {
+            border-color: #facc15;
+            box-shadow: 0 0 8px #facc15;
+            background: rgba(234, 179, 8, 0.2);
+        }
+
+        .seat-tiles-count {
+            font-size: 10px;
+            color: #fef08a;
+            margin-top: 2px;
+        }
+
+        /* Physical Domino Board Canvas Area */
+        #table-chain-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed rgba(255,255,255,0.2);
+            min-height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 10px;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .placed-tile {
+            background: #fff;
+            color: #000;
+            border: 2px solid #334155;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            min-width: 28px;
+        }
+
+        .placed-tile.double {
+            background: #fef08a;
+            border-color: #ca8a04;
+        }
+
+        /* Player Controls & Hand */
+        .my-hand-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .hand-label {
+            font-size: 10px;
+            color: #cbd5e1;
+            text-align: center;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .hand-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .domino-tile {
@@ -348,21 +363,20 @@
             color: #0f172a;
             border: 2px solid #94a3b8;
             border-radius: 6px;
-            padding: 8px 10px;
+            padding: 6px 8px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             user-select: none;
             display: flex;
             gap: 4px;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-            transition: transform 0.1s, border-color 0.1s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transition: transform 0.1s;
         }
 
-        .domino-tile:hover {
-            transform: translateY(-2px);
-            border-color: #6366f1;
+        .domino-tile:active {
+            transform: scale(0.95);
         }
 
         .domino-tile.double {
@@ -370,26 +384,69 @@
             border-color: #eab308;
         }
 
-        .action-row {
-            display: flex;
-            gap: 8px;
+        .domino-tile.selected {
+            border-color: #facc15;
+            box-shadow: 0 0 10px #facc15;
+            transform: translateY(-4px);
         }
 
-        .game-log {
-            font-size: 11px;
-            color: #94a3b8;
-            height: 45px;
-            overflow-y: auto;
-            background: #111827;
+        .end-choice-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .end-btn {
+            flex: 1;
             padding: 6px;
+            font-size: 11px;
+            background: #0284c7;
+        }
+
+        .end-btn:hover { background: #0369a1; }
+
+        .game-log {
+            font-size: 10px;
+            color: #f1f5f9;
+            height: 32px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 8px;
             border-radius: 4px;
             margin-bottom: 8px;
         }
 
+        /* Room Chat Box */
+        #chat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #messages {
+            background: #111115;
+            height: 100px;
+            border-radius: 6px;
+            padding: 8px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 12px;
+        }
+
+        .chat-message { word-break: break-word; }
+        .chat-message .author { font-weight: bold; color: #6366f1; }
+        .system-message { color: #888; font-style: italic; word-break: break-word; }
+
+        .chat-input-group { display: flex; gap: 6px; }
+        .chat-input-group input { flex: 1; padding: 8px; font-size: 13px; }
+        .chat-input-group button { width: auto; padding: 0 12px; font-size: 12px; }
+
         /* Toast Popup */
         #toast-container {
             position: fixed;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 999;
@@ -399,16 +456,10 @@
             background: #1e1b4b;
             color: #c7d2fe;
             border: 1px solid #4338ca;
-            padding: 10px 16px;
+            padding: 8px 14px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -424,7 +475,7 @@
     </div>
 
     <div id="lobby-container">
-        <h1>Xgames Lobby & Games</h1>
+        <h1>Xgames Lobby & Table</h1>
 
         <!-- Setup / Join Section -->
         <div id="setup-section">
@@ -447,9 +498,9 @@
             </div>
 
             <!-- Host Controls Panel -->
-            <div id="host-panel" class="hidden" style="margin-bottom: 10px; display: flex; gap: 8px;">
-                <button id="add-bot-btn" class="secondary-btn" style="flex:1;">+ Add Bot</button>
-                <button id="lock-room-btn" class="secondary-btn" style="flex:1;">Lock Room</button>
+            <div id="host-panel" class="hidden" style="margin-bottom: 8px; display: flex; gap: 6px;">
+                <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:12px;">+ Add Bot</button>
+                <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:12px;">Lock Room</button>
             </div>
 
             <!-- Voice Controls Panel -->
@@ -464,35 +515,47 @@
             <!-- Player List -->
             <div id="player-list-container">
                 <div class="player-header">
-                    <h3>Players</h3>
-                    <span id="player-count" style="font-size: 12px; color: #888;">0</span>
+                    <h3>Lobby Players</h3>
+                    <span id="player-count" style="font-size: 11px; color: #888;">0</span>
                 </div>
                 <ul id="player-list"></ul>
             </div>
 
             <!-- Ready Up / Start Game Bar -->
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <button id="ready-toggle-btn" class="secondary-btn" style="flex:1;">Toggle Ready</button>
-                <button id="start-game-btn" class="success-btn hidden" style="flex:1;">Start Dominoes</button>
+            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:8px; font-size:12px;">Toggle Ready</button>
+                <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:8px; font-size:12px;">Start Dominoes</button>
             </div>
 
-            <!-- Phase 4: Dominoes Game Area -->
+            <!-- VISUAL 2D DOMINOES BOARD -->
             <div id="dominoes-game-area" class="hidden">
-                <div class="game-status-bar">
-                    <span>🀏 Dominoes Match</span>
-                    <span id="turn-indicator">Turn: ---</span>
-                </div>
-                <div class="table-ends-display">
-                    Table Ends: <b id="left-end-val">None</b> | <b id="right-end-val">None</b>
+                <div class="table-top-bar">
+                    <span>🀏 DOMINOES TABLE</span>
+                    <span id="turn-indicator">Turn: Waiting...</span>
                 </div>
 
-                <div class="game-log" id="game-log">Game ready. First turn starting...</div>
+                <!-- Opponents Seating Layout -->
+                <div id="opponents-row" class="opponents-row"></div>
 
-                <div style="font-size: 11px; color: #888; margin-bottom: 4px; text-align: center;">YOUR HAND</div>
-                <div id="hand-container" class="hand-container"></div>
+                <!-- Visual Table Chain Board -->
+                <div id="table-chain-container">
+                    <span style="font-size:11px; color:#a7f3d0;" id="empty-table-msg">Table empty. Slam the first tile!</span>
+                </div>
 
-                <div class="action-row">
-                    <button id="pass-btn" class="secondary-btn">Pass Turn</button>
+                <div class="game-log" id="game-log">Match starting...</div>
+
+                <!-- Hand & Slam Controls -->
+                <div class="my-hand-section">
+                    <div class="hand-label">YOUR HAND</div>
+                    <div id="hand-container" class="hand-container"></div>
+
+                    <!-- End Play Selectors -->
+                    <div id="end-choice-bar" class="end-choice-bar hidden">
+                        <button id="play-left-btn" class="end-btn">Play Left End (<span id="l-val">-</span>)</button>
+                        <button id="play-right-btn" class="end-btn">Play Right End (<span id="r-val">-</span>)</button>
+                    </div>
+
+                    <button id="pass-btn" class="secondary-btn" style="padding:6px; font-size:12px;">Pass Turn</button>
                 </div>
             </div>
 
@@ -532,16 +595,16 @@
         let botCount = 0;
         let bots = [];
 
-        // Game State (Dominoes)
+        // Game Engine State
         let gameActive = false;
         let myHand = [];
         let leftEnd = null;
         let rightEnd = null;
+        let playedTilesChain = [];
+        let selectedTileIndex = null;
         let currentTurnPlayerId = null;
         let playerOrder = [];
-
-        // Voice state
-        let isMicMuted = false;
+        let playerHandsCount = {};
 
         // DOM Elements
         const statusDot = document.getElementById("status-dot");
@@ -569,13 +632,18 @@
         const voiceLabel = document.getElementById("voice-label");
         const micToggleBtn = document.getElementById("mic-toggle-btn");
 
-        // Game DOM
+        // Game Board DOM
         const dominoesGameArea = document.getElementById("dominoes-game-area");
         const turnIndicator = document.getElementById("turn-indicator");
-        const leftEndVal = document.getElementById("left-end-val");
-        const rightEndVal = document.getElementById("right-end-val");
+        const opponentsRow = document.getElementById("opponents-row");
+        const tableChainContainer = document.getElementById("table-chain-container");
         const gameLog = document.getElementById("game-log");
         const handContainer = document.getElementById("hand-container");
+        const endChoiceBar = document.getElementById("end-choice-bar");
+        const playLeftBtn = document.getElementById("play-left-btn");
+        const playRightBtn = document.getElementById("play-right-btn");
+        const lVal = document.getElementById("l-val");
+        const rVal = document.getElementById("r-val");
         const passBtn = document.getElementById("pass-btn");
 
         function showToast(msg) {
@@ -584,17 +652,14 @@
             toast.className = "toast";
             toast.textContent = msg;
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         function updateStatus(state, message) {
             statusDot.className = "dot " + state;
             statusText.textContent = message;
-            if (state === "offline") {
-                retryBtn.classList.remove("hidden");
-            } else {
-                retryBtn.classList.add("hidden");
-            }
+            if (state === "offline") retryBtn.classList.remove("hidden");
+            else retryBtn.classList.add("hidden");
         }
 
         async function initAuth() {
@@ -614,7 +679,7 @@
             } catch (err) {
                 console.error("Auth Error:", err);
                 updateStatus("offline", "Auth Failed");
-                showToast("Authentication error. Enable Anonymous Auth in Supabase.");
+                showToast("Authentication error.");
             }
         }
 
@@ -647,10 +712,6 @@
                     .insert([{ code: code, host_id: authUserId, is_locked: false }]);
 
                 if (!error) return code;
-                if (error.code !== "23505") {
-                    console.error("Error creating room:", error);
-                    return null;
-                }
             }
             return null;
         }
@@ -674,28 +735,22 @@
             roomChannel.on('broadcast', { event: 'message' }, (payload) => {
                 const data = payload && payload.payload;
                 if (!data) return;
-                displayMessage(
-                    String(data.user || "Player").slice(0, 15),
-                    String(data.text || "").slice(0, MAX_MESSAGE_LENGTH)
-                );
+                displayMessage(String(data.user || "Player").slice(0, 15), String(data.text || "").slice(0, MAX_MESSAGE_LENGTH));
             });
 
             roomChannel.on('broadcast', { event: 'kick' }, (payload) => {
-                const targetId = payload && payload.payload && payload.payload.targetId;
-                if (targetId === authUserId) {
+                if (payload.payload && payload.payload.targetId === authUserId) {
                     showToast("You were kicked by the host.");
                     leaveRoom();
                 }
             });
 
             roomChannel.on('broadcast', { event: 'game_start' }, (payload) => {
-                const data = payload.payload;
-                startDominoesClient(data);
+                startDominoesClient(payload.payload);
             });
 
             roomChannel.on('broadcast', { event: 'play_tile' }, (payload) => {
-                const data = payload.payload;
-                handleTilePlayed(data);
+                handleTilePlayed(payload.payload);
             });
 
             roomChannel.on('presence', { event: 'sync' }, () => {
@@ -712,11 +767,7 @@
                     await trackPresence();
                 } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
                     updateStatus("offline", "Connection Interrupted");
-                    showToast("Reconnecting in grace window...");
-                    disconnectTimer = setTimeout(() => {
-                        showToast("Reconnection window timed out.");
-                        leaveRoom();
-                    }, DISCONNECT_GRACE_PERIOD_MS);
+                    disconnectTimer = setTimeout(() => leaveRoom(), DISCONNECT_GRACE_PERIOD_MS);
                 }
             });
         }
@@ -784,7 +835,6 @@
                 }
             });
 
-            // Append local host-managed bots to state
             bots.forEach(bot => {
                 count++;
                 playerOrder.push({ id: bot.id, name: bot.name, isBot: true });
@@ -797,11 +847,6 @@
                 bBadge.className = "badge badge-bot";
                 bBadge.textContent = "BOT";
                 badgesSpan.appendChild(bBadge);
-
-                const rBadge = document.createElement("span");
-                rBadge.className = "badge badge-ready";
-                rBadge.textContent = "READY";
-                badgesSpan.appendChild(rBadge);
 
                 if (isHost) {
                     const kBtn = document.createElement("button");
@@ -817,19 +862,14 @@
             });
 
             playerCount.textContent = count;
-
-            if (isHost && count >= 2) {
-                startGameBtn.classList.remove("hidden");
-            } else {
-                startGameBtn.classList.add("hidden");
-            }
+            if (isHost && count >= 2) startGameBtn.classList.remove("hidden");
+            else startGameBtn.classList.add("hidden");
         }
 
-        // Add Bot (Host Only)
         addBotBtn.addEventListener("click", () => {
             if (!isHost) return;
             if (playerOrder.length >= 4) {
-                showToast("Maximum 4 players in Dominoes room.");
+                showToast("Maximum 4 players.");
                 return;
             }
             botCount++;
@@ -842,26 +882,17 @@
 
         function removeBot(botId) {
             bots = bots.filter(b => b.id !== botId);
-            showToast("Bot removed.");
             updatePlayerList(roomChannel ? roomChannel.presenceState() : {});
         }
 
         async function removePlayerOrBot(key, isBotFlag) {
-            if (isBotFlag) {
-                removeBot(key);
-            } else {
-                kickPlayer(key);
-            }
+            if (isBotFlag) removeBot(key);
+            else kickPlayer(key);
         }
 
         async function kickPlayer(targetUserId) {
             if (!roomChannel) return;
-            await roomChannel.send({
-                type: 'broadcast',
-                event: 'kick',
-                payload: { targetId: targetUserId }
-            });
-            showToast("Player kicked.");
+            await roomChannel.send({ type: 'broadcast', event: 'kick', payload: { targetId: targetUserId } });
         }
 
         async function enterRoomUI(code, hostStatus) {
@@ -869,11 +900,8 @@
             isHost = hostStatus;
             currentRoomCode.textContent = code;
 
-            if (isHost) {
-                hostPanel.classList.remove("hidden");
-            } else {
-                hostPanel.classList.add("hidden");
-            }
+            if (isHost) hostPanel.classList.remove("hidden");
+            else hostPanel.classList.add("hidden");
 
             setupSection.classList.add("hidden");
             roomSection.classList.remove("hidden");
@@ -888,11 +916,9 @@
         function displayMessage(author, text) {
             const msgElement = document.createElement("div");
             msgElement.classList.add("chat-message");
-
             const authorSpan = document.createElement("span");
             authorSpan.classList.add("author");
             authorSpan.textContent = author + ":";
-
             msgElement.appendChild(authorSpan);
             msgElement.appendChild(document.createTextNode(" " + text));
             messages.appendChild(msgElement);
@@ -907,27 +933,21 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
-        function logGame(text) {
-            gameLog.textContent = text;
-        }
+        function logGame(text) { gameLog.textContent = text; }
 
-        // Dominoes Game Engine (Phase 4)
         function generateDominoSet() {
             const tiles = [];
             for (let i = 0; i <= 6; i++) {
-                for (let j = i; j <= 6; j++) {
-                    tiles.push([i, j]);
-                }
+                for (let j = i; j <= 6; j++) tiles.push([i, j]);
             }
-            return tiles.sort(() => Math.random() - 0.5); // Shuffle
+            return tiles.sort(() => Math.random() - 0.5);
         }
 
         startGameBtn.addEventListener("click", async () => {
             if (!isHost) return;
             const fullDeck = generateDominoSet();
-
-            // Deal 7 tiles to each player
             const handsMap = {};
+
             playerOrder.forEach((p, index) => {
                 handsMap[p.id] = fullDeck.slice(index * 7, (index + 1) * 7);
                 if (p.isBot) {
@@ -942,12 +962,7 @@
                 startingTurnId: playerOrder[0].id
             };
 
-            await roomChannel.send({
-                type: 'broadcast',
-                event: 'game_start',
-                payload: startPayload
-            });
-
+            await roomChannel.send({ type: 'broadcast', event: 'game_start', payload: startPayload });
             startDominoesClient(startPayload);
         });
 
@@ -955,73 +970,118 @@
             gameActive = true;
             leftEnd = null;
             rightEnd = null;
-            leftEndVal.textContent = "None";
-            rightEndVal.textContent = "None";
-
+            playedTilesChain = [];
+            selectedTileIndex = null;
             playerOrder = payload.playerOrder;
             currentTurnPlayerId = payload.startingTurnId;
             myHand = payload.handsMap[authUserId] || [];
 
+            playerOrder.forEach(p => {
+                playerHandsCount[p.id] = 7;
+            });
+
             dominoesGameArea.classList.remove("hidden");
+            renderTableBoard();
             renderHand();
             updateTurnDisplay();
-            logGame("Match started! Standard double-six rules.");
-
+            logGame("Match started! Slam a tile to begin.");
             checkBotTurn();
+        }
+
+        function renderTableBoard() {
+            // Render Seating Layout
+            opponentsRow.innerHTML = "";
+            playerOrder.forEach(p => {
+                if (p.id !== authUserId) {
+                    const seat = document.createElement("div");
+                    const isActive = p.id === currentTurnPlayerId;
+                    seat.className = "player-seat" + (isActive ? " active-turn" : "");
+                    seat.innerHTML = `<div>${p.name}</div><div class="seat-tiles-count">🀏 ${playerHandsCount[p.id] || 0} tiles</div>`;
+                    opponentsRow.appendChild(seat);
+                }
+            });
+
+            // Render Table Chain
+            tableChainContainer.innerHTML = "";
+            if (playedTilesChain.length === 0) {
+                tableChainContainer.innerHTML = `<span style="font-size:11px; color:#a7f3d0;">Table empty. Slam the first tile!</span>`;
+            } else {
+                playedTilesChain.forEach(t => {
+                    const el = document.createElement("div");
+                    const isDouble = t[0] === t[1];
+                    el.className = "placed-tile" + (isDouble ? " double" : "");
+                    el.innerHTML = `<span>${t[0]}</span><span>${t[1]}</span>`;
+                    tableChainContainer.appendChild(el);
+                });
+            }
         }
 
         function renderHand() {
             handContainer.innerHTML = "";
+            endChoiceBar.classList.add("hidden");
+
             myHand.forEach((tile, index) => {
                 const el = document.createElement("div");
                 const isDouble = tile[0] === tile[1];
-                el.className = "domino-tile" + (isDouble ? " double" : "");
+                const isSelected = selectedTileIndex === index;
+                el.className = "domino-tile" + (isDouble ? " double" : "") + (isSelected ? " selected" : "");
                 el.textContent = `[${tile[0]}|${tile[1]}]`;
-                el.onclick = () => attemptPlayTile(index, tile);
+                el.onclick = () => selectHandTile(index, tile);
                 handContainer.appendChild(el);
             });
         }
 
-        function updateTurnDisplay() {
-            const currentPlayer = playerOrder.find(p => p.id === currentTurnPlayerId);
-            const isMyTurn = currentTurnPlayerId === authUserId;
-            turnIndicator.textContent = isMyTurn ? "Your Turn!" : `Turn: ${currentPlayer ? currentPlayer.name : 'Unknown'}`;
-        }
-
-        async function attemptPlayTile(handIndex, tile) {
-            if (!gameActive) return;
-            if (currentTurnPlayerId !== authUserId) {
+        function selectHandTile(index, tile) {
+            if (!gameActive || currentTurnPlayerId !== authUserId) {
                 showToast("It's not your turn!");
                 return;
             }
 
-            let playedSide = null;
-            if (leftEnd === null && rightEnd === null) {
-                leftEnd = tile[0];
-                rightEnd = tile[1];
-                playedSide = "first";
-            } else if (tile[0] === leftEnd) {
-                leftEnd = tile[1];
-                playedSide = "left";
-            } else if (tile[1] === leftEnd) {
-                leftEnd = tile[0];
-                playedSide = "left";
-            } else if (tile[0] === rightEnd) {
-                rightEnd = tile[1];
-                playedSide = "right";
-            } else if (tile[1] === rightEnd) {
-                rightEnd = tile[0];
-                playedSide = "right";
-            } else {
-                showToast("Tile does not match any table ends!");
-                return;
-            }
-
-            // Remove tile from hand
-            myHand.splice(handIndex, 1);
+            selectedTileIndex = index;
             renderHand();
 
-            // Advance Turn
+            // Check playable options
+            if (leftEnd === null && rightEnd === null) {
+                playTileDirect(index, tile, "first");
+            } else {
+                const matchesLeft = (tile[0] === leftEnd || tile[1] === leftEnd);
+                const matchesRight = (tile[0] === rightEnd || tile[1] === rightEnd);
+
+                if (matchesLeft && matchesRight) {
+                    lVal.textContent = leftEnd;
+                    rVal.textContent = rightEnd;
+                    endChoiceBar.classList.remove("hidden");
+                    playLeftBtn.onclick = () => playTileDirect(index, tile, "left");
+                    playRightBtn.onclick = () => playTileDirect(index, tile, "right");
+                } else if (matchesLeft) {
+                    playTileDirect(index, tile, "left");
+                } else if (matchesRight) {
+                    playTileDirect(index, tile, "right");
+                } else {
+                    showToast("Tile doesn't fit table ends!");
+                }
+            }
+        }
+
+        async function playTileDirect(handIndex, tile, side) {
+            if (side === "first") {
+                leftEnd = tile[0];
+                rightEnd = tile[1];
+                playedTilesChain.push(tile);
+            } else if (side === "left") {
+                if (tile[0] === leftEnd) leftEnd = tile[1];
+                else leftEnd = tile[0];
+                playedTilesChain.unshift(tile);
+            } else if (side === "right") {
+                if (tile[0] === rightEnd) rightEnd = tile[1];
+                else rightEnd = tile[0];
+                playedTilesChain.push(tile);
+            }
+
+            myHand.splice(handIndex, 1);
+            playerHandsCount[authUserId] = myHand.length;
+            selectedTileIndex = null;
+
             const currentIndex = playerOrder.findIndex(p => p.id === authUserId);
             const nextIndex = (currentIndex + 1) % playerOrder.length;
             const nextPlayerId = playerOrder[nextIndex].id;
@@ -1032,33 +1092,31 @@
                 tile: tile,
                 leftEnd: leftEnd,
                 rightEnd: rightEnd,
+                playedTilesChain: playedTilesChain,
                 nextTurnId: nextPlayerId,
                 handCount: myHand.length
             };
 
-            await roomChannel.send({
-                type: 'broadcast',
-                event: 'play_tile',
-                payload: movePayload
-            });
-
+            await roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: movePayload });
             handleTilePlayed(movePayload);
         }
 
         function handleTilePlayed(payload) {
             leftEnd = payload.leftEnd;
             rightEnd = payload.rightEnd;
+            playedTilesChain = payload.playedTilesChain;
             currentTurnPlayerId = payload.nextTurnId;
+            playerHandsCount[payload.playerId] = payload.handCount;
 
-            leftEndVal.textContent = leftEnd;
-            rightEndVal.textContent = rightEnd;
-
-            logGame(`${payload.playerName} played [${payload.tile[0]}|${payload.tile[1]}].`);
+            renderTableBoard();
+            renderHand();
             updateTurnDisplay();
 
+            logGame(`${payload.playerName} slammed [${payload.tile[0]}|${payload.tile[1]}]!`);
+
             if (payload.handCount === 0) {
-                logGame(`🎉 ${payload.playerName} won the round!`);
-                showToast(`${payload.playerName} Dominoes!`);
+                logGame(`🎉 ${payload.playerName} wins the round!`);
+                showToast(`${payload.playerName} DOMINOES!`);
                 gameActive = false;
                 return;
             }
@@ -1066,7 +1124,13 @@
             checkBotTurn();
         }
 
-        // Pass Turn
+        function updateTurnDisplay() {
+            const currentP = playerOrder.find(p => p.id === currentTurnPlayerId);
+            const isMyTurn = currentTurnPlayerId === authUserId;
+            turnIndicator.textContent = isMyTurn ? "Your Turn!" : `Turn: ${currentP ? currentP.name : '...'}`;
+            renderTableBoard();
+        }
+
         passBtn.addEventListener("click", async () => {
             if (!gameActive || currentTurnPlayerId !== authUserId) return;
 
@@ -1080,24 +1144,19 @@
                 tile: [null, null],
                 leftEnd: leftEnd,
                 rightEnd: rightEnd,
+                playedTilesChain: playedTilesChain,
                 nextTurnId: nextPlayerId,
                 handCount: myHand.length,
                 passed: true
             };
 
-            await roomChannel.send({
-                type: 'broadcast',
-                event: 'play_tile',
-                payload: passPayload
-            });
-
+            await roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: passPayload });
             logGame(`${currentUser} passed.`);
             currentTurnPlayerId = nextPlayerId;
             updateTurnDisplay();
             checkBotTurn();
         });
 
-        // Bot Logic Executor
         function checkBotTurn() {
             if (!gameActive || !isHost) return;
             const currentP = playerOrder.find(p => p.id === currentTurnPlayerId);
@@ -1108,16 +1167,23 @@
                 if (!b) return;
 
                 let playableIndex = -1;
-                let playableSide = null;
+                let playSide = "left";
 
                 for (let i = 0; i < b.hand.length; i++) {
                     const tile = b.hand[i];
                     if (leftEnd === null && rightEnd === null) {
                         playableIndex = i;
+                        playSide = "first";
                         break;
                     }
-                    if (tile[0] === leftEnd || tile[1] === leftEnd || tile[0] === rightEnd || tile[1] === rightEnd) {
+                    if (tile[0] === leftEnd || tile[1] === leftEnd) {
                         playableIndex = i;
+                        playSide = "left";
+                        break;
+                    }
+                    if (tile[0] === rightEnd || tile[1] === rightEnd) {
+                        playableIndex = i;
+                        playSide = "right";
                         break;
                     }
                 }
@@ -1128,13 +1194,19 @@
 
                 if (playableIndex !== -1) {
                     const tile = b.hand.splice(playableIndex, 1)[0];
-                    if (leftEnd === null) {
+                    if (playSide === "first") {
                         leftEnd = tile[0];
                         rightEnd = tile[1];
-                    } else if (tile[0] === leftEnd) leftEnd = tile[1];
-                    else if (tile[1] === leftEnd) leftEnd = tile[0];
-                    else if (tile[0] === rightEnd) rightEnd = tile[0];
-                    else if (tile[1] === rightEnd) rightEnd = tile[0];
+                        playedTilesChain.push(tile);
+                    } else if (playSide === "left") {
+                        if (tile[0] === leftEnd) leftEnd = tile[1];
+                        else leftEnd = tile[0];
+                        playedTilesChain.unshift(tile);
+                    } else if (playSide === "right") {
+                        if (tile[0] === rightEnd) rightEnd = tile[1];
+                        else rightEnd = tile[0];
+                        playedTilesChain.push(tile);
+                    }
 
                     const botPayload = {
                         playerId: b.id,
@@ -1142,16 +1214,12 @@
                         tile: tile,
                         leftEnd: leftEnd,
                         rightEnd: rightEnd,
+                        playedTilesChain: playedTilesChain,
                         nextTurnId: nextPlayerId,
                         handCount: b.hand.length
                     };
 
-                    roomChannel.send({
-                        type: 'broadcast',
-                        event: 'play_tile',
-                        payload: botPayload
-                    });
-
+                    roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: botPayload });
                     handleTilePlayed(botPayload);
                 } else {
                     const passPayload = {
@@ -1160,33 +1228,27 @@
                         tile: [null, null],
                         leftEnd: leftEnd,
                         rightEnd: rightEnd,
+                        playedTilesChain: playedTilesChain,
                         nextTurnId: nextPlayerId,
                         handCount: b.hand.length,
                         passed: true
                     };
 
-                    roomChannel.send({
-                        type: 'broadcast',
-                        event: 'play_tile',
-                        payload: passPayload
-                    });
-
+                    roomChannel.send({ type: 'broadcast', event: 'play_tile', payload: passPayload });
                     logGame(`${b.name} passed.`);
                     currentTurnPlayerId = nextPlayerId;
                     updateTurnDisplay();
                     checkBotTurn();
                 }
-            }, 1500);
+            }, 1200);
         }
 
-        // Ready Toggle
         readyToggleBtn.addEventListener("click", async () => {
             isReady = !isReady;
             readyToggleBtn.textContent = isReady ? "Unready" : "Toggle Ready";
             await trackPresence();
         });
 
-        // Host Lock Toggle
         lockRoomBtn.addEventListener("click", async () => {
             if (!isHost) return;
             isLocked = !isLocked;
@@ -1195,11 +1257,10 @@
             showToast(isLocked ? "Room Locked" : "Room Unlocked");
         });
 
-        // Create Room
         createRoomBtn.addEventListener("click", async () => {
             const name = usernameInput.value.trim();
             if (!name) {
-                showToast("Please enter a nickname first.");
+                showToast("Please enter a nickname.");
                 return;
             }
 
@@ -1211,21 +1272,16 @@
                 currentUser = name;
                 enterRoomUI(newCode, true);
             } else {
-                showToast("Failed to create room. Check database policies.");
+                showToast("Failed to create room.");
             }
         });
 
-        // Join Room
         joinRoomBtn.addEventListener("click", async () => {
             const name = usernameInput.value.trim();
             const code = normalizeCode(roomCodeInput.value);
 
-            if (!name) {
-                showToast("Please enter a nickname first.");
-                return;
-            }
-            if (!code || code === CODE_PREFIX) {
-                showToast("Please enter a valid room code.");
+            if (!name || !code || code === CODE_PREFIX) {
+                showToast("Please enter nickname and valid code.");
                 return;
             }
 
@@ -1233,30 +1289,19 @@
             const roomData = await getRoomDetails(code);
             setBusy(false);
 
-            if (!roomData) {
-                showToast("Room does not exist.");
-                return;
-            }
-
-            if (roomData.is_locked) {
-                showToast("This room is locked by the host.");
+            if (!roomData || roomData.is_locked) {
+                showToast("Room unavailable or locked.");
                 return;
             }
 
             currentUser = name;
-            const amIHost = roomData.host_id === authUserId;
-            enterRoomUI(code, amIHost);
+            enterRoomUI(code, roomData.host_id === authUserId);
         });
 
-        // Leave Room
         async function leaveRoom() {
             if (roomChannel) {
                 await supabaseClient.removeChannel(roomChannel);
                 roomChannel = null;
-            }
-            if (disconnectTimer) {
-                clearTimeout(disconnectTimer);
-                disconnectTimer = null;
             }
             activeRoom = null;
             isHost = false;
@@ -1270,29 +1315,16 @@
             roomSection.classList.add("hidden");
             setupSection.classList.remove("hidden");
             updateStatus("online", "Connected & Authenticated");
-
-            voiceDot.className = "dot";
-            voiceLabel.textContent = "Voice Disconnected";
-            micToggleBtn.disabled = true;
         }
 
         leaveRoomBtn.addEventListener("click", leaveRoom);
 
-        // Mic Mute Toggle
         micToggleBtn.addEventListener("click", () => {
             isMicMuted = !isMicMuted;
-            if (isMicMuted) {
-                micToggleBtn.textContent = "Unmute Mic";
-                micToggleBtn.classList.add("muted");
-                showToast("Microphone muted");
-            } else {
-                micToggleBtn.textContent = "Mute Mic";
-                micToggleBtn.classList.remove("muted");
-                showToast("Microphone unmuted");
-            }
+            micToggleBtn.textContent = isMicMuted ? "Unmute Mic" : "Mute Mic";
+            micToggleBtn.classList.toggle("muted", isMicMuted);
         });
 
-        // Messaging
         async function sendMessage() {
             const text = messageInput.value.trim().slice(0, MAX_MESSAGE_LENGTH);
             if (text && activeRoom && roomChannel) {
@@ -1301,7 +1333,6 @@
                     event: 'message',
                     payload: { user: currentUser, text: text }
                 });
-
                 displayMessage(currentUser, text);
                 messageInput.value = "";
             }
