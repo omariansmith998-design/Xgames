@@ -299,32 +299,31 @@
             margin-top: 1px;
         }
 
-        /* 2D Scrollable Branching Board Canvas */
+        /* Continuous Horizontal Scrollboard Track */
         #table-chain-container {
             background: rgba(0, 0, 0, 0.45);
             border: 1px dashed rgba(253, 224, 71, 0.2);
-            min-height: 180px;
-            max-height: 220px;
+            min-height: 100px;
             border-radius: 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            overflow: auto;
-            padding: 16px;
+            justify-content: flex-start;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 12px;
             margin-bottom: 6px;
-            position: relative;
+            white-space: nowrap;
+            scrollbar-width: thin;
         }
 
         .board-snake-wrap {
             display: flex;
             align-items: center;
-            gap: 3px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 380px;
+            gap: 4px;
+            flex-wrap: nowrap; /* Prevent stacking into multiple rows */
         }
 
-        /* REALISTIC DOMINO TILE CANVAS GRAPHICS */
+        /* REALISTIC DOMINO TILE GRAPHICS */
         .real-tile {
             background: #fdfbf7;
             color: #111;
@@ -337,19 +336,18 @@
             font-weight: bold;
             user-select: none;
             position: relative;
+            flex-shrink: 0;
         }
 
-        /* Horizontal Tile Layout */
         .real-tile.horiz {
-            width: 38px;
-            height: 20px;
+            width: 42px;
+            height: 22px;
             flex-direction: row;
         }
 
-        /* Vertical Tile Layout (Doubles / Crosses / Corners) */
         .real-tile.vert {
-            width: 20px;
-            height: 38px;
+            width: 22px;
+            height: 42px;
             flex-direction: column;
             background: #fef08a;
             border-color: #eab308;
@@ -539,34 +537,37 @@
                 <button id="leave-room-btn" class="danger-btn">Leave</button>
             </div>
 
-            <!-- Host Controls Panel -->
-            <div id="host-panel" class="hidden" style="margin-bottom: 6px; display: flex; gap: 6px;">
-                <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">+ Add Bot</button>
-                <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">Lock Room</button>
-            </div>
-
-            <!-- Voice Controls Panel -->
-            <div id="voice-controls">
-                <div class="voice-status">
-                    <span id="voice-dot" class="dot"></span>
-                    <span id="voice-label">Voice Disconnected</span>
+            <!-- Lobby UI Container (Hidden automatically when Dominoes starts) -->
+            <div id="lobby-ui-group">
+                <!-- Host Controls Panel -->
+                <div id="host-panel" class="hidden" style="margin-bottom: 6px; display: flex; gap: 6px;">
+                    <button id="add-bot-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">+ Add Bot</button>
+                    <button id="lock-room-btn" class="secondary-btn" style="flex:1; padding:5px; font-size:11px;">Lock Room</button>
                 </div>
-                <button id="mic-toggle-btn" class="voice-btn" disabled>Mute Mic</button>
-            </div>
 
-            <!-- Player List -->
-            <div id="player-list-container">
-                <div class="player-header">
-                    <h3>Lobby Players</h3>
-                    <span id="player-count" style="font-size: 10px; color: #888;">0</span>
+                <!-- Voice Controls Panel -->
+                <div id="voice-controls">
+                    <div class="voice-status">
+                        <span id="voice-dot" class="dot"></span>
+                        <span id="voice-label">Voice Disconnected</span>
+                    </div>
+                    <button id="mic-toggle-btn" class="voice-btn" disabled>Mute Mic</button>
                 </div>
-                <ul id="player-list"></ul>
-            </div>
 
-            <!-- Ready Up / Start Game Bar -->
-            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:11px;">Toggle Ready</button>
-                <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:6px; font-size:11px;">Start Dominoes</button>
+                <!-- Player List -->
+                <div id="player-list-container">
+                    <div class="player-header">
+                        <h3>Lobby Players</h3>
+                        <span id="player-count" style="font-size: 10px; color: #888;">0</span>
+                    </div>
+                    <ul id="player-list"></ul>
+                </div>
+
+                <!-- Ready Up / Start Game Bar -->
+                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                    <button id="ready-toggle-btn" class="secondary-btn" style="flex:1; padding:6px; font-size:11px;">Toggle Ready</button>
+                    <button id="start-game-btn" class="success-btn hidden" style="flex:1; padding:6px; font-size:11px;">Start Dominoes</button>
+                </div>
             </div>
 
             <!-- VISUAL 2D DOMINOES YARD TABLE BOARD -->
@@ -579,7 +580,7 @@
                 <!-- Opponents Seating Layout -->
                 <div id="opponents-row" class="opponents-row"></div>
 
-                <!-- Visual 2D Branching Board Canvas -->
+                <!-- Visual 2D Scrollable Board Canvas -->
                 <div id="table-chain-container">
                     <div id="board-snake-wrap" class="board-snake-wrap">
                         <span style="font-size:10px; color:#fde047;" id="empty-table-msg">Table empty. Slam the first tile!</span>
@@ -644,11 +645,49 @@
         let myHand = [];
         let leftEnd = null;
         let rightEnd = null;
-        let playedTilesChain = []; // Array of tile objects with orientation info
+        let playedTilesChain = [];
         let selectedTileIndex = null;
         let currentTurnPlayerId = null;
         let playerOrder = [];
         let playerHandsCount = {};
+
+        // Web Audio Synthesizer Effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSlamSound() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch (e) { console.error(e); }
+        }
+
+        function playWinSound() {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const notes = [261.63, 329.63, 392.00, 523.25];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + idx * 0.1);
+                    osc.stop(audioCtx.currentTime + idx * 0.1 + 0.25);
+                });
+            } catch (e) { console.error(e); }
+        }
 
         // DOM Elements
         const statusDot = document.getElementById("status-dot");
@@ -675,12 +714,14 @@
         const voiceDot = document.getElementById("voice-dot");
         const voiceLabel = document.getElementById("voice-label");
         const micToggleBtn = document.getElementById("mic-toggle-btn");
+        const lobbyUiGroup = document.getElementById("lobby-ui-group");
 
         // Game Board DOM
         const dominoesGameArea = document.getElementById("dominoes-game-area");
         const turnIndicator = document.getElementById("turn-indicator");
         const opponentsRow = document.getElementById("opponents-row");
         const boardSnakeWrap = document.getElementById("board-snake-wrap");
+        const tableChainContainer = document.getElementById("table-chain-container");
         const gameLog = document.getElementById("game-log");
         const handContainer = document.getElementById("hand-container");
         const endChoiceBar = document.getElementById("end-choice-bar");
@@ -1024,7 +1065,10 @@
                 playerHandsCount[p.id] = 7;
             });
 
+            // Hide upper lobby controls during active game play
+            lobbyUiGroup.classList.add("hidden");
             dominoesGameArea.classList.remove("hidden");
+
             renderTableBoard();
             renderHand();
             updateTurnDisplay();
@@ -1032,9 +1076,7 @@
             checkBotTurn();
         }
 
-        /* RENDERS 2D BRANCHING REALISTIC GRAPHICS BOARD */
         function renderTableBoard() {
-            // Render Seating Layout
             opponentsRow.innerHTML = "";
             playerOrder.forEach(p => {
                 if (p.id !== authUserId) {
@@ -1046,7 +1088,6 @@
                 }
             });
 
-            // Render 2D Board Snake
             boardSnakeWrap.innerHTML = "";
             if (playedTilesChain.length === 0) {
                 boardSnakeWrap.innerHTML = `<span style="font-size:10px; color:#fde047;">Table empty. Slam the first tile!</span>`;
@@ -1055,7 +1096,6 @@
                     const isDouble = t.vals[0] === t.vals[1];
                     const tileEl = document.createElement("div");
 
-                    // Render Vertical Cross for Doubles, Horizontal for Regular
                     if (isDouble) {
                         tileEl.className = "real-tile vert";
                         tileEl.innerHTML = `
@@ -1073,6 +1113,11 @@
                     }
                     boardSnakeWrap.appendChild(tileEl);
                 });
+
+                // Auto-scroll track to show newly played tiles
+                setTimeout(() => {
+                    tableChainContainer.scrollLeft = tableChainContainer.scrollWidth;
+                }, 50);
             }
         }
 
@@ -1179,6 +1224,7 @@
             currentTurnPlayerId = payload.nextTurnId;
             playerHandsCount[payload.playerId] = payload.handCount;
 
+            playSlamSound();
             renderTableBoard();
             renderHand();
             updateTurnDisplay();
@@ -1186,6 +1232,7 @@
             logGame(`💥 ${payload.playerName} slammed [${payload.tile[0]}|${payload.tile[1]}]!`);
 
             if (payload.handCount === 0) {
+                playWinSound();
                 logGame(`🎉 ${payload.playerName} wins the match!`);
                 showToast(`${payload.playerName} DOMINOES!`);
                 gameActive = false;
@@ -1392,6 +1439,7 @@
             gameActive = false;
             bots = [];
 
+            lobbyUiGroup.classList.remove("hidden");
             dominoesGameArea.classList.add("hidden");
             messages.innerHTML = "";
             playerList.innerHTML = "";
