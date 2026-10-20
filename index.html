@@ -191,7 +191,7 @@ canvas#board{display:block;width:100%;height:auto}
       <div id="scoreBoxR">E/W<span class="pill" id="sWE">0</span></div>
     </div>
 
-    <!-- SEATS OUTSIDE BOARD (100% OFF CANVAS) -->
+    <!-- SEATS OUTSIDE BOARD -->
     <div id="seatOverlayOutside" class="seat-grid-outside"></div>
     
     <div class="wrap" id="wrap">
@@ -244,7 +244,7 @@ function tone(f1, f2, d, type, vol, delay = 0) {
     if (AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f1, t + d);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
   } catch (e) {}
@@ -936,7 +936,7 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- CANVAS BOARD ENGINE ---------- */
+/* ---------- CANVAS BOARD ENGINE (WATERTIGHT 90° ELBOW TURNS) ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -994,23 +994,33 @@ function drawTile(c, x, y, a, b, vert, s) {
   c.restore();
 }
 
+/* Dynamic Snake Layout Engine with True Vertical Elbow Turn Geometry */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0; 
   const out = [];
-  const limitR = W - MARGIN;
-  const limitL = MARGIN;
+  const limitR = W - MARGIN - 10;
+  const limitL = MARGIN + 10;
 
   tiles.forEach(t => {
-    const isVert = t.d;
-    const tw = isVert ? 20 : 40;
+    let isVert = t.d;
+    let tw = isVert ? 20 : 40;
     
-    const fits = dir > 0 ? (x + dir * tw <= limitR) : (x + dir * tw >= limitL);
-    if (fits) {
-      out.push({ t, cx: x + dir * (tw / 2), cy: y, vert: isVert });
-      x += dir * tw;
-    } else {
-      y += rowDir * 28; 
+    // Check if standard horizontal tile exceeds edge
+    const willOverflow = dir > 0 ? (x + dir * tw > limitR) : (x + dir * tw < limitL);
+
+    if (willOverflow) {
+      // FORCE THIS TILE TO BE A VERTICAL ELBOW CONNECTOR
+      isVert = true;
+      tw = 20;
+      const elbowX = x + dir * (tw / 2);
+      const elbowY = y + rowDir * 12;
+      out.push({ t, cx: elbowX, cy: elbowY, vert: true });
+      
+      // Step down to next row and flip horizontal direction
+      y += rowDir * 24;
       dir = -dir;
+      x = elbowX + dir * 10;
+    } else {
       out.push({ t, cx: x + dir * (tw / 2), cy: y, vert: isVert });
       x += dir * tw;
     }
@@ -1020,10 +1030,10 @@ function layoutChain(tiles, startX, y0, dir, rowDir) {
 
 function endTag(x, y, dir, txt) {
   const w = 26, h = 13;
-  let cx = x + dir * (w / 2 + 4);
+  let cx = x + dir * (w / 2 + 6);
   cx = Math.min(W - MARGIN - w / 2, Math.max(MARGIN + w / 2, cx));
   rr(ctx, cx - w / 2, y - h / 2, w, h, 6);
-  ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fill();
   ctx.lineWidth = 1; ctx.strokeStyle = '#7c5a1c'; ctx.stroke();
   ctx.fillStyle = '#fcd34d'; ctx.font = '700 8px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(txt, cx, y + 0.5);
