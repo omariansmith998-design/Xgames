@@ -71,6 +71,13 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
 .modal-card { width: 90%; max-width: 360px; background: #141724; border: 1px solid #2a3045; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+
+@keyframes smokeRise {
+  0% { opacity: 0.2; transform: translateY(0px) scale(0.8); }
+  40% { opacity: 0.9; transform: translateY(-12px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-28px) scale(1.6); }
+}
+.animate-smoke-rise { animation: smokeRise 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 </style>
 </head>
 <body>
@@ -128,6 +135,7 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
       <div class="row" style="gap:6px; margin-top:8px">
         <input id="loungeChatInput" placeholder="Say something in the lounge..." maxlength="40">
         <button class="blue" onclick="sendLoungeMessage()">Send</button>
+        <button id="micBtn" class="purple" onclick="toggleProximityMic()">🎙️ Mic</button>
       </div>
 
       <div class="two" style="margin-top:8px">
@@ -175,6 +183,16 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
       <span id="p2ScoreText" style="font-size:12px;font-weight:700">Dark Pieces: 12</span>
     </div>
     <button class="blue" onclick="returnToLounge()" style="width:100%">Back to Room Lounge</button>
+  </div>
+</div>
+
+<!-- LOUNGE EXPRESS EMOTE BAR -->
+<div class="card row between" style="padding:6px 12px">
+  <div style="font-size:10px;font-weight:800;color:#94a3b8">EXPRESS EMOTES</div>
+  <div class="row" style="gap:6px">
+    <button onclick="triggerEmote('💨 Puff')" class="purple" style="padding:4px 8px;font-size:11px">💨 Puff</button>
+    <button onclick="triggerEmote('🂋 Slam')" class="blue" style="padding:4px 8px;font-size:11px">🂋 Slam</button>
+    <button onclick="triggerEmote('👑 Crown')" class="gold" style="padding:4px 8px;font-size:11px">👑 Crown</button>
   </div>
 </div>
 
@@ -235,6 +253,7 @@ const log = m => $('log').textContent = m;
 let myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
 let myNickname = 'Tav';
 let selectedGame = 'checkers', roomCode = '';
+let localMicStream = null, isMicMuted = true;
 
 function savePersona() {
   const inputEl = $('personaNameIn');
@@ -301,6 +320,29 @@ function renderIsometricLoop() {
 function sendLoungeMessage() {
   const input = $('loungeChatInput');
   if (input.value.trim()) { myAvatar.chatMsg = input.value.trim(); input.value = ''; }
+}
+
+function triggerEmote(emote) {
+  myAvatar.chatMsg = emote;
+  setTimeout(() => myAvatar.chatMsg = '', 3000);
+}
+
+async function toggleProximityMic() {
+  if (!localMicStream) {
+    try {
+      localMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      isMicMuted = false;
+      $('micBtn').textContent = '🎙️ Active';
+      toast('Proximity Mic Connected');
+    } catch(err) {
+      toast('Microphone access blocked');
+    }
+  } else {
+    isMicMuted = !isMicMuted;
+    localMicStream.getAudioTracks()[0].enabled = !isMicMuted;
+    $('micBtn').textContent = isMicMuted ? '🎙️ Mic' : '🎙️ Active';
+    toast(isMicMuted ? 'Mic Muted' : 'Mic Active');
+  }
 }
 
 function confirmCreateRoom() {
