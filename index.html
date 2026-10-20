@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Complete Master Edition</title>
+<title>Xgames Arcade - Polished Master Edition</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#05050a;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
-.card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:10px}
+.card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:12px}
 .row{display:flex;gap:8px;align-items:center}
 .between{justify-content:space-between}
 .hidden{display:none!important}
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
-button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 12px;cursor:pointer;background:#334155}
-button:disabled{opacity:.5}
+button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 14px;cursor:pointer;background:#334155;transition:transform .1s}
+button:active{transform:scale(0.96)}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
-input, select{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0}
+input, select{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:12px;padding:10px 14px;outline:0}
 input:focus, select:focus{border-color:#6366f1}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
@@ -38,20 +38,24 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 .hand canvas.sel{transform:translateY(-6px)}
 .hand canvas.dim{opacity:.4}
 
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
-.modal-card { width: 90%; max-width: 360px; background: #141724; border: 1px solid #2a3045; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(6px); }
+.modal-card { width: 90%; max-width: 380px; background: #141724; border: 1px solid #313852; border-radius: 20px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
 
-/* Speech Bubble System for Games */
+/* Polished Select Styling */
+.custom-select-wrapper { position: relative; }
+.custom-select-wrapper select { appearance: none; background: #1a1f30 url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.6%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 14px center; background-size: 10px; padding-right: 35px; border: 1px solid #3a4466; font-weight: 700; color: #f8fafc; }
+
+/* Speech Bubble System */
 .speech-bubble {
-  position: absolute; background: #f8fafc; color: #0f172a; padding: 6px 10px; border-radius: 12px;
-  font-size: 11px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 20;
-  animation: popUp 0.2s ease-out; max-width: 160px; text-align: center;
+  position: absolute; background: #f8fafc; color: #0f172a; padding: 6px 12px; border-radius: 12px;
+  font-size: 11px; font-weight: 800; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 20;
+  animation: popUp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-width: 180px; text-align: center;
 }
 .speech-bubble::after {
   content: ''; position: absolute; bottom: -6px; left: 20px; border-width: 6px 6px 0;
   border-style: solid; border-color: #f8fafc transparent; display: block; width: 0;
 }
-@keyframes popUp { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
@@ -85,47 +89,44 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       </div>
 
       <div class="two">
-        <button class="green" onclick="createRoomPrompt()">+ Create Room</button>
+        <button class="green" onclick="openCreateModal()">+ Create Room</button>
         <div class="row" style="gap:4px">
           <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
           <button id="joinBtn" onclick="joinRoomByCode($('codeIn').value.trim().toUpperCase())" class="blue">Join</button>
         </div>
       </div>
-
-      <!-- UPCOMING GAMES VAULT -->
-      <div class="panel stack" style="gap:6px">
-        <div style="font-size:11px;font-weight:800;color:#94a3b8">Arcade Vault (Upcoming Games)</div>
-        <div class="two">
-          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">Ludo (Yard)</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
-          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">All Fours</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
-        </div>
-        <div class="two">
-          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">Burns</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
-          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">Three-Card</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
-        </div>
-      </div>
     </div>
 
-    <!-- ROOM WAITING LOBBY -->
+    <!-- ROOM WAITING LOBBY WITH GAME CHANGER -->
     <div id="roomPanel" class="panel hidden stack">
       <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-FXR0M</div>
+
+      <!-- POLISHED GAME SELECTOR IN LOUNGE -->
+      <div class="panel stack" style="background:#111522; border:1px solid #313852; padding:10px">
+        <label class="lbl" style="text-align:left; color:#a5b4fc">Active Game Arena</label>
+        <div class="custom-select-wrapper">
+          <select id="roomGameSelect" onchange="changeRoomGame(this.value)">
+            <option value="dominoes">🂋 Yard Dominoes</option>
+            <option value="checkers">👑 Jamaican Checkers</option>
+          </select>
+        </div>
+      </div>
+
       <div class="two">
         <button class="blue" onclick="shareRoomLink()">🔗 Share / Invite</button>
         <button class="purple" onclick="copyRoomCode()">Copy Code</button>
       </div>
-      <button onclick="leaveRoom()" style="background:#475569;width:100%">Leave Room / Arcade Hub</button>
 
       <div class="row between" style="margin-top:4px">
         <span style="font-size:11px;font-weight:800;color:#fbbf24" id="playerCountLbl">Players (1/4)</span>
         <button class="purple" onclick="addBotPlayer()" style="padding:2px 8px;font-size:10px">+ Add Bot</button>
       </div>
 
-      <div id="playerListContainer" class="stack" style="gap:4px">
-        <!-- Dynamic Player List -->
-      </div>
+      <div id="playerListContainer" class="stack" style="gap:4px"></div>
 
-      <button class="btn-neon-emerald" onclick="startSelectedGame()" style="width:100%;margin-top:6px">Start Yard Dominoes</button>
+      <button class="btn-neon-emerald" id="startMatchBtn" onclick="startSelectedGame()" style="width:100%;margin-top:6px">Start Yard Dominoes</button>
+      <button onclick="leaveRoom()" style="background:#475569;width:100%">Leave Room / Arcade Hub</button>
     </div>
   </div>
 
@@ -136,15 +137,8 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat (FFA)</i></div>
       <div id="scoreBoxR">N:0 E:0</div>
     </div>
-
-    <!-- PLAYER CARDS WITH TALKING SYSTEM -->
-    <div class="two" style="grid-template-columns: repeat(4, 1fr); gap: 4px;" id="dominoPlayerCards">
-      <!-- Generated dynamically -->
-    </div>
-
-    <div class="wrap" id="wrap" style="position:relative">
-      <canvas id="board" width="800" height="720"></canvas>
-    </div>
+    <div class="two" style="grid-template-columns: repeat(4, 1fr); gap: 4px;" id="dominoPlayerCards"></div>
+    <div class="wrap" id="wrap" style="position:relative"><canvas id="board" width="800" height="720"></canvas></div>
     <div id="log">Table ready.</div>
     <div class="panel">
       <div class="lbl" id="turnLbl">Your turn</div>
@@ -164,31 +158,41 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <div>Checkers: <span id="checkersTurnText" style="color:#fbbf24;margin-left:6px">Light Turn</span></div>
       <button onclick="checkersEngine.resetBoard(); renderCheckers();" class="red" style="padding:4px 10px;font-size:11px">Reset Match</button>
     </div>
-    <div class="wrap" style="position:relative">
-      <canvas id="draughtsCanvas" width="800" height="800"></canvas>
-    </div>
+    <div class="wrap" id="checkersWrap" style="position:relative"><canvas id="draughtsCanvas" width="800" height="800"></canvas></div>
     <button class="blue" onclick="returnToRoom()" style="width:100%">Back to Room Lounge</button>
   </div>
 </div>
 
-<!-- CHAT & TALKING INPUT BAR FOR MATCHES -->
-<div class="card row between" style="padding:6px 12px">
-  <input id="matchChatInput" placeholder="Say something at the table..." maxlength="50">
-  <button class="blue" onclick="sendMatchChat()" style="padding:6px 12px">Talk</button>
+<!-- EXPRESS EMOTES & CHAT BAR -->
+<div class="card stack" style="gap:8px">
+  <div class="row between">
+    <div style="font-size:10px;font-weight:800;color:#94a3b8">EXPRESS EMOTES</div>
+    <div class="row" style="gap:4px">
+      <button onclick="triggerEmote('💨 Puff')" class="purple" style="padding:4px 8px;font-size:11px">💨 Puff</button>
+      <button onclick="triggerEmote('🂋 Slam')" class="blue" style="padding:4px 8px;font-size:11px">🂋 Slam</button>
+      <button onclick="triggerEmote('👑 Crown')" class="gold" style="padding:4px 8px;font-size:11px">👑 Crown</button>
+    </div>
+  </div>
+  <div class="row" style="gap:6px">
+    <input id="matchChatInput" placeholder="Say something at the table..." maxlength="50" onkeydown="if(event.key==='Enter') sendMatchChat()">
+    <button class="blue" onclick="sendMatchChat()" style="padding:8px 14px">Talk</button>
+  </div>
 </div>
 
 <!-- MODALS -->
 <div id="createModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:15px">🎮 Create Room</h2>
-    <div style="text-align:left">
-      <label class="lbl">Select Game</label>
-      <select id="createGameSelect">
-        <option value="dominoes">🂋 Yard Dominoes</option>
-        <option value="checkers">👑 Jamaican Checkers</option>
-      </select>
+    <h2 style="color:#fcd34d;font-size:16px">🎮 Create Table Room</h2>
+    <div class="stack" style="text-align:left; gap:4px">
+      <label class="lbl" style="text-align:left; color:#a5b4fc">Select Game Arena</label>
+      <div class="custom-select-wrapper">
+        <select id="createGameSelect">
+          <option value="dominoes">🂋 Yard Dominoes</option>
+          <option value="checkers">👑 Jamaican Checkers</option>
+        </select>
+      </div>
     </div>
-    <div class="two" style="margin-top:8px">
+    <div class="two" style="margin-top:6px">
       <button class="blue" onclick="$('createModal').classList.add('hidden')">Cancel</button>
       <button class="btn-neon-emerald" onclick="$('createModal').classList.add('hidden'); confirmCreateRoom()">Launch Room</button>
     </div>
@@ -197,7 +201,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 
 <div id="personaModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:15px">👤 Profile Settings</h2>
+    <h2 style="color:#fcd34d;font-size:16px">👤 Profile Settings</h2>
     <input id="personaNameIn" placeholder="Enter nickname" maxlength="15">
     <button class="btn-neon-emerald" onclick="savePersona()">Save Profile</button>
   </div>
@@ -215,10 +219,49 @@ function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on
 const log = m => $('log').textContent = m;
 
 let myNickname = 'Tav';
-let roomCode = '', roomData = null, selectedGame = 'dominoes';
+let roomCode = '', selectedGame = 'dominoes';
 let playersInRoom = [];
 let isMicEnabled = false, isSpeakerOn = true;
 let channel = null;
+
+// --- WEB AUDIO API SOUND ENGINE ---
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playSound(type) {
+  if (!isSpeakerOn) return;
+  initAudio();
+  if (!audioCtx) return;
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
+
+  if (type === 'slam') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+    gain.gain.setValueAtTime(0.8, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+    osc.start(now); osc.stop(now + 0.12);
+  } else if (type === 'click') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, now);
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+    osc.start(now); osc.stop(now + 0.05);
+  } else if (type === 'knock') {
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.setValueAtTime(180, now + 0.04);
+    gain.gain.setValueAtTime(0.5, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    osc.start(now); osc.stop(now + 0.08);
+  }
+}
 
 function savePersona() {
   const inputEl = $('personaNameIn');
@@ -243,12 +286,13 @@ function toggleMic() {
   toast(isMicEnabled ? 'Microphone live' : 'Microphone disabled');
 }
 
-function createRoomPrompt() {
-  $('createModal').classList.remove('hidden');
-}
+function openCreateModal() { $('createModal').classList.remove('hidden'); }
 
 async function confirmCreateRoom() {
   selectedGame = $('createGameSelect').value;
+  $('roomGameSelect').value = selectedGame;
+  updateStartButtonText();
+
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   $('codeBig').textContent = roomCode;
   $('roomBadge').textContent = 'Room: ' + roomCode;
@@ -259,7 +303,6 @@ async function confirmCreateRoom() {
 
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
 
-  // Supabase sync
   try {
     await sb.from('game_rooms').insert([{ room_code: roomCode, status: 'waiting', host: myNickname, players: playersInRoom }]);
     setupRealtimeChannel();
@@ -274,19 +317,13 @@ async function joinRoomByCode(code) {
   
   const { data, error } = await sb.from('game_rooms').select('*').eq('room_code', roomCode).single();
   if (error || !data) {
-    // Join local/fallback simulation if offline
-    roomCode = code;
+    playersInRoom = [{ name: myNickname, host: true, you: true }];
   } else {
-    roomData = data;
     playersInRoom = data.players || [];
     if (!playersInRoom.some(p => p.name === myNickname)) {
       playersInRoom.push({ name: myNickname, host: false, you: true });
       await sb.from('game_rooms').update({ players: playersInRoom }).eq('room_code', roomCode);
     }
-  }
-
-  if (playersInRoom.length === 0) {
-    playersInRoom = [{ name: myNickname, host: true, you: true }];
   }
 
   $('codeBig').textContent = roomCode;
@@ -297,6 +334,19 @@ async function joinRoomByCode(code) {
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
   setupRealtimeChannel();
   toast('Joined room ' + roomCode);
+}
+
+function changeRoomGame(game) {
+  selectedGame = game;
+  updateStartButtonText();
+  broadcastAction('change_game', { game });
+}
+
+function updateStartButtonText() {
+  const btn = $('startMatchBtn');
+  if (btn) {
+    btn.textContent = selectedGame === 'dominoes' ? 'Start Yard Dominoes' : 'Start Jamaican Checkers';
+  }
 }
 
 function setupRealtimeChannel() {
@@ -318,7 +368,7 @@ function updatePlayerListUI() {
   const container = $('playerListContainer');
   container.innerHTML = '';
   $('playerCountLbl').textContent = `Players (${playersInRoom.length}/4)`;
-  playersInRoom.forEach((p, idx) => {
+  playersInRoom.forEach((p) => {
     const row = document.createElement('div');
     row.className = 'panel row between';
     row.style.cssText = 'padding:6px 10px; background:#141724;';
@@ -335,17 +385,10 @@ function addBotPlayer() {
   toast('Added ' + botName);
 }
 
-function copyRoomCode() {
-  navigator.clipboard.writeText(roomCode);
-  toast('Room code copied to clipboard!');
-}
-
+function copyRoomCode() { navigator.clipboard.writeText(roomCode); toast('Room code copied!'); }
 function shareRoomLink() {
-  if (navigator.share) {
-    navigator.share({ title: 'Xgames Arcade', text: `Join my table in Xgames Arcade! Room Code: ${roomCode}`, url: window.location.href });
-  } else {
-    copyRoomCode();
-  }
+  if (navigator.share) { navigator.share({ title: 'Xgames Arcade', text: `Join room ${roomCode}`, url: window.location.href }); }
+  else { copyRoomCode(); }
 }
 
 function leaveRoom() {
@@ -376,7 +419,7 @@ function startSelectedGame() {
   }
 }
 
-/* --- MATCH TALKING / CHAT BUBBLE SYSTEM --- */
+/* --- POLISHED CHAT & EMOTE TALKING SYSTEM --- */
 function sendMatchChat() {
   const input = $('matchChatInput');
   const msg = input.value.trim();
@@ -386,33 +429,41 @@ function sendMatchChat() {
   broadcastAction('chat_message', { name: myNickname, text: msg });
 }
 
+function triggerEmote(emote) {
+  showSpeechBubble(myNickname, emote);
+  broadcastAction('chat_message', { name: myNickname, text: emote });
+}
+
 function showSpeechBubble(senderName, text) {
-  // Find player card or render bubble over board
-  const wrap = $('wrap');
-  if (!wrap) return;
-  const existing = wrap.querySelector('.speech-bubble');
+  const activeWrap = !$('gameDominoes').classList.contains('hidden') ? $('wrap') :$('checkersWrap');
+  if (!activeWrap) return;
+  
+  const existing = activeWrap.querySelector('.speech-bubble');
   if (existing) existing.remove();
 
   const bubble = document.createElement('div');
   bubble.className = 'speech-bubble';
-  bubble.style.top = '16px'; bubble.style.left = '16px';
+  bubble.style.top = '14px'; bubble.style.left = '14px';
   bubble.innerHTML = `<b>${senderName}:</b> ${text}`;
-  wrap.appendChild(bubble);
+  activeWrap.appendChild(bubble);
 
-  setTimeout(() => bubble.remove(), 4000);
+  setTimeout(() => bubble.remove(), 3500);
 }
 
 function handleIncomingBroadcast(payload) {
   if (payload.type === 'chat_message') {
     showSpeechBubble(payload.sender, payload.data.text);
-  } else if (payload.type === 'domino_play') {
-    // Sync remote domino move if needed
+  } else if (payload.type === 'change_game') {
+    selectedGame = payload.data.game;
+    $('roomGameSelect').value = selectedGame;
+    updateStartButtonText();
+    toast(`${payload.sender} changed game to ${selectedGame.toUpperCase()}`);
   }
 }
 
 
 /* ========================================================
-   FULL YARD DOMINOES ENGINE
+   FULL YARD DOMINOES ENGINE WITH SOUNDS
    ======================================================== */
 function fullSet() {
   const t = [];
@@ -421,12 +472,12 @@ function fullSet() {
   return t;
 }
 
-let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
+let handNo = 1, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false;
 const byPos = p => players.find(x => x.pos === p);
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 
-function newMatch() { sNS = 0; sWE = 0; handNo = 1; lastWin = null; newHand(); }
+function newMatch() { handNo = 1; lastWin = null; newHand(); }
 function newHand() {
   const deck = fullSet();
   const assignedPlayers = playersInRoom.length > 0 ? playersInRoom : [{ name: myNickname, you: true }];
@@ -452,14 +503,15 @@ function play(i, side) {
   if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
   else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
   else { const o = t.a === R ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; R = o.b; rb.push(o); }
+  
+  playSound('slam');
   log('💥 ' + p.name + ' slammed [' + t.a + '|' + t.b + ']');
-  broadcastAction('domino_play', { pos: p.pos, tile: t, side });
   if (!p.hand.length) return win(p.pos, p.name + ' went out!');
   nextDominoTurn();
 }
 
 function pass() {
-  const p = byPos(turn); passes++; log('✋ ' + p.name + ' knocked (passed).');
+  const p = byPos(turn); passes++; playSound('knock'); log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
   nextDominoTurn();
 }
@@ -560,6 +612,7 @@ function drawDominoBoard() {
 let selIdx = null;
 function selectTile(i) {
   if (!active || turn !== 'S') return toast('Not your turn');
+  playSound('click');
   const me = byPos('S'); if (!me || !me.hand) return;
   const t = me.hand[i];
   if (!isValid(t)) return toast('Tile does not fit');
@@ -593,7 +646,6 @@ function renderHand() {
     box.appendChild(c);
   });
 
-  // Update Player Header Cards
   const cardsContainer = $('dominoPlayerCards');
   if (cardsContainer && players.length > 0) {
     cardsContainer.innerHTML = '';
@@ -616,7 +668,7 @@ function refreshDominoes() { drawDominoBoard(); renderHand(); }
 class JamaicanDraughtsEngine {
   constructor() {
     this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    this.activeTurn = 1; this.selectedSquare = null; this.validMoves = []; this.mustCapture = false;
+    this.activeTurn = 1; this.selectedSquare = null; this.validMoves = [];
     this.resetBoard();
   }
   resetBoard() {
@@ -669,6 +721,7 @@ if (draughtsCanvas) {
     const col = Math.floor((e.clientX - rect.left) / tileSize);
     const row = Math.floor((e.clientY - rect.top) / tileSize);
     if (!checkersEngine.isInBounds(row, col)) return;
+    playSound('click');
     const clicked = checkersEngine.board[row][col];
     if (checkersEngine.isCurrentPlayerPiece(clicked)) {
       checkersEngine.selectedSquare = { row, col };
