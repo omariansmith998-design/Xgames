@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Isometric 3/4 Spatial Lounge & Complete Board Games</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Xgames Arcade - Isometric Spatial Lounge & Complete Board Games</title>
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
@@ -29,10 +28,6 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
-
-.pill-group { display: flex; gap: 4px; background: #141724; padding: 3px; border-radius: 99px; border: 1px solid #282e42; }
-.pill-opt { flex: 1; text-align: center; font-size: 11px; font-weight: 800; padding: 6px 8px; border-radius: 99px; cursor: pointer; color: #94a3b8; transition: all 0.15s ease; }
-.pill-opt.active { background: #4f46e5; color: #fff; box-shadow: 0 0 8px rgba(79, 70, 229, 0.4); }
 
 .arcade-floor-mesh {
   background-color: #05050a;
@@ -71,13 +66,6 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
 .modal-card { width: 90%; max-width: 360px; background: #141724; border: 1px solid #2a3045; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
-
-@keyframes smokeRise {
-  0% { opacity: 0.2; transform: translateY(0px) scale(0.8); }
-  40% { opacity: 0.9; transform: translateY(-12px) scale(1.2); }
-  100% { opacity: 0; transform: translateY(-28px) scale(1.6); }
-}
-.animate-smoke-rise { animation: smokeRise 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 </style>
 </head>
 <body>
@@ -88,7 +76,7 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 </div>
 
 <div class="card stack">
-  <div class="panel row between status"><span id="syncLabel">Supabase Realtime Mode</span><b id="roomBadge">No active room</b></div>
+  <div class="panel row between status"><span id="syncLabel">Local Arcade Mode</span><b id="roomBadge">No active room</b></div>
 
   <!-- MAIN STREET LOBBY -->
   <div id="lobby" class="stack">
@@ -99,20 +87,10 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
       </div>
 
       <div class="two">
-        <button class="green" onclick="$('createModal').classList.remove('hidden')">+ Create Table</button>
+        <button class="green" onclick="$('createModal').classList.add('hidden'); confirmCreateRoom()">+ Create Table</button>
         <div class="row" style="gap:4px">
           <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
           <button id="joinBtn" onclick="joinRoomByCode($('codeIn').value.trim().toUpperCase())" class="blue">Join</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="row between" style="margin-bottom:6px">
-          <span style="font-size:11px;font-weight:800;color:#fbbf24">🎲 LIVE PUBLIC TABLES</span>
-          <button onclick="fetchActivePublicRooms()" class="purple" style="padding:2px 8px;font-size:9px">↻ Refresh</button>
-        </div>
-        <div id="publicRoomsContainer" class="stack" style="gap:6px">
-          <div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Checking active rooms...</div>
         </div>
       </div>
     </div>
@@ -209,7 +187,7 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
     </div>
     <div class="two" style="margin-top:8px">
       <button class="blue" onclick="$('createModal').classList.add('hidden')">Cancel</button>
-      <button class="btn-neon-emerald" onclick="confirmCreateRoom()">Launch Room</button>
+      <button class="btn-neon-emerald" onclick="$('createModal').classList.add('hidden'); confirmCreateRoom()">Launch Room</button>
     </div>
   </div>
 </div>
@@ -242,15 +220,10 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 <div id="toast"></div>
 
 <script>
-const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
-const sb = supabase.createClient(SB_URL, SB_KEY);
-
 const $ = id => document.getElementById(id);
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
 
-let myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
 let myNickname = 'Tav';
 let selectedGame = 'checkers', roomCode = '';
 let localMicStream = null, isMicMuted = true;
@@ -328,11 +301,13 @@ function triggerEmote(emote) {
 }
 
 async function toggleProximityMic() {
+  const micBtn = $('micBtn');
   if (!localMicStream) {
     try {
       localMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       isMicMuted = false;
-      $('micBtn').textContent = '🎙️ Active';
+      micBtn.textContent = '🎙️ Active';
+      micBtn.style.background = '#059669';
       toast('Proximity Mic Connected');
     } catch(err) {
       toast('Microphone access blocked');
@@ -340,14 +315,20 @@ async function toggleProximityMic() {
   } else {
     isMicMuted = !isMicMuted;
     localMicStream.getAudioTracks()[0].enabled = !isMicMuted;
-    $('micBtn').textContent = isMicMuted ? '🎙️ Mic' : '🎙️ Active';
-    toast(isMicMuted ? 'Mic Muted' : 'Mic Active');
+    if (isMicMuted) {
+      micBtn.textContent = '🎙️ Mic (Muted)';
+      micBtn.style.background = '#4f46e5';
+      toast('Mic Muted');
+    } else {
+      micBtn.textContent = '🎙️ Active';
+      micBtn.style.background = '#059669';
+      toast('Mic Active');
+    }
   }
 }
 
 function confirmCreateRoom() {
   selectedGame = $('createGameSelect').value;
-  $('createModal').classList.add('hidden');
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   $('codeBig').textContent = roomCode;
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
@@ -370,7 +351,6 @@ function returnToLounge() {
 function returnToMainHub() {
   $('gameDominoes').classList.add('hidden');$('gameCheckers').classList.add('hidden');
   $('roomPanel').classList.add('hidden');$('homeBox').classList.remove('hidden');
-  fetchActivePublicRooms();
 }
 
 function startMatchWithZoom() {
@@ -383,26 +363,6 @@ function startMatchWithZoom() {
     checkersEngine.resetBoard();
     resizeDraughtsCanvas();
   }
-}
-
-async function fetchActivePublicRooms() {
-  const container = $('publicRoomsContainer');
-  container.innerHTML = '<div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Querying active Supabase tables...</div>';
-  const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-  const { data, error } = await sb.from('game_rooms').select('*').eq('status', 'waiting').gt('updated_at', tenMinsAgo).limit(5);
-
-  if (error || !data || data.length === 0) {
-    container.innerHTML = '<div style="font-size:11px;color:#64748b;text-align:center;padding:12px">No public tables found. Create one above!</div>';
-    return;
-  }
-  container.innerHTML = '';
-  data.forEach(room => {
-    const card = document.createElement('div');
-    card.className = 'panel row between';
-    card.style.cssText = 'background:#141724; border-color:#282e42; padding:8px 10px; cursor:pointer;';
-    card.innerHTML = `<div><div style="font-size:11px;font-weight:800;color:#fff">${room.room_code}</div></div><button class="green" style="padding:4px 8px;font-size:10px" onclick="joinRoomByCode('${room.room_code}')">Join</button>`;
-    container.appendChild(card);
-  });
 }
 
 /* ========================================================
@@ -650,8 +610,6 @@ if (draughtsCanvas) {
     renderCheckers();
   });
 }
-
-fetchActivePublicRooms();
 </script>
 </body>
 </html>
