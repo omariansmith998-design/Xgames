@@ -936,7 +936,7 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- CANVAS BOARD ENGINE (WATERTIGHT 90° ELBOW TURNS) ---------- */
+/* ---------- CANVAS BOARD ENGINE (WATERTIGHT 48px ROW STRIDE) ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -994,12 +994,12 @@ function drawTile(c, x, y, a, b, vert, s) {
   c.restore();
 }
 
-/* Dynamic Snake Layout Engine with True Vertical Elbow Turn Geometry */
+/* Clean Dynamic Layout Engine with 48px Row Centerline Stride */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0; 
   const out = [];
-  const limitR = W - MARGIN - 10;
-  const limitL = MARGIN + 10;
+  const limitR = W - MARGIN - 12;
+  const limitL = MARGIN + 12;
 
   tiles.forEach(t => {
     let isVert = t.d;
@@ -1013,11 +1013,11 @@ function layoutChain(tiles, startX, y0, dir, rowDir) {
       isVert = true;
       tw = 20;
       const elbowX = x + dir * (tw / 2);
-      const elbowY = y + rowDir * 12;
+      const elbowY = y + rowDir * 20; // Bridge down cleanly from top row
       out.push({ t, cx: elbowX, cy: elbowY, vert: true });
       
-      // Step down to next row and flip horizontal direction
-      y += rowDir * 24;
+      // Step down by 48px row stride (gives 28px clean vertical space between rows)
+      y += rowDir * 48;
       dir = -dir;
       x = elbowX + dir * 10;
     } else {
