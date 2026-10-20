@@ -72,6 +72,17 @@ canvas#board{display:block;width:100%;height:auto}
 .seat-card-out .p-avatar.bot { background: #581c87; }
 .seat-mute-btn { background: #334155; border: 0; color: #fff; border-radius: 4px; padding: 1px 4px; font-size: 8px; cursor: pointer; margin-top: 2px; }
 .seat-mute-btn.muted { background: #dc2626; }
+
+/* EXIT CONFIRMATION MODAL */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center;
+  z-index: 100; backdrop-filter: blur(4px);
+}
+.modal-card {
+  width: 90%; max-width: 340px; background: #141724; border: 1px solid #2a3045;
+  border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px;
+}
 </style>
 </head>
 <body>
@@ -104,7 +115,7 @@ canvas#board{display:block;width:100%;height:auto}
       </div>
 
       <!-- ARCADE VAULT PREVIEW GRID -->
-      <div class="panel style="margin-top:4px"">
+      <div class="panel" style="margin-top:4px">
         <div class="lbl" style="text-align:left;font-weight:800">Arcade Vault (Upcoming Games)</div>
         <div class="vault-grid">
           <div class="vault-card"><div class="v-title">Ludo (Yard)</div><div class="v-tag">COMING SOON</div></div>
@@ -202,6 +213,19 @@ canvas#board{display:block;width:100%;height:auto}
     </div>
   </div>
 </div>
+
+<!-- EXIT CONFIRMATION MODAL -->
+<div id="exitModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h2 style="color:#f43f5e;font-size:16px">Leave Active Table?</h2>
+    <div style="font-size:12px;color:#94a3b8">If you leave now, your seat will be freed up for other players.</div>
+    <div class="two" style="margin-top:8px">
+      <button class="blue" id="cancelExitBtn">Stay at Table</button>
+      <button class="red" id="confirmExitBtn">Leave Game</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <div id="audioBox"></div>
 
@@ -569,6 +593,31 @@ $('shareBtn').onclick = () => {
   }
 };
 
+/* ---------- ACCIDENTAL EXIT & MODAL GUARDS ---------- */
+window.addEventListener('beforeunload', (e) => {
+  if (roomCode && active) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+function confirmLeave() {
+  if (roomCode && active) {
+    $('exitModal').classList.remove('hidden');
+  } else {
+    leaveToHome();
+  }
+}
+
+$('cancelExitBtn').onclick = () => $('exitModal').classList.add('hidden');
+$('confirmExitBtn').onclick = () => {
+  $('exitModal').classList.add('hidden');
+  leaveToHome();
+};
+
+$('leaveBtn').onclick = () => confirmLeave();
+$('hubBtn').onclick = () => confirmLeave();
+
 async function leaveToHome(message) {
   clearSession();
   epoch++; active = false;
@@ -590,8 +639,6 @@ async function leaveToHome(message) {
   refresh();
   if (message) toast(message);
 }
-$('leaveBtn').onclick = () => leaveToHome();
-$('hubBtn').onclick = () => leaveToHome();
 
 $('botBtn').onclick = () => {
   if (!isHost) return toast('Only host can add bots');
@@ -842,7 +889,7 @@ function updateMicUI(on, silent) {
   }
 }
 
-/* ---------- RESUME SESSION ---------- */
+/* ---------- FAST-TRACK SESSION RECOVERY ---------- */
 async function resumeSession() {
   const s = store.get(SESSION_KEY);
   if (!s || !s.roomCode || !myNickname) return false;
@@ -864,17 +911,23 @@ async function reconnect() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reconnect(); });
 window.addEventListener('online', reconnect);
 
-window.addEventListener('load', async () => {
+async function fastResume() {
   initProfile();
   const params = new URLSearchParams(window.location.search);
   const roomParam = (params.get('room') || '').toUpperCase();
   if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) {
     $('codeIn').value = roomParam;
-    joinRoomByCode(roomParam);
+    await joinRoomByCode(roomParam);
   } else if (myNickname) {
     await resumeSession();
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', fastResume);
+} else {
+  fastResume();
+}
 
 /* ---------- GAME CORE ---------- */
 function fullSet() {
@@ -966,15 +1019,12 @@ function aiTurn() {
   if (!opts.length) return pass();
 
   if (botDiff === 'easy') {
-    // EASY: Pick a random legal move
     const choice = opts[Math.floor(Math.random() * opts.length)];
     play(choice.i, choice.side);
   } else if (botDiff === 'medium') {
-    // MEDIUM: Prioritize doubles and heaviest tiles
     opts.sort((x, y) => (y.isDouble ? 10 : 0) + y.w - ((x.isDouble ? 10 : 0) + x.w));
     play(opts[0].i, opts[0].side);
   } else {
-    // HARD: Advanced pip dumping + double unloading + starving ends
     opts.sort((x, y) => {
       let scoreX = x.w + (x.isDouble ? 15 : 0);
       let scoreY = y.w + (y.isDouble ? 15 : 0);
