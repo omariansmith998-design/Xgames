@@ -143,6 +143,7 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
 let roomCode = '', mySeatPos = 'S', micActive = false;
 let stateVersion = 0, lastAppliedVersion = -1, joinConfirmed = false, syncing = false, syncDirty = false;
+let mutedPlayers = new Set();
 
 /* PERMANENT DEVICE IDENTITY */
 let myClientId = localStorage.getItem('xg_perm_client_id');
@@ -160,7 +161,7 @@ function tone(f1, f2, d, type, vol, delay = 0) {
     if (AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f1, t + d);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
   } catch (e) {}
@@ -471,19 +472,46 @@ $('botBtn').onclick = () => {
   renderLobby(); syncRoomState();
 };
 
+function toggleMutePlayer(targetClientId) {
+  const audioEl = $('audio_' + targetClientId);
+  if (mutedPlayers.has(targetClientId)) {
+    mutedPlayers.delete(targetClientId);
+    if (audioEl) audioEl.muted = false;
+    toast('Unmuted player');
+  } else {
+    mutedPlayers.add(targetClientId);
+    if (audioEl) audioEl.muted = true;
+    toast('Muted player locally');
+  }
+  renderLobby();
+}
+
 function renderLobby() {
   $('plist').innerHTML = '';
   lobby.forEach((p, i) => {
     const isPlayerHost = p.clientId === hostClientId;
     const isMe = p.clientId === myClientId;
-    const d = document.createElement('div'); d.className = 'pl';
+    const isMuted = mutedPlayers.has(p.clientId);
+
+    const d = document.createElement('div');
+    d.className = 'pl';
+
+    let actionBtns = '';
+    if (!isMe && !p.isBot) {
+      actionBtns += '<button style="padding:2px 6px;margin-right:4px;font-size:10px;" class="' + (isMuted ? 'red' : 'purple') + '" onclick="toggleMutePlayer(\'' + p.clientId + '\')">' + (isMuted ? 'Unmute' : 'Mute') + '</button>';
+    }
+    if (isHost && !isPlayerHost) {
+      actionBtns += '<button style="padding:2px 6px;background:none;color:#fb7185;font-weight:900;" data-i="' + i + '">×</button>';
+    }
+
     d.innerHTML = '<span></span><span>' +
       '<span class="tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : '')) + '">' + (p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER')) + '</span>' +
-      (isMe ? ' <span class="tag you">YOU</span>' : '') +
-      (isHost && !isPlayerHost ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') +
+      (isMe ? ' <span class="tag you">YOU</span>' : '') + ' ' + actionBtns +
       '</span>';
+
     d.firstChild.textContent = p.name;
-    const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
+    const removeBtn = d.querySelector('button[data-i]');
+    if (removeBtn) removeBtn.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
   });
 
@@ -505,31 +533,17 @@ $('startBtn').onclick = () => {
 };
 
 /* ---------- VOICE (LiveKit) ---------- */
-let audioCtx = null, gainNode = null;
-
-function initVoiceAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    gainNode = audioCtx.createGain();
-    gainNode.gain.value = 2.5;
-    gainNode.connect(audioCtx.destination);
-  }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-
 async function connectVoice() {
   if (livekitRoom) return true;
   if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
   if (!roomCode) { toast('Join a room first'); return false; }
-
-  initVoiceAudio();
 
   const { data, error } = await sb.functions.invoke('livekit-token', {
     body: { roomCode, clientId: myClientId, name: myNickname }
   });
   if (error || !data || !data.token) {
     console.error('Voice token error', error, data);
-    toast('Voice is not set up yet');
+    toast('Voice token error. Check Supabase setup.');
     return false;
   }
 
@@ -546,26 +560,29 @@ async function connectVoice() {
   room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
     if (track.kind === 'audio') {
       const el = track.attach();
+      el.id = 'audio_' + participant.identity;
       el.autoplay = true;
       el.playsInline = true;
-      $('audioBox').appendChild(el);
-      
-      try {
-        const source = audioCtx.createMediaElementSource(el);
-        source.connect(gainNode);
-      } catch(e) { console.log('Direct audio fallback active'); }
 
+      if (mutedPlayers.has(participant.identity)) {
+        el.muted = true;
+      }
+
+      $('audioBox').appendChild(el);
       routeToSpeaker(el);
     }
   });
 
-  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => track.detach().forEach(el => el.remove()));
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+    track.detach().forEach(el => el.remove());
+  });
+
   room.on(LivekitClient.RoomEvent.Disconnected, () => {
     if (livekitRoom === room) { livekitRoom = null; micActive = false; updateMicUI(false, true); }
   });
 
   await room.connect(LIVEKIT_URL, data.token);
-  try { await room.startAudio(); } catch (e) {}
+  try { await room.startAudio(); } catch (e) { console.log('Audio autoplay prompt needed'); }
   livekitRoom = room;
   return true;
 }
@@ -576,18 +593,14 @@ async function routeToSpeaker(audioEl) {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const speaker = devices.find(d => d.kind === 'audiooutput' && (d.deviceId === 'speaker' || d.label.toLowerCase().includes('speaker')));
       if (speaker) await audioEl.setSinkId(speaker.deviceId);
-    } catch(e) { console.log('Sink ID routing unsupported'); }
+    } catch(e) {}
   }
 }
 
 $('speakerBtn').onclick = async () => {
-  initVoiceAudio();
-  if (gainNode) {
-    gainNode.gain.value = gainNode.gain.value === 1.0 ? 3.0 : 1.0;
-    toast(gainNode.gain.value > 1.0 ? '🔊 Speaker Boost MAX' : '🔉 Normal Volume');
-  }
   const elements = document.querySelectorAll('#audioBox audio');
   elements.forEach(el => routeToSpeaker(el));
+  toast('🔊 Speaker mode enabled');
 };
 
 function disconnectVoice() {
