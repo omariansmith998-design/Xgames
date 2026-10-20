@@ -8,41 +8,41 @@
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
-body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#07080c;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
-.card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:10px}
+body{margin:0;padding:10px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#07080c;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:10px}
+.card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:16px;padding:14px}
 .row{display:flex;gap:8px;align-items:center}
 .between{justify-content:space-between}
 .hidden{display:none!important}
-.logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
-button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 12px;cursor:pointer;background:#334155}
+.logo{font-weight:900;letter-spacing:.04em;color:#818cf8;font-size:16px}.logo b{color:#f43f5e}
+button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:10px 16px;cursor:pointer;background:#334155;transition:transform 0.1s}
+button:active{transform:scale(0.97)}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
-input, select{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0}
+input, select{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 16px;outline:0}
 input:focus, select:focus{border-color:#6366f1}
-.stack{display:flex;flex-direction:column;gap:10px}
-.panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
-#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
+.stack{display:flex;flex-direction:column;gap:12px}
+.panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.codeBig{font-size:30px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:6px 0}
+#toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:100;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
 
-.pill-group { display: flex; gap: 4px; background: #141724; padding: 3px; border-radius: 99px; border: 1px solid #282e42; }
-.pill-opt { flex: 1; text-align: center; font-size: 11px; font-weight: 800; padding: 6px 8px; border-radius: 99px; cursor: pointer; color: #94a3b8; }
-.pill-opt.active { background: #4f46e5; color: #fff; box-shadow: 0 0 8px rgba(79, 70, 229, 0.4); }
+.quick-card{background:linear-gradient(135deg, #1e1b4b 0%, #141724 100%); border:1px solid #312e81; border-radius:14px; padding:14px; cursor:pointer; display:flex; flex-direction:column; gap:6px; transition:border-color 0.2s;}
+.quick-card:hover{border-color:#6366f1;}
 
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
 canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
-.modal-card { width: 90%; max-width: 360px; background: #141724; border: 1px solid #2a3045; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+.modal-card { width: 90%; max-width: 380px; background: #141724; border: 1px solid #2a3045; border-radius: 18px; padding: 18px; text-align: center; display: flex; flex-direction: column; gap: 14px; }
 </style>
 </head>
 <body>
 
 <div class="card row between">
   <div class="logo">XGAMES <b>ARCADE</b></div>
-  <div class="row" style="gap:4px">
-    <button id="bgmToggleBtn" class="purple" onclick="toggleBgm()" style="padding:5px 10px;font-size:11px">🎵 BGM: OFF</button>
-    <button class="blue" onclick="returnToMainHub()">Main Hub</button>
+  <div class="row" style="gap:6px">
+    <button id="bgmToggleBtn" class="purple" onclick="toggleBgm()" style="padding:6px 12px;font-size:11px">🎵 BGM: OFF</button>
+    <button class="blue" onclick="returnToMainHub()" style="padding:6px 12px">Main Hub</button>
   </div>
 </div>
 
@@ -53,20 +53,31 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <h2 class="text-xs text-indigo-300">Your Handle: <b id="myNickDisplay" class="text-amber-400">Tav</b></h2>
     </div>
 
-    <!-- QUICK-PLAY TILES -->
-    <div class="panel stack" style="gap:6px; background:#141724; border-color:#2e3650;">
+    <!-- PREMIUM QUICK-PLAY CARDS -->
+    <div class="stack" style="gap:8px">
       <span style="font-size:11px; font-weight:800; color:#38bdf8">⚡ QUICK PLAY (INSTANT SOLO VS BOTS)</span>
       <div class="two">
-        <button class="green" onclick="quickStartGame('dominoes')">🂋 Yard Dominoes</button>
-        <button class="purple" onclick="quickStartGame('checkers')">👑 Jamaican Checkers</button>
+        <div class="quick-card" onclick="quickStartGame('dominoes')">
+          <div style="font-size:15px; font-weight:800; color:#fff">🂋 Yard Dominoes</div>
+          <div style="font-size:10px; color:#94a3b8">4-Player FFA with slams & knocks</div>
+          <button class="green" style="margin-top:4px; padding:6px 10px; font-size:11px">Play Instant</button>
+        </div>
+        <div class="quick-card" onclick="quickStartGame('checkers')">
+          <div style="font-size:15px; font-weight:800; color:#fff">👑 Jamaican Checkers</div>
+          <div style="font-size:10px; color:#94a3b8">Brown & white board with forced jumps</div>
+          <button class="purple" style="margin-top:4px; padding:6px 10px; font-size:11px">Play Instant</button>
+        </div>
       </div>
     </div>
 
-    <div class="two">
-      <button class="green" onclick="$('createModal').classList.remove('hidden')">+ Create Online Room</button>
-      <div class="row" style="gap:4px">
-        <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
-        <button id="joinBtn" class="blue" onclick="joinRoomFromInput()">Join</button>
+    <div class="panel stack" style="background:#10131d; gap:10px">
+      <div style="font-size:12px; font-weight:800; color:#fbbf24">🌐 ONLINE MULTIPLAYER</div>
+      <div class="two">
+        <button class="green" onclick="$('createModal').classList.remove('hidden')">+ Create Online Room</button>
+        <div class="row" style="gap:4px">
+          <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
+          <button id="joinBtn" class="blue" onclick="joinRoomFromInput()">Join</button>
+        </div>
       </div>
     </div>
 
@@ -74,7 +85,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
     <div class="panel">
       <div class="row between" style="margin-bottom:6px">
         <span style="font-size:11px;font-weight:800;color:#fbbf24">🎲 LIVE ACTIVE TABLES</span>
-        <button onclick="fetchActivePublicRooms()" class="purple" style="padding:2px 8px;font-size:9px">↻ Refresh</button>
+        <button onclick="fetchActivePublicRooms()" class="purple" style="padding:3px 10px;font-size:10px">↻ Refresh</button>
       </div>
       <div id="publicRoomsContainer" class="stack" style="gap:6px">
         <div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Checking active rooms...</div>
@@ -83,58 +94,33 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
   </div>
 
   <!-- SPATIAL ROOM LOBBY LOUNGE VIEW -->
-  <div id="roomPanel" class="panel hidden">
+  <div id="roomPanel" class="panel hidden stack">
     <div class="text-xs text-slate-400 text-center">Room Code</div>
     <div class="codeBig" id="codeBig">XG-T1K50</div>
 
-    <div class="panel" style="background:#10131d; padding:8px; margin-bottom:8px">
-      <div class="row between" style="margin-bottom:6px">
-        <span class="text-xs text-emerald-400 font-bold">● Yard Voice (Mic)</span>
-        <div class="row" style="gap:4px">
-          <button id="speakerToggleBtn" class="blue" onclick="toggleSpeaker()" style="padding:4px 8px; font-size:10px">Speaker ON</button>
-          <button id="micToggleBtn" class="green" onclick="toggleMic()" style="padding:4px 8px; font-size:10px">Enable Mic</button>
-        </div>
-      </div>
-    </div>
-
-    <div style="text-align:left; font-size:11px; color:#94a3b8; margin-bottom:4px">Active Game Arena</div>
-    <select id="loungeGameSelect" onchange="updateLoungeGame(this.value)" style="margin-bottom:8px">
+    <div style="text-align:left; font-size:11px; color:#94a3b8">Active Game Arena</div>
+    <select id="loungeGameSelect" onchange="updateLoungeGame(this.value)">
       <option value="dominoes">🂋 Yard Dominoes (4-Player FFA)</option>
       <option value="checkers">👑 Jamaican Checkers</option>
     </select>
 
-    <div class="two" style="margin-bottom:8px">
-      <button class="blue" onclick="toast('Invite link copied!')">🔗 Share / Invite</button>
-      <button class="purple" onclick="toast('Code copied!')">📋 Copy Code</button>
-    </div>
-
-    <div class="stack" style="gap:4px; margin-bottom:8px">
+    <div class="stack" style="gap:4px">
       <div style="font-size:11px; font-weight:700; color:#cbd5e1" id="loungePlayerHeader">Players (3/4)</div>
-      <div id="loungePlayerList" class="stack" style="gap:4px">
-        <div class="panel row between" style="padding:6px 10px; background:#141724">
-          <div class="row" style="gap:6px"><span class="w-2 h-2 rounded-full bg-emerald-400"></span><span style="font-size:12px; font-weight:700">Tav</span> <span style="font-size:9px; background:#a16207; padding:1px 6px; border-radius:4px">HOST</span> <span style="font-size:9px; background:#3730a3; padding:1px 6px; border-radius:4px">YOU</span></div>
-          <button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('Tav')">Mute</button>
-        </div>
-        <div class="panel row between" style="padding:6px 10px; background:#141724">
-          <div class="row" style="gap:6px"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span style="font-size:12px; font-weight:700">XBot-743</span></div>
-          <div class="row" style="gap:4px"><button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('XBot-743')">Mute</button><button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('XBot-743')">Remove</button></div>
-        </div>
-        <div class="panel row between" style="padding:6px 10px; background:#141724">
-          <div class="row" style="gap:6px"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span style="font-size:12px; font-weight:700">XBot-847</span></div>
-          <div class="row" style="gap:4px"><button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('XBot-847')">Mute</button><button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('XBot-847')">Remove</button></div>
-        </div>
-      </div>
+      <div id="loungePlayerList" class="stack" style="gap:4px"></div>
     </div>
 
-    <button class="purple" id="addBotBtn" onclick="addBotToLounge()" style="width:100%; margin-bottom:6px">+ Add Bot</button>
-    <button class="green" id="startBtn" onclick="launchGameEngine()" style="width:100%">Start Yard Dominoes Match</button>
+    <div class="two">
+      <button class="purple" onclick="addBotToLounge()">+ Add Bot</button>
+      <button class="green" onclick="launchGameEngine()">Start Match</button>
+    </div>
+    <button class="red" onclick="returnToMainHub()" style="width:100%">Leave Room</button>
   </div>
 
   <!-- YARD DOMINOES GAME VIEW -->
   <div id="gameDominoes" class="stack hidden">
     <div class="row between" style="font-size:12px; font-weight:700">
       <span id="dominoScoreText">Score: Tav 0 : 0</span>
-      <span class="text-emerald-400" id="dominoModeBadge" style="background:#064e3b; padding:2px 8px; border-radius:6px">Hand 1Cut Throat (FFA)</span>
+      <span class="text-emerald-400" id="dominoModeBadge" style="background:#064e3b; padding:2px 8px; border-radius:6px">Hand 1 Cut Throat</span>
       <span class="text-slate-400" id="dominoCountsText">N:7 E:7</span>
     </div>
 
@@ -150,16 +136,16 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <canvas id="board"></canvas>
     </div>
 
-    <div class="panel" style="text-align:center; font-size:11px; color:#fbbf24; padding:6px" id="dominoActionEvent">XBot-3 played double [6:6] with a slam!</div>
+    <div class="panel" style="text-align:center; font-size:11px; color:#fbbf24; padding:6px" id="dominoActionEvent">Match started. Good luck!</div>
 
     <div class="stack panel" style="background:#10131d">
-      <div style="font-size:11px; font-weight:700; color:#38bdf8" id="dominoTurnHeader">Your turn</div>
-      <div id="dominoHandContainer" class="row" style="overflow-x:auto; padding:4px 0; min-height:60px"></div>
+      <div style="font-size:11px; font-weight:700; color:#38bdf8" id="dominoTurnHeader">Your hand (Tap tile to play)</div>
+      <div id="dominoHandContainer" class="row" style="overflow-x:auto; padding:4px 0; min-height:64px; gap:6px"></div>
     </div>
 
     <div class="row" style="gap:8px">
-      <button class="gold" onclick="dominoEngine.knockTable()" style="flex:1">Knock table (pass)</button>
-      <button class="blue" onclick="returnToMainHub()" style="flex:1">Back to Room Lounge</button>
+      <button class="gold" onclick="dominoEngine.knockTable()" style="flex:1">Knock Table (Pass)</button>
+      <button class="blue" onclick="returnToMainHub()" style="flex:1">Lounge</button>
     </div>
 
     <!-- EXPRESS EMOTES -->
@@ -172,13 +158,13 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
           <button class="purple" style="padding:2px 8px; font-size:10px" onclick="sendEmote('👑 Crown')">👑 Crown</button>
         </div>
       </div>
-      <div id="emoteLog" style="font-size:10px; color:#cbd5e1; max-height:36px; overflow-y:auto">Table chat initialized...</div>
+      <div id="emoteLog" style="font-size:10px; color:#cbd5e1; max-height:36px; overflow-y:auto">Table chat active...</div>
     </div>
   </div>
 
   <!-- CHECKERS GAME BOARD VIEW -->
   <div id="gameCheckers" class="stack hidden">
-    <div class="score">
+    <div class="score row between">
       <div>Checkers: <span id="checkersTurnText" class="text-amber-400">Light Turn</span></div>
       <button onclick="checkersEngine.resetBoard(); renderCheckers();" class="red" style="padding:4px 10px;font-size:11px">Reset</button>
     </div>
@@ -190,14 +176,14 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <span id="p1ScoreText" style="font-size:12px;font-weight:700">Light: 12</span>
       <span id="p2ScoreText" style="font-size:12px;font-weight:700">Dark: 12</span>
     </div>
-    <button class="blue" onclick="returnToMainHub()" style="width:100%">Back to Room Lounge</button>
+    <button class="blue" onclick="returnToMainHub()" style="width:100%">Back to Lounge</button>
   </div>
 </div>
 
 <!-- ROOM CREATION MODAL -->
 <div id="createModal" class="modal-overlay hidden">
   <div class="modal-card stack">
-    <h2 style="color:#fcd34d;font-size:15px">🎮 Create Game Room</h2>
+    <h2 style="color:#fcd34d;font-size:16px">🎮 Create Game Room</h2>
     
     <div style="text-align:left">
       <label class="text-xs text-slate-400">Select Game</label>
@@ -209,11 +195,11 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 
     <div style="text-align:left">
       <label class="text-xs text-slate-400">Match Mode</label>
-      <div class="pill-group">
-        <div class="pill-opt active" onclick="setMatchType('pvp', this)">Online PvP</div>
-        <div class="pill-opt" onclick="setMatchType('ai', this)">Vs AI Bot</div>
-        <div class="pill-opt" onclick="setMatchType('pass', this)">Pass & Play</div>
-      </div>
+      <select id="createModeSelect">
+        <option value="pvp">Online PvP Room</option>
+        <option value="ai">Vs AI Bots</option>
+        <option value="pass">Pass & Play</option>
+      </select>
     </div>
 
     <div class="two" style="margin-top:8px">
@@ -238,18 +224,16 @@ localStorage.setItem('xg_perm_client_id', myClientId);
 let myNickname = localStorage.getItem('xg_perm_nickname') || 'Tav';
 $('myNickDisplay').textContent = myNickname;
 
-let selectedGame = 'dominoes', selectedMatchType = 'pvp', roomCode = 'XG-T1K50', lobby = [
+let selectedGame = 'dominoes', roomCode = 'XG-T1K50', lobby = [
   { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true },
   { clientId: 'b1', name: 'XBot-743', isBot: true, pos: 'N' },
   { clientId: 'b2', name: 'XBot-847', isBot: true, pos: 'E' }
 ];
 
-/* --- WEB AUDIO SYNTHESIS & BGM --- */
+/* --- AUDIO SYNTHESIS & BGM --- */
 let audioCtx = null;
 let bgmInterval = null;
 let bgmActive = false;
-let speakerOn = true;
-let micActive = false;
 
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -278,7 +262,7 @@ function startBgmLoop() {
   const notes = [130.81, 164.81, 196.00, 220.00, 261.63, 329.63];
   let step = 0;
   bgmInterval = setInterval(() => {
-    if (!bgmActive || !speakerOn || !audioCtx) return;
+    if (!bgmActive || !audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'triangle';
@@ -298,44 +282,36 @@ function stopBgmLoop() {
   bgmInterval = null;
 }
 
-function toggleSpeaker() {
-  speakerOn = !speakerOn;
-  const btn = $('speakerToggleBtn');
-  btn.textContent = speakerOn ? "Speaker ON" : "Speaker OFF";
-  btn.className = speakerOn ? "blue" : "red";
-  toast(speakerOn ? "Audio playback enabled" : "Audio muted");
+function playSlamSound() {
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(90, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
 }
 
-function toggleMic() {
-  micActive = !micActive;
-  const btn = $('micToggleBtn');
-  btn.textContent = micActive ? "Mic Active" : "Enable Mic";
-  btn.className = micActive ? "red" : "green";
-  toast(micActive ? "Microphone active" : "Microphone muted");
-}
-
-function toggleMutePlayer(name) {
-  toast(`Muted audio for ${name}`);
-}
-
-function removeBot(name) {
-  lobby = lobby.filter(p => p.name !== name);
-  renderLoungePlayers();
-  toast(`Removed ${name}`);
-}
-
-function addBotToLounge() {
-  if (lobby.length >= 4) return toast('Table full');
-  const botNames = ['XBot-743', 'XBot-847', 'XBot-3'];
-  const name = botNames[lobby.length - 1] || 'AI Bot';
-  lobby.push({ clientId: 'bot_' + Math.random(), name, isBot: true, pos: 'E' });
-  renderLoungePlayers();
-  toast('Added ' + name);
-}
-
-function updateLoungeGame(val) {
-  selectedGame = val;
-  toast('Game changed to ' + val.toUpperCase());
+function playKnockSound() {
+  initAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.08);
 }
 
 function renderLoungePlayers() {
@@ -354,54 +330,30 @@ function renderLoungePlayers() {
         ${p.isHost ? '<span style="font-size:9px; background:#a16207; padding:1px 6px; border-radius:4px">HOST</span>' : ''}
         ${!p.isBot && p.clientId === myClientId ? '<span style="font-size:9px; background:#3730a3; padding:1px 6px; border-radius:4px">YOU</span>' : ''}
       </div>
-      <div class="row" style="gap:4px">
-        <button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('${p.name}')">Mute</button>
-        ${p.isBot ? `<button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('${p.name}')">Remove</button>` : ''}
-      </div>
+      <button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('${p.name}')">Remove</button>
     `;
     container.appendChild(row);
   });
 }
 
-// RESTRICTED AUDIO FX: Slam strictly on doubles, realistic table knock for pass
-function playSlamSound() {
-  if (!speakerOn) return;
-  initAudio();
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(90, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
-  gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.15);
+function addBotToLounge() {
+  if (lobby.length >= 4) return toast('Table full');
+  const botNames = ['XBot-743', 'XBot-847', 'XBot-3'];
+  const name = botNames[lobby.length - 1] || 'AI Bot';
+  lobby.push({ clientId: 'bot_' + Math.random(), name, isBot: true, pos: 'E' });
+  renderLoungePlayers();
+  toast('Added ' + name);
 }
 
-function playKnockSound() {
-  if (!speakerOn) return;
-  initAudio();
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.08);
+function removeBot(name) {
+  lobby = lobby.filter(p => p.name !== name);
+  renderLoungePlayers();
+  toast(`Removed ${name}`);
 }
 
-function setMatchType(type, el) {
-  selectedMatchType = type;
-  document.querySelectorAll('#createModal .pill-opt').forEach(o => o.classList.remove('active'));
-  el.classList.add('active');
+function updateLoungeGame(val) {
+  selectedGame = val;
+  toast('Game changed to ' + val.toUpperCase());
 }
 
 function confirmCreateRoom() {
@@ -448,7 +400,7 @@ async function fetchActivePublicRooms() {
         <div style="font-size:11px; font-weight:800; color:#fff">${room.room_code}: ${(st.gameType || 'dominoes').toUpperCase()}</div>
         <div style="font-size:9px; color:#94a3b8">Host: ${st.lobby ? st.lobby[0]?.name : 'Player'}</div>
       </div>
-      <button class="green" style="padding:4px 8px; font-size:10px" onclick="joinRoom('${room.room_code}')">Join</button>
+      <button class="green" style="padding:4px 8px; font-size:10px" onclick="joinRoomFromInput()">Join</button>
     `;
     container.appendChild(card);
   });
@@ -492,7 +444,7 @@ function sendEmote(txt) {
 }
 
 /* ========================================================
-   YARD DOMINOES ENGINE (WITH DOUBLE SLAM & TABLE KNOCK)
+   YARD DOMINOES ENGINE
    ======================================================== */
 class YardDominoesEngine {
   constructor() {
@@ -690,10 +642,10 @@ class YardDominoesEngine {
     this.hands[0].forEach((tile, idx) => {
       const btn = document.createElement('button');
       btn.className = 'panel row';
-      btn.style.cssText = 'background:#1e293b; padding:6px; cursor:pointer; min-width:50px; justify-content:center;';
-      btn.innerHTML = `<span style="font-size:12px; font-weight:800; color:#fbbf24">[${tile[0]}:${tile[1]}]</span>`;
+      btn.style.cssText = 'background:#1e293b; padding:6px; cursor:pointer; min-width:54px; justify-content:center;';
+      btn.innerHTML = `<span style="font-size:13px; font-weight:800; color:#fbbf24">[${tile[0]}:${tile[1]}]</span>`;
       btn.onclick = () => {
-        const choice = confirm("Play on Left end? (Cancel for Right)") ? 'left' : 'right';
+        const choice = confirm("Play on Left end? (OK for Left, Cancel for Right)") ? 'left' : 'right';
         this.playTile(idx, choice);
       };
       handContainer.appendChild(btn);
@@ -754,7 +706,7 @@ function renderDominoCanvasBoard() {
 }
 
 /* ========================================================
-   JAMAICAN DRAUGHTS (CHECKERS) FULL ENGINE
+   JAMAICAN DRAUGHTS (CHECKERS) ENGINE
    ======================================================== */
 class JamaicanDraughtsEngine {
   constructor() {
@@ -999,7 +951,7 @@ function renderCheckers() {
 
   $('checkersTurnText').innerText = checkersEngine.activeTurn === 1 ? "Light Turn" : "Dark Turn";
   $('checkersStatusBadge').innerText = checkersEngine.mustCapture ? "FORCED JUMP REQUIRED!" : "Jamaican Draughts Engine Active";
-  $('checkersStatusBadge'].style.color = checkersEngine.mustCapture ? "#f43f5e" : "#38bdf8";
+  $('checkersStatusBadge').style.color = checkersEngine.mustCapture ? "#f43f5e" : "#38bdf8";
 }
 
 draughtsCanvas.addEventListener('click', (e) => {
