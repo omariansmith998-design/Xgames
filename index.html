@@ -131,8 +131,6 @@ canvas#board{display:block;width:100%;height:auto}
 
 <script>
 /* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
-// The key below is the PUBLIC anon key (safe in the browser). Never put a service_role key,
-// a "sb_secret_" key, or the LiveKit API secret in this file.
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
@@ -141,8 +139,6 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
 let roomCode = '', mySeatPos = 'S', micActive = false;
-// stateVersion: the host bumps it on every update. Guests ignore anything not newer than what they have,
-// so a slow or stale database read can never roll the table back.
 let stateVersion = 0, lastAppliedVersion = -1, joinConfirmed = false, syncing = false, syncDirty = false;
 
 /* PERMANENT DEVICE IDENTITY */
@@ -221,10 +217,7 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
-/* ---------- ROOM SYNC ----------
-   THE HOST OWNS THE GAME. Only the host changes the table. Every change bumps stateVersion and is
-   sent to everyone (instant broadcast + saved to the database). Guests only ever apply NEWER versions.
-   The host never applies state coming back from the network, so it can't overwrite itself with an old copy. */
+/* ---------- ROOM SYNC ---------- */
 function snapshot() {
   return { version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
 }
@@ -234,7 +227,6 @@ async function syncRoomState() {
   stateVersion++;
   if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'STATE', payload: snapshot() });
 
-  // Saves never overlap: if one is in flight, the next one waits and then saves the very latest table
   if (syncing) { syncDirty = true; return; }
   syncing = true;
   try {
@@ -247,12 +239,11 @@ async function syncRoomState() {
   syncing = false;
 }
 
-// Guests (and a returning host, with force) take a state from the network
 function applyState(st, force) {
   if (!st) return;
-  if (isHost && !force) return; // the host owns the table and never takes state from the network
+  if (isHost && !force) return;
   const v = typeof st.version === 'number' ? st.version : 0;
-  if (!force && v <= lastAppliedVersion) return; // stale or duplicate
+  if (!force && v <= lastAppliedVersion) return;
   lastAppliedVersion = v;
 
   roomStatus = pick(st.status, roomStatus);
@@ -281,7 +272,6 @@ function applyState(st, force) {
     $('game').classList.remove('hidden');
   }
   refresh();
-  if (force) maybeAi();
 }
 
 async function fetchLatestState() {
@@ -314,11 +304,9 @@ function listenToRoom() {
       if (!isHost) { fetchLatestState(); startJoinRetry(); }
     });
 
-  // Guests re-check the saved table every few seconds as a safety net
   if (!isHost) pollTimer = setInterval(fetchLatestState, 3000);
 }
 
-// A guest asks to join until the host confirms by sending a lobby that includes them
 function startJoinRetry() {
   clearInterval(joinRetryTimer);
   if (joinConfirmed) return;
@@ -340,7 +328,6 @@ function denyJoin(clientId, reason) {
   if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'JOIN_DENIED', payload: { clientId, reason } });
 }
 
-// HOST: seat a guest
 function handleJoin(g) {
   if (!g || typeof g.clientId !== 'string') return;
   if (!lobby.some(p => p.clientId === g.clientId)) {
@@ -352,10 +339,9 @@ function handleJoin(g) {
     renderLobby();
     toast(name + ' joined the table!');
   }
-  syncRoomState(); // also re-confirms a guest who asked twice
+  syncRoomState();
 }
 
-// HOST: a guest plays or passes. Only the player whose turn it is, and only a legal move, is accepted.
 function handleMove(mv) {
   if (!isHost || !mv || !active) return;
   const cur = byPos(turn);
@@ -370,7 +356,7 @@ function handleMove(mv) {
     else return;
     play(mv.index, mv.side);
   } else if (mv.type === 'PASS') {
-    if (center && cur.hand.some(isValid)) return; // can't pass with a playable tile
+    if (center && cur.hand.some(isValid)) return;
     pass();
   }
 }
@@ -417,8 +403,6 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
   joinConfirmed = false; lastAppliedVersion = -1;
 
-  // A guest is not added here. They ask the host to seat them (see startJoinRetry), and the host
-  // is the only one who ever changes the player list.
   if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId)
       && (data.state.lobby || []).length >= 4) {
     roomCode = '';
@@ -428,7 +412,7 @@ async function joinRoomByCode(code) {
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
 
-  if (isHost) stateVersion = data.state.version || 0; // host coming back: carry on from the saved table
+  if (isHost) stateVersion = data.state.version || 0;
   applyState(data.state, isHost);
   renderLobby(); refresh();
   listenToRoom();
@@ -454,7 +438,6 @@ $('shareBtn').onclick = () => {
   }
 };
 
-// Everything that takes you back to the home screen goes through here
 async function leaveToHome(message) {
   epoch++; active = false;
   if (isHost && roomSubscription) {
@@ -518,9 +501,7 @@ $('startBtn').onclick = () => {
   newMatch();
 };
 
-/* ---------- VOICE (LiveKit) ----------
-   Tapping Enable Mic joins the room's voice channel (this is also the tap that lets phones play sound).
-   The token comes from the livekit-token Edge Function, so the LiveKit secret never touches this page. */
+/* ---------- VOICE (LiveKit) ---------- */
 async function connectVoice() {
   if (livekitRoom) return true;
   if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
@@ -545,7 +526,7 @@ async function connectVoice() {
   });
 
   await room.connect(LIVEKIT_URL, data.token);
-  try { await room.startAudio(); } catch (e) { /* needs a tap, and this was one */ }
+  try { await room.startAudio(); } catch (e) {}
   livekitRoom = room;
   return true;
 }
@@ -566,7 +547,7 @@ $('micBtn').onclick = async () => {
       if (!(await connectVoice())) return;
       await livekitRoom.localParticipant.setMicrophoneEnabled(true);
     } else if (livekitRoom) {
-      await livekitRoom.localParticipant.setMicrophoneEnabled(false); // stay connected so you can still hear others
+      await livekitRoom.localParticipant.setMicrophoneEnabled(false);
     }
     micActive = wantOn;
     updateMicUI(micActive);
@@ -603,7 +584,7 @@ window.addEventListener('load', () => {
   }
 });
 
-/* ---------- GAME CORE (runs on the host only) ---------- */
+/* ---------- GAME CORE (runs on host only) ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -678,7 +659,9 @@ function maybeAi() {
 }
 
 function aiTurn() {
-  const p = byPos(turn), opts = [];
+  const p = byPos(turn);
+  if (!p) return;
+  const opts = [];
   p.hand.forEach((t, i) => {
     if (!isValid(t)) return;
     if (!center) opts.push({ i, side: 'first', w: t.a + t.b });
