@@ -55,7 +55,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 
     <!-- QUICK-PLAY TILES -->
     <div class="panel stack" style="gap:6px; background:#141724; border-color:#2e3650;">
-      <span style="font-size:11px; font-weight:800; color:#38bdf8">⚡ QUICK PLAY (SOLO VS BOTS)</span>
+      <span style="font-size:11px; font-weight:800; color:#38bdf8">⚡ QUICK PLAY (INSTANT SOLO VS BOTS)</span>
       <div class="two">
         <button class="green" onclick="quickStartGame('dominoes')">🂋 Yard Dominoes</button>
         <button class="purple" onclick="quickStartGame('checkers')">👑 Jamaican Checkers</button>
@@ -82,34 +82,52 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
     </div>
   </div>
 
-  <!-- FIXED LOBBY LOUNGE VIEW -->
-  <div id="roomPanel" class="panel hidden stack" style="align-items:center;">
+  <!-- SPATIAL ROOM LOBBY LOUNGE VIEW -->
+  <div id="roomPanel" class="panel hidden">
     <div class="text-xs text-slate-400 text-center">Room Code</div>
     <div class="codeBig" id="codeBig">XG-T1K50</div>
 
-    <div style="width: 100%; background: #0b0c12; border: 1px solid #23273a; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 4px 0;">
-      <!-- North Player Seat -->
-      <div id="seat-N" class="row" style="gap: 8px; background: #141724; padding: 6px 14px; border-radius: 99px; width: 100%; justify-content: center;">
-        <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold text-white text-xs" id="avatar-N">?</div>
-        <span style="font-size: 12px; font-weight: 700; color: #94a3b8" id="name-N">Empty Seat (North)</span>
-      </div>
-
-      <!-- Center Active Table Badge -->
-      <div class="w-24 h-24 rounded-full bg-amber-900/40 border-4 border-amber-800/60 flex flex-col items-center justify-center">
-        <span class="text-[9px] font-bold text-amber-500">GAME</span>
-        <span class="text-[10px] font-extrabold text-white uppercase" id="selectedLoungeGameBadge">DOMINOES</span>
-      </div>
-
-      <!-- South Player Seat (You) -->
-      <div id="seat-S" class="row" style="gap: 8px; background: #141724; border: 1px solid #059669; padding: 6px 14px; border-radius: 99px; width: 100%; justify-content: center;">
-        <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 text-xs" id="avatar-S">T</div>
-        <span style="font-size: 12px; font-weight: 700; color: #34d399" id="name-S">Tav ★ (Host)</span>
+    <div class="panel" style="background:#10131d; padding:8px; margin-bottom:8px">
+      <div class="row between" style="margin-bottom:6px">
+        <span class="text-xs text-emerald-400 font-bold">● Yard Voice (Mic)</span>
+        <div class="row" style="gap:4px">
+          <button id="speakerToggleBtn" class="blue" onclick="toggleSpeaker()" style="padding:4px 8px; font-size:10px">Speaker ON</button>
+          <button id="micToggleBtn" class="green" onclick="toggleMic()" style="padding:4px 8px; font-size:10px">Enable Mic</button>
+        </div>
       </div>
     </div>
 
-    <button class="red" onclick="returnToMainHub()" style="width:100%">Leave Room</button>
-    <button class="purple" id="addBotBtn" onclick="addBotToLounge()" style="width:100%">+ Add AI Opponent</button>
-    <button class="green" id="startBtn" onclick="launchGameEngine()" style="width:100%">Start Match</button>
+    <div style="text-align:left; font-size:11px; color:#94a3b8; margin-bottom:4px">Active Game Arena</div>
+    <select id="loungeGameSelect" onchange="updateLoungeGame(this.value)" style="margin-bottom:8px">
+      <option value="dominoes">🂋 Yard Dominoes (4-Player FFA)</option>
+      <option value="checkers">👑 Jamaican Checkers</option>
+    </select>
+
+    <div class="two" style="margin-bottom:8px">
+      <button class="blue" onclick="toast('Invite link copied!')">🔗 Share / Invite</button>
+      <button class="purple" onclick="toast('Code copied!')">📋 Copy Code</button>
+    </div>
+
+    <div class="stack" style="gap:4px; margin-bottom:8px">
+      <div style="font-size:11px; font-weight:700; color:#cbd5e1" id="loungePlayerHeader">Players (3/4)</div>
+      <div id="loungePlayerList" class="stack" style="gap:4px">
+        <div class="panel row between" style="padding:6px 10px; background:#141724">
+          <div class="row" style="gap:6px"><span class="w-2 h-2 rounded-full bg-emerald-400"></span><span style="font-size:12px; font-weight:700">Tav</span> <span style="font-size:9px; background:#a16207; padding:1px 6px; border-radius:4px">HOST</span> <span style="font-size:9px; background:#3730a3; padding:1px 6px; border-radius:4px">YOU</span></div>
+          <button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('Tav')">Mute</button>
+        </div>
+        <div class="panel row between" style="padding:6px 10px; background:#141724">
+          <div class="row" style="gap:6px"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span style="font-size:12px; font-weight:700">XBot-743</span></div>
+          <div class="row" style="gap:4px"><button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('XBot-743')">Mute</button><button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('XBot-743')">Remove</button></div>
+        </div>
+        <div class="panel row between" style="padding:6px 10px; background:#141724">
+          <div class="row" style="gap:6px"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span style="font-size:12px; font-weight:700">XBot-847</span></div>
+          <div class="row" style="gap:4px"><button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('XBot-847')">Mute</button><button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('XBot-847')">Remove</button></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="purple" id="addBotBtn" onclick="addBotToLounge()" style="width:100%; margin-bottom:6px">+ Add Bot</button>
+    <button class="green" id="startBtn" onclick="launchGameEngine()" style="width:100%">Start Yard Dominoes Match</button>
   </div>
 
   <!-- YARD DOMINOES GAME VIEW -->
@@ -117,25 +135,26 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
     <div class="row between" style="font-size:12px; font-weight:700">
       <span id="dominoScoreText">Score: Tav 0 : 0</span>
       <span class="text-emerald-400" id="dominoModeBadge" style="background:#064e3b; padding:2px 8px; border-radius:6px">Hand 1Cut Throat (FFA)</span>
-      <span class="text-slate-400" id="dominoCountsText">N:0 E:0</span>
+      <span class="text-slate-400" id="dominoCountsText">N:7 E:7</span>
     </div>
 
-    <div class="grid grid-cols-4 gap-1">
-      <div class="panel" style="padding:4px; text-align:center"><div id="dom-p0-name" style="font-weight:700; font-size:10px; color:#38bdf8">Tav</div><div id="dom-p0-count" style="font-size:10px; color:#94a3b8">7 tiles</div></div>
-      <div class="panel" style="padding:4px; text-align:center"><div id="dom-p1-name" style="font-weight:700; font-size:10px">XBot-743</div><div id="dom-p1-count" style="font-size:10px; color:#94a3b8">6 tiles</div></div>
-      <div class="panel" style="padding:4px; text-align:center"><div id="dom-p2-name" style="font-weight:700; font-size:10px">XBot-2</div><div id="dom-p2-count" style="font-size:10px; color:#94a3b8">7 tiles</div></div>
-      <div class="panel" style="padding:4px; text-align:center"><div id="dom-p3-name" style="font-weight:700; font-size:10px">XBot-3</div><div id="dom-p3-count" style="font-size:10px; color:#94a3b8">7 tiles</div></div>
+    <!-- PLAYER TILES HUD -->
+    <div class="stack" style="gap:4px">
+      <div class="panel row between" style="padding:4px 8px"><span id="dom-p0-name" style="font-weight:700; font-size:11px; color:#38bdf8">Tav</span><span id="dom-p0-count" style="font-size:11px; color:#94a3b8">7 tiles</span></div>
+      <div class="panel row between" style="padding:4px 8px"><span id="dom-p1-name" style="font-weight:700; font-size:11px">XBot-743</span><span id="dom-p1-count" style="font-size:11px; color:#94a3b8">7 tiles</span></div>
+      <div class="panel row between" style="padding:4px 8px"><span id="dom-p2-name" style="font-weight:700; font-size:11px">XBot-2</span><span id="dom-p2-count" style="font-size:11px; color:#94a3b8">7 tiles</span></div>
+      <div class="panel row between" style="padding:4px 8px"><span id="dom-p3-name" style="font-weight:700; font-size:11px">XBot-3</span><span id="dom-p3-count" style="font-size:11px; color:#94a3b8">6 tiles</span></div>
     </div>
 
-    <div class="wrap" style="height:260px; background:#064e3b">
+    <div class="wrap" style="height:260px; background:#155e2b">
       <canvas id="board"></canvas>
     </div>
 
-    <div class="panel" style="text-align:center; font-size:11px; color:#fbbf24; padding:4px" id="dominoActionEvent">★ Tav played [5:6]</div>
+    <div class="panel" style="text-align:center; font-size:11px; color:#fbbf24; padding:6px" id="dominoActionEvent">XBot-3 played double [6:6] with a slam!</div>
 
     <div class="stack panel" style="background:#10131d">
       <div style="font-size:11px; font-weight:700; color:#38bdf8" id="dominoTurnHeader">Your turn</div>
-      <div id="dominoHandContainer" class="row" style="overflow-x:auto; padding:4px 0; min-height:64px"></div>
+      <div id="dominoHandContainer" class="row" style="overflow-x:auto; padding:4px 0; min-height:60px"></div>
     </div>
 
     <div class="row" style="gap:8px">
@@ -143,6 +162,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <button class="blue" onclick="returnToMainHub()" style="flex:1">Back to Room Lounge</button>
     </div>
 
+    <!-- EXPRESS EMOTES -->
     <div class="panel stack" style="gap:4px">
       <div class="row between">
         <span style="font-size:10px; font-weight:800; color:#94a3b8">EXPRESS EMOTES</span>
@@ -218,12 +238,18 @@ localStorage.setItem('xg_perm_client_id', myClientId);
 let myNickname = localStorage.getItem('xg_perm_nickname') || 'Tav';
 $('myNickDisplay').textContent = myNickname;
 
-let selectedGame = 'dominoes', selectedMatchType = 'pvp', roomCode = '', lobby = [];
+let selectedGame = 'dominoes', selectedMatchType = 'pvp', roomCode = 'XG-T1K50', lobby = [
+  { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true },
+  { clientId: 'b1', name: 'XBot-743', isBot: true, pos: 'N' },
+  { clientId: 'b2', name: 'XBot-847', isBot: true, pos: 'E' }
+];
 
 /* --- WEB AUDIO SYNTHESIS & BGM --- */
 let audioCtx = null;
 let bgmInterval = null;
 let bgmActive = false;
+let speakerOn = true;
+let micActive = false;
 
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -252,7 +278,7 @@ function startBgmLoop() {
   const notes = [130.81, 164.81, 196.00, 220.00, 261.63, 329.63];
   let step = 0;
   bgmInterval = setInterval(() => {
-    if (!bgmActive || !audioCtx) return;
+    if (!bgmActive || !speakerOn || !audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'triangle';
@@ -272,8 +298,74 @@ function stopBgmLoop() {
   bgmInterval = null;
 }
 
+function toggleSpeaker() {
+  speakerOn = !speakerOn;
+  const btn = $('speakerToggleBtn');
+  btn.textContent = speakerOn ? "Speaker ON" : "Speaker OFF";
+  btn.className = speakerOn ? "blue" : "red";
+  toast(speakerOn ? "Audio playback enabled" : "Audio muted");
+}
+
+function toggleMic() {
+  micActive = !micActive;
+  const btn = $('micToggleBtn');
+  btn.textContent = micActive ? "Mic Active" : "Enable Mic";
+  btn.className = micActive ? "red" : "green";
+  toast(micActive ? "Microphone active" : "Microphone muted");
+}
+
+function toggleMutePlayer(name) {
+  toast(`Muted audio for ${name}`);
+}
+
+function removeBot(name) {
+  lobby = lobby.filter(p => p.name !== name);
+  renderLoungePlayers();
+  toast(`Removed ${name}`);
+}
+
+function addBotToLounge() {
+  if (lobby.length >= 4) return toast('Table full');
+  const botNames = ['XBot-743', 'XBot-847', 'XBot-3'];
+  const name = botNames[lobby.length - 1] || 'AI Bot';
+  lobby.push({ clientId: 'bot_' + Math.random(), name, isBot: true, pos: 'E' });
+  renderLoungePlayers();
+  toast('Added ' + name);
+}
+
+function updateLoungeGame(val) {
+  selectedGame = val;
+  toast('Game changed to ' + val.toUpperCase());
+}
+
+function renderLoungePlayers() {
+  const container = $('loungePlayerList');
+  container.innerHTML = '';
+  $('loungePlayerHeader').textContent = `Players (${lobby.length}/4)`;
+
+  lobby.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'panel row between';
+    row.style.cssText = 'padding:6px 10px; background:#141724';
+    row.innerHTML = `
+      <div class="row" style="gap:6px">
+        <span class="w-2 h-2 rounded-full ${p.isBot ? 'bg-slate-500' : 'bg-emerald-400'}"></span>
+        <span style="font-size:12px; font-weight:700">${p.name}</span>
+        ${p.isHost ? '<span style="font-size:9px; background:#a16207; padding:1px 6px; border-radius:4px">HOST</span>' : ''}
+        ${!p.isBot && p.clientId === myClientId ? '<span style="font-size:9px; background:#3730a3; padding:1px 6px; border-radius:4px">YOU</span>' : ''}
+      </div>
+      <div class="row" style="gap:4px">
+        <button class="purple" style="padding:2px 8px; font-size:10px" onclick="toggleMutePlayer('${p.name}')">Mute</button>
+        ${p.isBot ? `<button class="red" style="padding:2px 8px; font-size:10px" onclick="removeBot('${p.name}')">Remove</button>` : ''}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
 // RESTRICTED AUDIO FX: Slam strictly on doubles, realistic table knock for pass
 function playSlamSound() {
+  if (!speakerOn) return;
   initAudio();
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
@@ -290,6 +382,7 @@ function playSlamSound() {
 }
 
 function playKnockSound() {
+  if (!speakerOn) return;
   initAudio();
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
@@ -313,62 +406,19 @@ function setMatchType(type, el) {
 
 function confirmCreateRoom() {
   selectedGame = $('createGameSelect').value;
-  $('createModal').classList.add('hidden');
-
-  if (selectedMatchType === 'pass') {
-    launchGameEngine();
-    toast('Pass & Play Mode Active');
-    return;
-  }
-
-  createOnlineRoom();
-}
-
-async function createOnlineRoom() {
-  const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true };
-
-  const { error } = await sb.from('game_rooms').insert([{
-    room_code: code,
-    status: 'waiting',
-    state: { gameType: selectedGame, hostClientId: myClientId, lobby: [myEntry] }
-  }]);
-
-  if (error) return toast('Error creating room');
-
-  roomCode = code; lobby = [myEntry];
-  $('codeBig').textContent = roomCode;
-  $('selectedLoungeGameBadge').textContent = selectedGame.toUpperCase();
-  $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-  renderLounge();
+  $('createModal').classList.add('hidden');$('homeBox').classList.add('hidden');
+  $('roomPanel').classList.remove('hidden');$('loungeGameSelect').value = selectedGame;
+  renderLoungePlayers();
 }
 
 async function joinRoomFromInput() {
   const code = $('codeIn').value.trim().toUpperCase();
   if (!code) return toast('Enter room code');
-  joinRoom(code);
-}
-
-async function joinRoom(code) {
-  const { data, error } = await sb.from('game_rooms').select('*').eq('room_code', code).single();
-  if (error || !data) return toast('Room not found');
-
   roomCode = code;
-  selectedGame = data.state?.gameType || 'dominoes';
-  lobby = data.state?.lobby || [];
-
-  if (!lobby.some(p => p.clientId === myClientId)) {
-    if (lobby.length >= 4) return toast('Room is full');
-    const assignedPos = lobby.length === 1 ? 'N' : (lobby.length === 2 ? 'E' : 'W');
-    lobby.push({ clientId: myClientId, name: myNickname, isBot: false, pos: assignedPos, isHost: false });
-    await sb.from('game_rooms').update({ state: { ...data.state, lobby } }).eq('room_code', code);
-  }
-
   $('codeBig').textContent = roomCode;
-  $('selectedLoungeGameBadge').textContent = selectedGame.toUpperCase();
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-  renderLounge();
-  toast('Joined room successfully');
+  renderLoungePlayers();
+  toast('Joined room ' + code);
 }
 
 async function fetchActivePublicRooms() {
@@ -402,28 +452,6 @@ async function fetchActivePublicRooms() {
     `;
     container.appendChild(card);
   });
-}
-
-function renderLounge() {
-  const northPlayer = lobby.find(x => x.pos === 'N');
-  const nameEl = $('name-N');
-  const avatarEl = $('avatar-N');
-
-  if (northPlayer) {
-    nameEl.textContent = northPlayer.name;
-    avatarEl.textContent = northPlayer.name.charAt(0).toUpperCase();
-  } else {
-    nameEl.textContent = 'Empty Seat (North)';
-    avatarEl.textContent = '?';
-  }
-}
-
-function addBotToLounge() {
-  if (lobby.length >= 4) return toast('Table full');
-  const botNames = ['XBot-743', 'XBot-2', 'XBot-3'];
-  const name = botNames[lobby.length - 1] || 'AI Bot';
-  lobby.push({ clientId: 'bot_' + Math.random(), name, isBot: true, pos: 'N' });
-  renderLounge();
 }
 
 function quickStartGame(type) {
@@ -464,7 +492,7 @@ function sendEmote(txt) {
 }
 
 /* ========================================================
-   YARD DOMINOES ENGINE
+   YARD DOMINOES ENGINE (WITH DOUBLE SLAM & TABLE KNOCK)
    ======================================================== */
 class YardDominoesEngine {
   constructor() {
@@ -726,7 +754,7 @@ function renderDominoCanvasBoard() {
 }
 
 /* ========================================================
-   JAMAICAN DRAUGHTS (CHECKERS) ENGINE
+   JAMAICAN DRAUGHTS (CHECKERS) FULL ENGINE
    ======================================================== */
 class JamaicanDraughtsEngine {
   constructor() {
@@ -971,7 +999,7 @@ function renderCheckers() {
 
   $('checkersTurnText').innerText = checkersEngine.activeTurn === 1 ? "Light Turn" : "Dark Turn";
   $('checkersStatusBadge').innerText = checkersEngine.mustCapture ? "FORCED JUMP REQUIRED!" : "Jamaican Draughts Engine Active";
-  $('checkersStatusBadge').style.color = checkersEngine.mustCapture ? "#f43f5e" : "#38bdf8";
+  $('checkersStatusBadge'].style.color = checkersEngine.mustCapture ? "#f43f5e" : "#38bdf8";
 }
 
 draughtsCanvas.addEventListener('click', (e) => {
