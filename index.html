@@ -3,55 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Xgames Arcade - Jamaican Draughts Engine</title>
+  <title>Xgames Arcade - Master Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      touch-action: manipulation;
-      user-select: none;
-      -webkit-user-select: none;
+    body { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+    @keyframes smokeRise {
+      0% { opacity: 0.2; transform: translateY(0px) scale(0.8); }
+      40% { opacity: 0.9; transform: translateY(-12px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-28px) scale(1.6); }
     }
+    .animate-smoke-rise { animation: smokeRise 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 flex flex-col h-screen w-full items-center justify-between p-2 sm:p-4 overflow-hidden">
+<body class="bg-slate-950 text-slate-100 flex flex-col h-screen w-full justify-between items-center overflow-hidden font-sans">
 
-  <!-- Utility Header -->
-  <header class="w-full max-w-md flex h-12 items-center justify-between border-b border-slate-800 px-3 bg-slate-900 rounded-lg">
-    <button id="resetBtn" class="rounded-lg bg-red-900/40 px-3 py-1 text-xs font-semibold text-red-400 hover:bg-red-900/60 transition">Reset Match</button>
+  <!-- TOP HEADER / PLAYER PROFILE BAR -->
+  <header class="w-full max-w-md flex h-14 items-center justify-between border-b border-slate-800 px-3 bg-slate-900/90 backdrop-blur z-20">
     <div class="flex items-center gap-2">
-      <span id="turnDot" class="h-3 w-3 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span id="turnText" class="text-xs font-semibold text-slate-200">Player 1 (Light) Turn</span>
+      <div id="playerAvatarCard" class="relative h-9 w-9 rounded-full bg-amber-500 border border-emerald-400 flex items-center justify-center font-bold text-slate-900">
+        O
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-100 leading-tight">Omarian <span class="text-[10px] font-normal text-amber-400">(Lv. 20)</span></p>
+        <p class="text-[10px] text-slate-400">Grandmaster</p>
+      </div>
     </div>
-    <div id="statusBadge" class="text-xs font-bold text-amber-400 hidden">FORCED JUMP!</div>
+
+    <!-- Ticket Balance & Shop Opener -->
+    <button id="openShopBtn" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-full transition active:scale-95">
+      <span class="text-sm">🎟️</span>
+      <span id="ticketBalance" class="text-xs font-bold text-amber-400">1,450</span>
+    </button>
   </header>
 
-  <!-- 1:1 Responsive Game Canvas Container -->
-  <main class="w-full max-w-md flex flex-col items-center justify-center my-auto">
-    <div class="relative aspect-square w-full max-h-[calc(100vh-12rem)] rounded-xl border-2 border-slate-700 bg-emerald-950 shadow-2xl overflow-hidden">
-      <canvas id="draughtsCanvas" class="w-full h-full block cursor-pointer"></canvas>
+  <!-- LOBBY GAME SELECTOR TABS -->
+  <nav class="w-full max-w-md flex justify-around bg-slate-900 border-b border-slate-800 text-xs font-semibold text-slate-400 z-10">
+    <button onclick="switchTab('checkers')" id="tab-checkers" class="flex-1 py-2.5 border-b-2 border-emerald-400 text-emerald-400 font-bold">👑 Checkers</button>
+    <button onclick="switchTab('dominoes')" id="tab-dominoes" class="flex-1 py-2.5 border-b-2 border-transparent hover:text-slate-200">🂋 Dominoes</button>
+    <button onclick="switchTab('ludo')" id="tab-ludo" class="flex-1 py-2.5 border-b-2 border-transparent hover:text-slate-200">🎲 Ludo</button>
+  </nav>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="w-full max-w-md flex-1 flex flex-col items-center justify-center relative p-2 my-auto">
+    
+    <!-- CHECKERS GAME VIEW -->
+    <div id="view-checkers" class="w-full flex flex-col items-center">
+      <!-- In-Game Subheader -->
+      <div class="w-full flex justify-between items-center mb-2 px-2 text-xs">
+        <button id="resetCheckersBtn" class="bg-red-900/40 text-red-400 border border-red-800 px-2.5 py-1 rounded hover:bg-red-900/60 transition">Reset</button>
+        <span id="checkersTurnText" class="font-semibold text-slate-300">Light Turn</span>
+        <span id="p1ScoreText" class="text-slate-400">Pieces: 12 vs 12</span>
+      </div>
+
+      <!-- 1:1 Aspect Canvas Wrapper -->
+      <div id="checkersCanvasWrapper" class="relative aspect-square w-full max-h-[calc(100vh-16rem)] rounded-xl border-2 border-slate-700 bg-emerald-950 shadow-2xl overflow-hidden">
+        <canvas id="draughtsCanvas" class="w-full h-full block cursor-pointer"></canvas>
+      </div>
     </div>
+
+    <!-- DOMINOES PLACEHOLDER VIEW -->
+    <div id="view-dominoes" class="hidden w-full aspect-square max-h-[calc(100vh-16rem)] rounded-xl border border-slate-800 bg-slate-900 flex flex-col items-center justify-center p-4 text-center">
+      <span class="text-4xl mb-2">🂋</span>
+      <p class="font-bold text-slate-200">Dominoes Table Room</p>
+      <p class="text-xs text-slate-500 mt-1">4-Player Yard Rules Table Active</p>
+    </div>
+
+    <!-- LUDO PLACEHOLDER VIEW -->
+    <div id="view-ludo" class="hidden w-full aspect-square max-h-[calc(100vh-16rem)] rounded-xl border border-slate-800 bg-slate-900 flex flex-col items-center justify-center p-4 text-center">
+      <span class="text-4xl mb-2">🎲</span>
+      <p class="font-bold text-slate-200">Ludo Track Circuit</p>
+      <p class="text-xs text-slate-500 mt-1">Ready for 4-Player Circuit</p>
+    </div>
+
   </main>
 
-  <!-- Footer Controls & Status -->
-  <footer class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-lg p-3 text-center">
-    <div class="flex justify-between text-xs text-slate-400 font-medium">
-      <span id="p1Score">Light Pieces: 12</span>
-      <span id="p2Score">Dark Pieces: 12</span>
+  <!-- STREET LOUNGE EMOTE BURST BAR -->
+  <div class="w-full max-w-md bg-slate-900 border-t border-slate-800 px-3 py-2 flex items-center justify-between">
+    <span class="text-[10px] uppercase font-bold text-slate-500">Lounge Express</span>
+    <div class="flex gap-2">
+      <button onclick="triggerPuffEmote()" class="bg-slate-800 hover:bg-slate-700 p-1.5 rounded-lg text-sm active:scale-90 transition">💨 Puff</button>
+      <button onclick="triggerLobbyEmote('🂋')" class="bg-slate-800 hover:bg-slate-700 p-1.5 rounded-lg text-sm active:scale-90 transition">🂋 Slam</button>
+      <button onclick="triggerLobbyEmote('👑')" class="bg-slate-800 hover:bg-slate-700 p-1.5 rounded-lg text-sm active:scale-90 transition">👑 Crown</button>
     </div>
-  </footer>
+  </div>
 
+  <!-- ARCADE TICKET SHOP MODAL -->
+  <div id="shopModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-4 flex flex-col gap-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-sm text-slate-100">🛒 Arcade Ticket Store</h3>
+        <button id="closeShopBtn" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <!-- Item Grid -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between p-2.5 bg-slate-800/60 rounded-xl border border-slate-700">
+          <div>
+            <p class="text-xs font-bold text-slate-200">Hot Box Dark Felt</p>
+            <p class="text-[10px] text-slate-400">Foggy dark slate table theme</p>
+          </div>
+          <button onclick="buyCosmetic('hotbox', 600)" class="bg-emerald-600 hover:bg-emerald-500 text-xs font-bold px-3 py-1.5 rounded-lg transition">🎟️ 600</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-800/60 rounded-xl border border-slate-700">
+          <div>
+            <p class="text-xs font-bold text-slate-200">Puff & Fade Emote</p>
+            <p class="text-[10px] text-slate-400">Animated cloud avatar burst</p>
+          </div>
+          <button onclick="buyCosmetic('puff', 350)" class="bg-emerald-600 hover:bg-emerald-500 text-xs font-bold px-3 py-1.5 rounded-lg transition">🎟️ 350</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMBEDDED CHECKERS ENGINE & PLATFORM SCRIPT -->
   <script>
-    /**
-     * Jamaican Draughts / Checkers Matrix Engine
-     */
+    let tickets = 1450;
+
+    // View Navigation
+    function switchTab(tabName) {
+      ['checkers', 'dominoes', 'ludo'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).className = "flex-1 py-2.5 border-b-2 border-transparent text-slate-400";
+      });
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      document.getElementById(`tab-${tabName}`).className = "flex-1 py-2.5 border-b-2 border-emerald-400 text-emerald-400 font-bold";
+      if (tabName === 'checkers') resizeCanvas();
+    }
+
+    // Shop Control
+    document.getElementById('openShopBtn').onclick = () => document.getElementById('shopModal').classList.remove('hidden');
+    document.getElementById('closeShopBtn').onclick = () => document.getElementById('shopModal').classList.add('hidden');
+
+    function buyCosmetic(id, cost) {
+      if (tickets >= cost) {
+        tickets -= cost;
+        document.getElementById('ticketBalance').innerText = tickets.toLocaleString();
+        alert('Cosmetic unlocked!');
+        if (id === 'hotbox') {
+          document.getElementById('checkersCanvasWrapper').style.background = '#020617';
+        }
+      } else {
+        alert('Not enough Arcade Tickets!');
+      }
+    }
+
+    // Emote Particle Injection
+    function triggerPuffEmote() {
+      const card = document.getElementById('playerAvatarCard');
+      const puff = document.createElement('span');
+      puff.innerText = '💨';
+      puff.className = 'absolute -top-4 -right-2 text-xl pointer-events-none select-none animate-smoke-rise';
+      card.appendChild(puff);
+      setTimeout(() => puff.remove(), 1200);
+    }
+
+    function triggerLobbyEmote(symbol) {
+      const el = document.createElement('div');
+      el.innerText = symbol;
+      el.className = 'fixed text-3xl pointer-events-none z-50 animate-bounce';
+      el.style.left = `${Math.random() * 70 + 15}%`;
+      el.style.bottom = '80px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    // CHECKERS ENGINE CODE
     class JamaicanDraughtsEngine {
       constructor() {
         this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-        this.activeTurn = 1; // 1 = Light (Bottom), 2 = Dark (Top)
-        this.selectedSquare = null; // { row, col }
+        this.activeTurn = 1;
+        this.selectedSquare = null;
         this.validMoves = [];
         this.mustCapture = false;
-        this.chainCapturePiece = null; // { row, col } if multi-jump required
+        this.chainCapturePiece = null;
         this.resetBoard();
       }
 
@@ -60,8 +185,8 @@
         for (let r = 0; r < 8; r++) {
           for (let c = 0; c < 8; c++) {
             if ((r + c) % 2 === 1) {
-              if (r < 3) this.board[r][c] = 2; // Dark
-              else if (r > 4) this.board[r][c] = 1; // Light
+              if (r < 3) this.board[r][c] = 2;
+              else if (r > 4) this.board[r][c] = 1;
             }
           }
         }
@@ -75,9 +200,7 @@
       checkForForcedCaptures() {
         this.mustCapture = false;
         const allCaptures = this.getAllPossibleCaptures(this.activeTurn);
-        if (allCaptures.length > 0) {
-          this.mustCapture = true;
-        }
+        if (allCaptures.length > 0) this.mustCapture = true;
       }
 
       isCurrentPlayerPiece(piece) {
@@ -89,17 +212,9 @@
       getValidMovesForPiece(r, c) {
         const piece = this.board[r][c];
         if (piece === 0 || !this.isCurrentPlayerPiece(piece)) return [];
-
-        // If in a multi-jump chain, force player to keep jumping with that piece
-        if (this.chainCapturePiece) {
-          if (this.chainCapturePiece.row !== r || this.chainCapturePiece.col !== c) return [];
-        }
-
+        if (this.chainCapturePiece && (this.chainCapturePiece.row !== r || this.chainCapturePiece.col !== c)) return [];
         const captures = this.getPieceCaptures(r, c);
-        if (this.mustCapture) {
-          return captures;
-        }
-
+        if (this.mustCapture) return captures;
         return this.getPieceSimpleMoves(r, c);
       }
 
@@ -107,20 +222,15 @@
         const piece = this.board[r][c];
         const isKing = piece === 3 || piece === 4;
         const moves = [];
-        const directions = isKing
-          ? [[-1,-1], [-1,1], [1,-1], [1,1]]
-          : (this.activeTurn === 1 ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]]);
-
+        const directions = isKing ? [[-1,-1], [-1,1], [1,-1], [1,1]] : (this.activeTurn === 1 ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]]);
         for (const [dr, dc] of directions) {
           if (isKing) {
-            // Flying King Slide
             let nr = r + dr, nc = c + dc;
             while (this.isInBounds(nr, nc) && this.board[nr][nc] === 0) {
               moves.push({ toRow: nr, toCol: nc, captured: null });
               nr += dr; nc += dc;
             }
           } else {
-            // Standard Man 1-step move
             const nr = r + dr, nc = c + dc;
             if (this.isInBounds(nr, nc) && this.board[nr][nc] === 0) {
               moves.push({ toRow: nr, toCol: nc, captured: null });
@@ -135,31 +245,23 @@
         const isKing = piece === 3 || piece === 4;
         const captures = [];
         const directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
-
         for (const [dr, dc] of directions) {
           if (isKing) {
-            // Flying King Jump
             let nr = r + dr, nc = c + dc;
             let foundOpponent = null;
-
             while (this.isInBounds(nr, nc)) {
               const cell = this.board[nr][nc];
               if (cell !== 0) {
-                if (this.isOpponentPiece(piece, cell) && !foundOpponent) {
-                  foundOpponent = { r: nr, c: nc };
-                } else {
-                  break; // Blocked
-                }
+                if (this.isOpponentPiece(piece, cell) && !foundOpponent) foundOpponent = { r: nr, c: nc };
+                else break;
               } else if (foundOpponent) {
                 captures.push({ toRow: nr, toCol: nc, captured: foundOpponent });
               }
               nr += dr; nc += dc;
             }
           } else {
-            // Standard Man Jump
             const midR = r + dr, midC = c + dc;
             const landR = r + (dr * 2), landC = c + (dc * 2);
-
             if (this.isInBounds(landR, landC) && this.board[landR][landC] === 0) {
               const midPiece = this.board[midR][midC];
               if (midPiece !== 0 && this.isOpponentPiece(piece, midPiece)) {
@@ -174,23 +276,16 @@
       makeMove(fromR, fromC, toR, toC) {
         const validMoves = this.getValidMovesForPiece(fromR, fromC);
         const chosenMove = validMoves.find(m => m.toRow === toR && m.toCol === toC);
-
         if (!chosenMove) return false;
 
         let piece = this.board[fromR][fromC];
         this.board[fromR][fromC] = 0;
         this.board[toR][toC] = piece;
 
-        // Remove Captured Piece
-        if (chosenMove.captured) {
-          this.board[chosenMove.captured.r][chosenMove.captured.c] = 0;
-        }
-
-        // King Promotion
+        if (chosenMove.captured) this.board[chosenMove.captured.r][chosenMove.captured.c] = 0;
         if (piece === 1 && toR === 0) { this.board[toR][toC] = 3; piece = 3; }
         if (piece === 2 && toR === 7) { this.board[toR][toC] = 4; piece = 4; }
 
-        // Check Chained Double Jumps
         if (chosenMove.captured) {
           const extraCaptures = this.getPieceCaptures(toR, toC);
           if (extraCaptures.length > 0) {
@@ -202,7 +297,6 @@
           }
         }
 
-        // End Turn
         this.chainCapturePiece = null;
         this.activeTurn = this.activeTurn === 1 ? 2 : 1;
         this.selectedSquare = null;
@@ -212,7 +306,6 @@
       }
 
       isInBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
-      
       isOpponentPiece(myPiece, otherPiece) {
         if (otherPiece === 0) return false;
         const p1 = [1, 3], p2 = [2, 4];
@@ -246,9 +339,6 @@
       }
     }
 
-    /**
-     * Canvas UI Renderer & Input Controller
-     */
     const engine = new JamaicanDraughtsEngine();
     const canvas = document.getElementById('draughtsCanvas');
     const ctx = canvas.getContext('2d');
@@ -266,22 +356,18 @@
       const size = canvas.parentElement.getBoundingClientRect().width;
       const tileSize = size / 8;
 
-      // 1. Draw Board Squares
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
-          const isDark = (r + c) % 2 === 1;
-          ctx.fillStyle = isDark ? '#064e3b' : '#ecfdf5'; // Deep emerald green & soft cream
+          ctx.fillStyle = (r + c) % 2 === 1 ? '#064e3b' : '#ecfdf5';
           ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
         }
       }
 
-      // 2. Highlight Selected Square
       if (engine.selectedSquare) {
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.4)'; // Amber glow
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.4)';
         ctx.fillRect(engine.selectedSquare.col * tileSize, engine.selectedSquare.row * tileSize, tileSize, tileSize);
       }
 
-      // 3. Highlight Valid Target Moves
       for (const move of engine.validMoves) {
         ctx.fillStyle = 'rgba(16, 185, 129, 0.5)';
         ctx.beginPath();
@@ -289,34 +375,26 @@
         ctx.fill();
       }
 
-      // 4. Render Pieces
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const val = engine.board[r][c];
           if (val === 0) continue;
-
           const cx = c * tileSize + tileSize / 2;
           const cy = r * tileSize + tileSize / 2;
           const radius = tileSize * 0.38;
 
-          // Outer Token Ring
           ctx.beginPath();
           ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a'; // White/Slate vs Black/Slate
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-          ctx.shadowBlur = 8;
+          ctx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a';
           ctx.fill();
-          ctx.shadowBlur = 0;
 
-          // Inner Bezel Style
           ctx.beginPath();
           ctx.arc(cx, cy, radius * 0.75, 0, Math.PI * 2);
           ctx.fillStyle = (val === 1 || val === 3) ? '#cbd5e1' : '#334155';
           ctx.fill();
 
-          // Flying King Crown Rendering
           if (val === 3 || val === 4) {
-            ctx.fillStyle = '#fbbf24'; // Gold Crown
+            ctx.fillStyle = '#fbbf24';
             ctx.font = `${tileSize * 0.4}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -325,58 +403,36 @@
         }
       }
 
-      // 5. Update Status UI Headers
-      document.getElementById('turnText').innerText = engine.activeTurn === 1 ? "Player 1 (Light) Turn" : "Player 2 (Dark) Turn";
-      document.getElementById('turnDot').className = `h-3 w-3 rounded-full animate-pulse ${engine.activeTurn === 1 ? 'bg-emerald-400' : 'bg-red-500'}`;
-      
-      const statusBadge = document.getElementById('statusBadge');
-      if (engine.mustCapture) statusBadge.classList.remove('hidden');
-      else statusBadge.classList.add('hidden');
-
+      document.getElementById('checkersTurnText').innerText = engine.activeTurn === 1 ? "Light Turn" : "Dark Turn";
       const counts = engine.getPieceCounts();
-      document.getElementById('p1Score').innerText = `Light Pieces: ${counts.p1}`;
-      document.getElementById('p2Score').innerText = `Dark Pieces: ${counts.p2}`;
+      document.getElementById('p1ScoreText').innerText = `Pieces: ${counts.p1} vs ${counts.p2}`;
     }
 
-    // Touch & Mouse Input Listener
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
-      const size = rect.width;
-      const tileSize = size / 8;
-      
+      const tileSize = rect.width / 8;
       const col = Math.floor((e.clientX - rect.left) / tileSize);
       const row = Math.floor((e.clientY - rect.top) / tileSize);
 
       if (!engine.isInBounds(row, col)) return;
-
       const clickedPiece = engine.board[row][col];
 
-      // If user clicks their own piece
       if (engine.isCurrentPlayerPiece(clickedPiece)) {
         if (!engine.chainCapturePiece) {
           engine.selectedSquare = { row, col };
           engine.validMoves = engine.getValidMovesForPiece(row, col);
         }
-      } 
-      // If user clicks a valid move destination
-      else if (engine.selectedSquare) {
+      } else if (engine.selectedSquare) {
         const moved = engine.makeMove(engine.selectedSquare.row, engine.selectedSquare.col, row, col);
-        if (!moved) {
-          if (!engine.chainCapturePiece) {
-            engine.selectedSquare = null;
-            engine.validMoves = [];
-          }
+        if (!moved && !engine.chainCapturePiece) {
+          engine.selectedSquare = null;
+          engine.validMoves = [];
         }
       }
-
       render();
     });
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      engine.resetBoard();
-      render();
-    });
-
+    document.getElementById('resetCheckersBtn').onclick = () => { engine.resetBoard(); render(); };
     window.addEventListener('resize', resizeCanvas);
     window.addEventListener('load', resizeCanvas);
   </script>
