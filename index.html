@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Xgames Arcade - Yard Dominoes (Six Love)</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#07080c;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -15,6 +15,7 @@ body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,
 .hidden{display:none!important}
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
 button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#334155}
+button:disabled{opacity:.5}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
 input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0;text-transform:none}
 input:focus{border-color:#6366f1}
@@ -56,9 +57,9 @@ canvas#board{display:block;width:100%;height:auto}
 </div>
 
 <div class="card stack">
-  <div class="panel row between status"><span id="syncLabel">Connecting...</span><b id="roomBadge">No room yet</b></div>
+  <div class="panel row between status"><span id="syncLabel">Offline Practice</span><b id="roomBadge">No room yet</b></div>
 
-  <!-- PROFILE SETUP MODAL -->
+  <!-- PROFILE SETUP -->
   <div id="profileBox" class="profile-card stack hidden">
     <h2>Set Up Your Player Profile</h2>
     <input id="profileNameIn" placeholder="Enter nickname (e.g. Omarian, Tav, Louis)" maxlength="15">
@@ -126,16 +127,23 @@ canvas#board{display:block;width:100%;height:auto}
   </div>
 </div>
 <div id="toast"></div>
+<div id="audioBox"></div>
 
 <script>
 /* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
+// The key below is the PUBLIC anon key (safe in the browser). Never put a service_role key,
+// a "sb_secret_" key, or the LiveKit API secret in this file.
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
-let roomSubscription = null, lobbyPollInterval = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
-let micActive = false, pollPausedUntil = 0;
+
+let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
+let roomCode = '', mySeatPos = 'S', micActive = false;
+// stateVersion: the host bumps it on every update. Guests ignore anything not newer than what they have,
+// so a slow or stale database read can never roll the table back.
+let stateVersion = 0, lastAppliedVersion = -1, joinConfirmed = false, syncing = false, syncDirty = false;
 
 /* PERMANENT DEVICE IDENTITY */
 let myClientId = localStorage.getItem('xg_perm_client_id');
@@ -171,6 +179,7 @@ function shake() {
 const $ = id => document.getElementById(id);
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
+const pick = (v, cur) => (v === undefined ? cur : v);
 
 /* ---------- STATE ---------- */
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
@@ -200,7 +209,7 @@ $('saveProfileBtn').onclick = () => {
   $('profileBox').classList.add('hidden');
   $('homeBox').classList.remove('hidden');
   toast('Profile saved!');
-  
+
   const params = new URLSearchParams(window.location.search);
   const roomParam = params.get('room');
   if (roomParam) joinRoomByCode(roomParam.toUpperCase());
@@ -212,123 +221,185 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
-/* ---------- REALTIME BROADCAST & DB SYNC ---------- */
+/* ---------- ROOM SYNC ----------
+   THE HOST OWNS THE GAME. Only the host changes the table. Every change bumps stateVersion and is
+   sent to everyone (instant broadcast + saved to the database). Guests only ever apply NEWER versions.
+   The host never applies state coming back from the network, so it can't overwrite itself with an old copy. */
+function snapshot() {
+  return { version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+}
+
 async function syncRoomState() {
   if (!roomCode || !isHost) return;
-  const stateData = { status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
-  await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: stateData, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
+  stateVersion++;
+  if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'STATE', payload: snapshot() });
+
+  // Saves never overlap: if one is in flight, the next one waits and then saves the very latest table
+  if (syncing) { syncDirty = true; return; }
+  syncing = true;
+  try {
+    do {
+      syncDirty = false;
+      const st = snapshot();
+      await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: st, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
+    } while (syncDirty);
+  } catch (e) { console.error('Save failed', e); }
+  syncing = false;
 }
 
-function listenToRoom() {
-  if (roomSubscription) roomSubscription.unsubscribe();
-  if (lobbyPollInterval) clearInterval(lobbyPollInterval);
-
-  roomSubscription = sb.channel('room_' + roomCode)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
-      if (Date.now() > pollPausedUntil) handleRoomPayload(payload.new.state);
-    })
-    .on('broadcast', { event: 'JOIN_EVENT' }, payload => {
-      if (isHost && payload.payload) {
-        const guest = payload.payload;
-        if (!lobby.some(p => p.clientId === guest.clientId)) {
-          const positions = ['S', 'W', 'N', 'E'];
-          const taken = lobby.map(p => p.pos);
-          const freePos = positions.find(p => !taken.includes(p)) || 'W';
-          lobby.push({ clientId: guest.clientId, name: guest.name, isBot: false, pos: freePos, isHost: false });
-          renderLobby();
-          syncRoomState();
-          
-          roomSubscription.send({ type: 'broadcast', event: 'LOBBY_UPDATE', payload: { lobby, hostClientId } });
-          toast(guest.name + ' joined the table!');
-        }
-      }
-    })
-    .on('broadcast', { event: 'LOBBY_UPDATE' }, payload => {
-      if (!isHost && payload.payload) {
-        lobby = payload.payload.lobby;
-        hostClientId = payload.payload.hostClientId;
-        const meInLobby = lobby.find(p => p.clientId === myClientId);
-        if (meInLobby) mySeatPos = meInLobby.pos;
-        renderLobby();
-      }
-    })
-    .on('broadcast', { event: 'ACTION_MOVE' }, payload => {
-      if (isHost && payload.payload) {
-        const move = payload.payload;
-        if (move.type === 'PLAY') play(move.index, move.side);
-        else if (move.type === 'PASS') pass();
-      }
-    })
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        fetchLatestState();
-      }
-    });
-
-  lobbyPollInterval = setInterval(() => {
-    if (Date.now() > pollPausedUntil) {
-      if (!$('roomPanel').classList.contains('hidden') || active) {
-        fetchLatestState();
-      }
-    }
-  }, 2500);
-}
-
-async function fetchLatestState() {
-  if (!roomCode) return;
-  const { data } = await sb.from('game_rooms').select('state').eq('room_code', roomCode).single();
-  if (data && data.state) handleRoomPayload(data.state);
-}
-
-function handleRoomPayload(st) {
+// Guests (and a returning host, with force) take a state from the network
+function applyState(st, force) {
   if (!st) return;
-  roomStatus = st.status || 'waiting';
-  hostClientId = st.hostClientId || hostClientId;
-  isHost = (hostClientId === myClientId);
-  
-  handNo = st.handNo; sNS = st.sNS; sWE = st.sWE; lastWin = st.lastWin; needD6 = st.needD6;
-  if (st.players && st.players.length > 0) players = st.players;
-  turn = st.turn; L = st.L; R = st.R; center = st.center;
-  lb = st.lb || []; rb = st.rb || []; passes = st.passes; active = st.active; matchOver = st.matchOver;
-  
-  if (st.lobby && st.lobby.length > 0) {
+  if (isHost && !force) return; // the host owns the table and never takes state from the network
+  const v = typeof st.version === 'number' ? st.version : 0;
+  if (!force && v <= lastAppliedVersion) return; // stale or duplicate
+  lastAppliedVersion = v;
+
+  roomStatus = pick(st.status, roomStatus);
+  hostClientId = pick(st.hostClientId, hostClientId);
+  handNo = pick(st.handNo, handNo); sNS = pick(st.sNS, sNS); sWE = pick(st.sWE, sWE);
+  lastWin = pick(st.lastWin, lastWin); needD6 = pick(st.needD6, needD6);
+  if (st.players && st.players.length) players = st.players;
+  turn = pick(st.turn, turn); L = pick(st.L, L); R = pick(st.R, R); center = pick(st.center, center);
+  lb = st.lb || []; rb = st.rb || [];
+  passes = pick(st.passes, passes); active = pick(st.active, active); matchOver = pick(st.matchOver, matchOver);
+
+  if (st.lobby) {
     lobby = st.lobby;
-    const meInLobby = lobby.find(p => p.clientId === myClientId);
-    if (meInLobby) mySeatPos = meInLobby.pos;
+    const me = lobby.find(p => p.clientId === myClientId);
+    if (me) {
+      mySeatPos = me.pos; joinConfirmed = true; clearInterval(joinRetryTimer);
+    } else if (joinConfirmed && !isHost) {
+      leaveToHome('The host removed you from the table.');
+      return;
+    }
     renderLobby();
   }
-  
+
   if (roomStatus === 'playing' && $('game').classList.contains('hidden')) {
     $('lobby').classList.add('hidden');
     $('game').classList.remove('hidden');
   }
   refresh();
+  if (force) maybeAi();
+}
+
+async function fetchLatestState() {
+  if (!roomCode) return;
+  const { data } = await sb.from('game_rooms').select('state').eq('room_code', roomCode).maybeSingle();
+  if (data && data.state) applyState(data.state);
+}
+
+function stopListening() {
+  clearInterval(pollTimer); clearInterval(joinRetryTimer);
+  if (roomSubscription) { sb.removeChannel(roomSubscription); roomSubscription = null; }
+}
+
+function listenToRoom() {
+  stopListening();
+
+  roomSubscription = sb.channel('room_' + roomCode)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
+      if (!isHost && payload.new) applyState(payload.new.state);
+    })
+    .on('broadcast', { event: 'STATE' }, ({ payload }) => { if (!isHost) applyState(payload); })
+    .on('broadcast', { event: 'JOIN_EVENT' }, ({ payload }) => { if (isHost) handleJoin(payload); })
+    .on('broadcast', { event: 'JOIN_DENIED' }, ({ payload }) => {
+      if (payload && payload.clientId === myClientId) leaveToHome(payload.reason || 'The host could not seat you.');
+    })
+    .on('broadcast', { event: 'ROOM_CLOSED' }, () => { if (!isHost) leaveToHome('The host closed the room.'); })
+    .on('broadcast', { event: 'ACTION_MOVE' }, ({ payload }) => { if (isHost) handleMove(payload); })
+    .subscribe(status => {
+      if (status !== 'SUBSCRIBED') return;
+      if (!isHost) { fetchLatestState(); startJoinRetry(); }
+    });
+
+  // Guests re-check the saved table every few seconds as a safety net
+  if (!isHost) pollTimer = setInterval(fetchLatestState, 3000);
+}
+
+// A guest asks to join until the host confirms by sending a lobby that includes them
+function startJoinRetry() {
+  clearInterval(joinRetryTimer);
+  if (joinConfirmed) return;
+  let tries = 0;
+  const send = () => {
+    if (joinConfirmed || !roomSubscription) { clearInterval(joinRetryTimer); return; }
+    if (++tries > 12) {
+      clearInterval(joinRetryTimer);
+      toast("Couldn't reach the host. Ask them to keep the room open.");
+      return;
+    }
+    roomSubscription.send({ type: 'broadcast', event: 'JOIN_EVENT', payload: { clientId: myClientId, name: myNickname } });
+  };
+  send();
+  joinRetryTimer = setInterval(send, 1500);
+}
+
+function denyJoin(clientId, reason) {
+  if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'JOIN_DENIED', payload: { clientId, reason } });
+}
+
+// HOST: seat a guest
+function handleJoin(g) {
+  if (!g || typeof g.clientId !== 'string') return;
+  if (!lobby.some(p => p.clientId === g.clientId)) {
+    if (roomStatus === 'playing') return denyJoin(g.clientId, 'That match has already started.');
+    if (lobby.length >= 4) return denyJoin(g.clientId, 'The room is full.');
+    const freePos = ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
+    const name = String(g.name || 'Player').slice(0, 15);
+    lobby.push({ clientId: g.clientId, name, isBot: false, pos: freePos, isHost: false });
+    renderLobby();
+    toast(name + ' joined the table!');
+  }
+  syncRoomState(); // also re-confirms a guest who asked twice
+}
+
+// HOST: a guest plays or passes. Only the player whose turn it is, and only a legal move, is accepted.
+function handleMove(mv) {
+  if (!isHost || !mv || !active) return;
+  const cur = byPos(turn);
+  if (!cur || cur.ai || cur.clientId !== mv.clientId) return;
+
+  if (mv.type === 'PLAY') {
+    const t = cur.hand[mv.index];
+    if (!t || !isValid(t)) return;
+    if (!center) { if (mv.side !== 'first') return; }
+    else if (mv.side === 'left') { if (!(t.a === L || t.b === L)) return; }
+    else if (mv.side === 'right') { if (!(t.a === R || t.b === R)) return; }
+    else return;
+    play(mv.index, mv.side);
+  } else if (mv.type === 'PASS') {
+    if (center && cur.hand.some(isValid)) return; // can't pass with a playable tile
+    pass();
+  }
 }
 
 /* ---------- LOBBY CONTROLLER ---------- */
 $('createBtn').onclick = async () => {
   if (!myNickname) return initProfile();
-  
-  roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
-  
-  $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  lobby = [{ clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true }];
-  $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby();
-  
+
+  const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true };
+
   const { error } = await sb.from('game_rooms').insert([{
-    room_code: roomCode,
+    room_code: code,
     status: 'waiting',
-    state: { status: 'waiting', hostClientId, lobby, handNo: 1, sNS: 0, sWE: 0 }
+    state: { version: 0, status: 'waiting', hostClientId: myClientId, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0 }
   }]);
-  
-  if (error) { toast('Error creating room'); return; }
+  if (error) { console.error(error); toast('Error creating room'); return; }
+
+  roomCode = code; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
+  joinConfirmed = true; stateVersion = 0; lastAppliedVersion = -1;
+  lobby = [myEntry];
+  $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
+  $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
+  renderLobby(); refresh();
   toast('Room ' + roomCode + ' created!');
   listenToRoom();
 };
 
-$('joinBtn').onclick = async () => {
+$('joinBtn').onclick = () => {
   if (!myNickname) return initProfile();
   const code = $('codeIn').value.trim().toUpperCase();
   if (!code) return toast('Enter a room code');
@@ -337,44 +408,30 @@ $('joinBtn').onclick = async () => {
 
 async function joinRoomByCode(code) {
   if (!myNickname) return initProfile();
-  
-  const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).single();
-  if (error || !data) return toast('Room not found');
-  
-  pollPausedUntil = Date.now() + 6000;
+
+  const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).maybeSingle();
+  if (error || !data || !data.state) return toast('Room not found');
+
   roomCode = code; roomStatus = data.status || 'waiting';
   hostClientId = data.state.hostClientId || '';
   isHost = (hostClientId === myClientId);
-  
-  $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
-  
-  let currentLobby = data.state.lobby || [];
-  const existingPlayer = currentLobby.find(p => p.clientId === myClientId);
-  
-  if (!existingPlayer) {
-    const positions = ['S', 'W', 'N', 'E'];
-    const taken = currentLobby.map(p => p.pos);
-    const freePos = positions.find(p => !taken.includes(p)) || 'W';
-    mySeatPos = freePos;
-    currentLobby.push({ clientId: myClientId, name: myNickname, isBot: false, pos: freePos, isHost: false });
-  } else {
-    mySeatPos = existingPlayer.pos;
+  joinConfirmed = false; lastAppliedVersion = -1;
+
+  // A guest is not added here. They ask the host to seat them (see startJoinRetry), and the host
+  // is the only one who ever changes the player list.
+  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId)
+      && (data.state.lobby || []).length >= 4) {
+    roomCode = '';
+    return toast('That room is full');
   }
-  
-  lobby = currentLobby;
+
+  $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby(); 
+
+  if (isHost) stateVersion = data.state.version || 0; // host coming back: carry on from the saved table
+  applyState(data.state, isHost);
+  renderLobby(); refresh();
   listenToRoom();
-  
-  setTimeout(() => {
-    if (roomSubscription) {
-      roomSubscription.send({
-        type: 'broadcast',
-        event: 'JOIN_EVENT',
-        payload: { clientId: myClientId, name: myNickname }
-      });
-    }
-  }, 400);
 }
 
 $('copyBtn').onclick = () => {
@@ -397,28 +454,33 @@ $('shareBtn').onclick = () => {
   }
 };
 
-$('leaveBtn').onclick = () => {
-  lobby = []; roomCode = ''; $('roomBadge').textContent = 'No room yet';
-  if (lobbyPollInterval) clearInterval(lobbyPollInterval);
-  $('roomPanel').classList.add('hidden'); $('homeBox').classList.remove('hidden');
-  window.history.replaceState({}, document.title, window.location.pathname);
-};
+// Everything that takes you back to the home screen goes through here
+async function leaveToHome(message) {
+  epoch++; active = false;
+  if (isHost && roomSubscription) {
+    try { await roomSubscription.send({ type: 'broadcast', event: 'ROOM_CLOSED', payload: {} }); } catch (e) {}
+  }
+  stopListening();
+  disconnectVoice();
 
-$('hubBtn').onclick = () => {
-  epoch++; active = false; 
-  if (lobbyPollInterval) clearInterval(lobbyPollInterval);
-  $('game').classList.add('hidden');
-  $('roomPanel').classList.add('hidden');
-  $('homeBox').classList.remove('hidden');
+  lobby = []; players = []; roomCode = ''; isHost = false; hostClientId = ''; joinConfirmed = false;
+  lastAppliedVersion = -1; stateVersion = 0; roomStatus = 'waiting'; matchOver = false;
+  center = null; lb = []; rb = []; L = R = null; botN = 0;
+
+  $('roomBadge').textContent = 'No room yet';
+  $('game').classList.add('hidden'); $('roomPanel').classList.add('hidden');
+  $('lobby').classList.remove('hidden'); $('homeBox').classList.remove('hidden');
   window.history.replaceState({}, document.title, window.location.pathname);
-};
+  refresh();
+  if (message) toast(message);
+}
+$('leaveBtn').onclick = () => leaveToHome();
+$('hubBtn').onclick = () => leaveToHome();
 
 $('botBtn').onclick = () => {
   if (!isHost) return toast('Only host can add bots');
   if (lobby.length >= 4) return toast('Room is full');
-  const positions = ['S', 'W', 'N', 'E'];
-  const taken = lobby.map(p => p.pos);
-  const freePos = positions.find(p => !taken.includes(p));
+  const freePos = ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
   lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos: freePos, isHost: false });
   renderLobby(); syncRoomState();
 };
@@ -432,13 +494,13 @@ function renderLobby() {
     d.innerHTML = '<span></span><span>' +
       '<span class="tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : '')) + '">' + (p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER')) + '</span>' +
       (isMe ? ' <span class="tag you">YOU</span>' : '') +
-      (isHost && !isPlayerHost ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') + 
+      (isHost && !isPlayerHost ? ' <button style="padding:2px 8px;background:none;color:#fb7185" data-i="' + i + '">×</button>' : '') +
       '</span>';
     d.firstChild.textContent = p.name;
     const x = d.querySelector('button'); if (x) x.onclick = () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); };
     $('plist').appendChild(d);
   });
-  
+
   $('pc').textContent = lobby.length;
   $('startBtn').classList.toggle('hidden', !isHost);
   $('botBtn').classList.toggle('hidden', !isHost);
@@ -447,8 +509,7 @@ function renderLobby() {
 
 $('startBtn').onclick = () => {
   if (!isHost) return toast('Only host can start');
-  const positions = ['S', 'W', 'N', 'E'];
-  positions.forEach(pos => {
+  ['S', 'W', 'N', 'E'].forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) {
       lobby.push({ clientId: 'bot_' + (++botN), name: 'XBot-' + botN, isBot: true, pos, isHost: false });
     }
@@ -457,43 +518,78 @@ $('startBtn').onclick = () => {
   newMatch();
 };
 
-/* ---------- INSTANT MIC TOGGLE ---------- */
-$('micBtn').onclick = () => {
-  if (AC.state === 'suspended') AC.resume();
-  micActive = !micActive;
-  updateMicUI(micActive);
+/* ---------- VOICE (LiveKit) ----------
+   Tapping Enable Mic joins the room's voice channel (this is also the tap that lets phones play sound).
+   The token comes from the livekit-token Edge Function, so the LiveKit secret never touches this page. */
+async function connectVoice() {
+  if (livekitRoom) return true;
+  if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
+  if (!roomCode) { toast('Join a room first'); return false; }
 
-  setTimeout(async () => {
-    try {
-      if (micActive) {
-        if (window.LivekitClient && !livekitRoom) {
-          livekitRoom = new LivekitClient.Room();
-          await livekitRoom.connect(LIVEKIT_URL, 'demo-token');
-        }
-        if (livekitRoom && livekitRoom.localParticipant) {
-          await livekitRoom.localParticipant.setMicrophoneEnabled(true);
-        }
-      } else {
-        if (livekitRoom && livekitRoom.localParticipant) {
-          await livekitRoom.localParticipant.setMicrophoneEnabled(false);
-        }
-      }
-    } catch (e) { console.log('Voice background sync'); }
-  }, 10);
+  const { data, error } = await sb.functions.invoke('livekit-token', {
+    body: { roomCode, clientId: myClientId, name: myNickname }
+  });
+  if (error || !data || !data.token) {
+    console.error('Voice token error', error, data);
+    toast('Voice is not set up yet');
+    return false;
+  }
+
+  const room = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
+  room.on(LivekitClient.RoomEvent.TrackSubscribed, track => {
+    if (track.kind === 'audio') $('audioBox').appendChild(track.attach());
+  });
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => track.detach().forEach(el => el.remove()));
+  room.on(LivekitClient.RoomEvent.Disconnected, () => {
+    if (livekitRoom === room) { livekitRoom = null; micActive = false; updateMicUI(false, true); }
+  });
+
+  await room.connect(LIVEKIT_URL, data.token);
+  try { await room.startAudio(); } catch (e) { /* needs a tap, and this was one */ }
+  livekitRoom = room;
+  return true;
+}
+
+function disconnectVoice() {
+  const r = livekitRoom; livekitRoom = null;
+  if (r) { try { r.disconnect(); } catch (e) {} }
+  $('audioBox').innerHTML = '';
+  if (micActive) { micActive = false; updateMicUI(false, true); }
+}
+
+$('micBtn').onclick = async () => {
+  if (AC.state === 'suspended') AC.resume();
+  const wantOn = !micActive;
+  $('micBtn').disabled = true;
+  try {
+    if (wantOn) {
+      if (!(await connectVoice())) return;
+      await livekitRoom.localParticipant.setMicrophoneEnabled(true);
+    } else if (livekitRoom) {
+      await livekitRoom.localParticipant.setMicrophoneEnabled(false); // stay connected so you can still hear others
+    }
+    micActive = wantOn;
+    updateMicUI(micActive);
+  } catch (e) {
+    console.error('Voice error', e);
+    toast('Mic blocked or voice failed. Check mic permission.');
+  } finally {
+    $('micBtn').disabled = false;
+  }
 };
 
-function updateMicUI(active) {
+function updateMicUI(on, silent) {
   const btn = $('micBtn'), dot = $('micDot');
-  if (active) {
+  if (on) {
     btn.textContent = 'Mute Mic';
     btn.className = 'red';
     dot.classList.add('active');
-    toast('Microphone ON');
+    if (!silent) toast('Microphone ON');
   } else {
     btn.textContent = 'Enable Mic';
     btn.className = 'blue';
     dot.classList.remove('active');
-    toast('Microphone OFF');
+    if (!silent) toast('Microphone OFF');
   }
 }
 
@@ -507,7 +603,7 @@ window.addEventListener('load', () => {
   }
 });
 
-/* ---------- GAME CORE ---------- */
+/* ---------- GAME CORE (runs on the host only) ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -547,7 +643,7 @@ function isValid(t) {
 function play(i, side) {
   if (!isHost) {
     if (roomSubscription) {
-      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PLAY', index: i, side } });
+      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PLAY', index: i, side, clientId: myClientId } });
     }
     return;
   }
@@ -564,7 +660,7 @@ function play(i, side) {
 function pass() {
   if (!isHost) {
     if (roomSubscription) {
-      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PASS' } });
+      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PASS', clientId: myClientId } });
     }
     return;
   }
@@ -577,8 +673,8 @@ function next() { turn = NEXT[turn]; refresh(); syncRoomState(); maybeAi(); }
 
 function maybeAi() {
   if (!isHost) return;
-  const e = epoch;
-  if (active && byPos(turn).ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
+  const e = epoch, cur = byPos(turn);
+  if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
 }
 
 function aiTurn() {
@@ -603,6 +699,7 @@ function blocked() {
   else if (we < ns) win('E', 'Blocked! E/W win (' + we + ' vs ' + ns + ' pips)');
   else {
     active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
+    syncRoomState();
     setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
   }
 }
@@ -770,10 +867,10 @@ function refresh() {
   const currPlayer = byPos(turn);
   $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (currPlayer ? currPlayer.name : 'Waiting...'));
   selIdx = null; drawBoard(); renderHand();
-  $('againBtn').classList.toggle('hidden', !matchOver);
+  $('againBtn').classList.toggle('hidden', !(matchOver && isHost));
 }
 
-$('againBtn').onclick = newMatch;
+$('againBtn').onclick = () => { if (isHost) newMatch(); };
 </script>
 </body>
 </html>
