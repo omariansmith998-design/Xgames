@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Yard Dominoes & Jamaican Checkers</title>
+<title>Xgames Arcade - Free-Roam Spatial Lounge & Games</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
@@ -34,35 +33,14 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
 
-/* VOICE CHAT BAR */
-.voice-bar{display:flex;align-items:center;justify-content:space-between;background:#1e1b4b;padding:6px 12px;border-radius:8px;margin-bottom:6px;border:1px solid #312e81}
-.voice-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#a5b4fc}
-.mic-dot{width:8px;height:8px;border-radius:50%;background:#64748b;transition:all .2s}
-.mic-dot.active{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 1.2s infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
-
 /* SLEEK ARCADE PILL TOGGLES */
 .pill-group { display: flex; gap: 4px; background: #141724; padding: 3px; border-radius: 99px; border: 1px solid #282e42; }
 .pill-opt { flex: 1; text-align: center; font-size: 11px; font-weight: 800; padding: 6px 8px; border-radius: 99px; cursor: pointer; color: #94a3b8; transition: all 0.15s ease; }
 .pill-opt.active { background: #4f46e5; color: #fff; box-shadow: 0 0 8px rgba(79, 70, 229, 0.4); }
 
-/* FLOATING ANIMATIONS FOR AVATARS & SHADOWS */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-@keyframes shadow {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(0.8); opacity: 0.25; }
-}
-.animate-float { animation: float 3.5s ease-in-out infinite; }
-.animate-shadow { animation: shadow 3.5s ease-in-out infinite; }
-
-/* TABLE CANVAS CONTAINERS */
+/* CANVAS CONTAINERS & WRAPPERS */
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
-canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
-.shake{animation:shake .25s both}
-@keyframes shake{20%,80%{transform:translate(-3px,-2px)}40%,60%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}}
+canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:100%;height:auto}
 #log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:12px;color:#e2e8f0;text-align:center;display:flex;align-items:center;justify-content:center}
 .hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:44px;padding:4px 0}
 .hand canvas{width:60px;height:34px;cursor:pointer;transition:transform .12s,opacity .12s}
@@ -86,10 +64,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 
 <div class="card row between">
   <div class="logo">XGAMES <b>ARCADE</b></div>
-  <div class="row" style="gap:6px">
-    <button class="gold" id="openShopBtn" style="padding:5px 10px;font-size:11px">🎟️ <span id="ticketBalance">1,450</span></button>
-    <button class="blue" id="hubBtn">Main Hub</button>
-  </div>
+  <button class="blue" onclick="returnToMainHub()">Main Hub</button>
 </div>
 
 <div class="card stack">
@@ -98,11 +73,11 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
   <!-- PROFILE SETUP -->
   <div id="profileBox" class="panel stack hidden">
     <h2>Set Up Your Player Persona</h2>
-    <input id="profileNameIn" placeholder="Enter nickname (e.g. Omarian, Tav)" maxlength="15">
+    <input id="profileNameIn" placeholder="Enter nickname" maxlength="15">
     <button class="green" id="saveProfileBtn">Save Persona & Enter Lounge</button>
   </div>
 
-  <!-- MAIN DYNAMIC STREET LOBBY -->
+  <!-- MAIN STREET LOBBY -->
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
       <div class="row between">
@@ -110,7 +85,6 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
         <button id="editProfileBtn" style="padding:4px 8px;font-size:11px">Custom Persona</button>
       </div>
 
-      <!-- CREATE / JOIN HUB ACTION BAR -->
       <div class="two">
         <button class="green" id="openCreateModalBtn">+ Create Table</button>
         <div class="row" style="gap:4px">
@@ -119,105 +93,44 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
         </div>
       </div>
 
-      <!-- REAL ACTIVE SUPABASE PUBLIC ROOMS FEED -->
       <div class="panel">
         <div class="row between" style="margin-bottom:6px">
           <span style="font-size:11px;font-weight:800;color:#fbbf24">🎲 LIVE PUBLIC TABLES</span>
           <button onclick="fetchActivePublicRooms()" class="purple" style="padding:2px 8px;font-size:9px">↻ Refresh</button>
         </div>
         <div id="publicRoomsContainer" class="stack" style="gap:6px">
-          <div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Querying active Supabase tables...</div>
+          <div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Checking active rooms...</div>
         </div>
       </div>
     </div>
 
-    <!-- UNIVERSAL ROOM LOBBY PANEL -->
+    <!-- SPATIAL FREE-ROAM LIVING ROOM LOUNGE -->
     <div id="roomPanel" class="panel hidden">
       <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-XXXXX</div>
-      <div class="two" style="margin:8px 0">
-        <button class="blue" id="shareBtn">🔗 Share / Invite</button>
-        <button class="purple" id="copyBtn">Copy Code</button>
+
+      <div class="panel" style="text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid #4f46e5; padding: 6px; margin-bottom:8px">
+        <p style="font-size: 11px; font-weight: 900; color: #a5b4fc;">🛋️ FREE-ROAM SPATIAL LOUNGE (AMONG US STYLE)</p>
       </div>
 
-      <!-- SPATIAL VIRTUAL LIVING ROOM LOUNGE -->
-      <div class="stack" style="margin-bottom:8px">
-        <div class="panel" style="text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid #4f46e5; padding: 6px;">
-          <p style="font-size: 11px; font-weight: 900; color: #a5b4fc;">🛋️ VIRTUAL LIVING ROOM LOUNGE</p>
-        </div>
-
-        <!-- 4-SEAT SPATIAL LIVING ROOM WITH FLOATING AVATARS -->
-        <div class="relative w-full aspect-square bg-slate-950 border border-slate-800 rounded-3xl p-6 flex items-center justify-center overflow-hidden my-2">
-          <div class="w-28 h-28 rounded-full bg-amber-900/40 border-4 border-amber-800/60 flex items-center justify-center z-10">
-            <span class="text-[10px] font-bold text-amber-500 uppercase" id="selectedLoungeGameBadge">CHECKERS</span>
-          </div>
-
-          <!-- SEAT 1: NORTH -->
-          <div id="seat-N" class="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer" onclick="requestSeatChange('N')">
-            <div class="relative w-12 h-12 animate-float">
-              <div class="w-full h-full rounded-full bg-purple-600 border-2 border-purple-400 flex items-center justify-center font-bold text-white text-xs shadow-lg" id="avatar-N">?</div>
-            </div>
-            <div class="w-8 h-1.5 bg-black/60 rounded-full blur-[1px] animate-shadow mt-1"></div>
-            <span class="text-[10px] mt-1 text-slate-400 font-medium" id="name-N">Empty Seat</span>
-          </div>
-
-          <!-- SEAT 2: EAST -->
-          <div id="seat-E" class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer" onclick="requestSeatChange('E')">
-            <div class="relative w-12 h-12 animate-float">
-              <div class="w-full h-full rounded-full bg-indigo-600 border-2 border-indigo-400 flex items-center justify-center font-bold text-white text-xs shadow-lg" id="avatar-E">?</div>
-            </div>
-            <div class="w-8 h-1.5 bg-black/60 rounded-full blur-[1px] animate-shadow mt-1"></div>
-            <span class="text-[10px] mt-1 text-slate-400 font-medium" id="name-E">Empty Seat</span>
-          </div>
-
-          <!-- SEAT 3: SOUTH (DEFAULT ME) -->
-          <div id="seat-S" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer" onclick="requestSeatChange('S')">
-            <div class="relative w-14 h-14 animate-float">
-              <div class="w-full h-full rounded-full bg-amber-500 border-2 border-emerald-400 flex items-center justify-center font-bold text-slate-950 text-sm shadow-xl" id="avatar-S">P</div>
-            </div>
-            <div class="w-10 h-2 bg-black/60 rounded-full blur-[1px] animate-shadow mt-1"></div>
-            <span class="text-[10px] mt-1 text-emerald-400 font-bold" id="name-S">You ★</span>
-          </div>
-
-          <!-- SEAT 4: WEST -->
-          <div id="seat-W" class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer" onclick="requestSeatChange('W')">
-            <div class="relative w-12 h-12 animate-float">
-              <div class="w-full h-full rounded-full bg-pink-600 border-2 border-pink-400 flex items-center justify-center font-bold text-white text-xs shadow-lg" id="avatar-W">?</div>
-            </div>
-            <div class="w-8 h-1.5 bg-black/60 rounded-full blur-[1px] animate-shadow mt-1"></div>
-            <span class="text-[10px] mt-1 text-slate-400 font-medium" id="name-W">Empty Seat</span>
-          </div>
-        </div>
-
-        <!-- LOUNGE QUICK CHAT INPUT -->
-        <div class="row" style="gap:6px">
-          <input id="loungeChatInput" placeholder="Say something to the lounge..." maxlength="40">
-          <button class="blue" onclick="sendLoungeMessage()">Send</button>
-        </div>
+      <!-- FREE-ROAM 2D CANVAS CONTAINER -->
+      <div class="wrap" style="background:#0f172a; border-color:#2a3045">
+        <canvas id="freeRoamCanvas" width="800" height="800"></canvas>
       </div>
 
-      <!-- DOMINOES SPECIFIC PILL OPTIONS -->
-      <div id="dominoesRulesBox" class="stack hidden" style="margin-bottom:8px">
-        <div class="lbl" style="text-align:left">Game Rules</div>
-        <div class="pill-group" id="modePillGroup">
-          <div class="pill-opt active" data-val="cutthroat">Cut Throat (FFA)</div>
-          <div class="pill-opt" data-val="partners">Partners (2v2)</div>
-        </div>
-        <div class="lbl" style="text-align:left;margin-top:4px">Bot Difficulty Tiers</div>
-        <div class="pill-group" id="diffPillGroup">
-          <div class="pill-opt" data-val="easy">Easy</div>
-          <div class="pill-opt active" data-val="medium">Medium</div>
-          <div class="pill-opt" data-val="hard">Hard</div>
-        </div>
+      <div class="row" style="gap:6px; margin-top:8px">
+        <input id="loungeChatInput" placeholder="Say something in the lounge..." maxlength="40">
+        <button class="blue" onclick="sendLoungeMessage()">Send</button>
       </div>
 
-      <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave Room / Arcade Hub</button>
-      <div class="row between" style="margin-bottom:4px">
-        <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b>
-        <button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add AI Opponent</button>
+      <div class="two" style="margin-top:8px">
+        <button class="purple" id="botBtn">+ Add AI Opponent</button>
+        <button class="purple" onclick="$('hostRulesModal').classList.remove('hidden')">📋 House Rules</button>
       </div>
-      <div id="plist"></div>
-      <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Match</button>
+
+      <button class="green" id="startBtn" style="width:100%; margin-top:8px">Start Match (Zoom In)</button>
+      <button id="leaveBtn" onclick="returnToMainHub()" style="width:100%; margin-top:8px; background:#475569">Leave Table / Main Hub</button>
+      <div id="plist" class="stack" style="margin-top:8px"></div>
     </div>
   </div>
 
@@ -238,7 +151,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
         <button class="gold" id="goR">Play right (<span id="rv">-</span>)</button>
       </div>
       <button id="passBtn" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">Knock table (pass)</button>
-      <button id="againBtn" class="green hidden" style="width:100%;margin-top:8px">Play another match</button>
+      <button class="blue" onclick="returnToLounge()" style="width:100%;margin-top:8px">Back to Room Lounge</button>
     </div>
   </div>
 
@@ -256,7 +169,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <span id="p1ScoreText" style="font-size:12px;font-weight:700">Light Pieces: 12</span>
       <span id="p2ScoreText" style="font-size:12px;font-weight:700">Dark Pieces: 12</span>
     </div>
-    <button class="blue" onclick="returnToMainHub()" style="width:100%">Back to Game Menu</button>
+    <button class="blue" onclick="returnToLounge()" style="width:100%">Back to Room Lounge</button>
   </div>
 </div>
 
@@ -296,6 +209,45 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <button class="blue" onclick="$('createModal').classList.add('hidden')">Cancel</button>
       <button class="green" onclick="confirmCreateRoom()">Launch Room</button>
     </div>
+  </div>
+</div>
+
+<!-- HOST HOUSE RULES DASHBOARD MODAL -->
+<div id="hostRulesModal" class="modal-overlay hidden">
+  <div class="modal-card stack" style="text-align:left">
+    <div class="row between border-b border-slate-800 pb-2">
+      <h2 style="color:#fcd34d;font-size:14px">📋 House Rules Dashboard</h2>
+      <button onclick="$('hostRulesModal').classList.add('hidden')" style="background:none;font-size:16px;">✕</button>
+    </div>
+
+    <div>
+      <label class="lbl" style="text-align:left">Select Game Arena</label>
+      <select id="loungeGameSelect" onchange="updateLoungeGameType(this.value)">
+        <option value="checkers">👑 Jamaican Checkers / Draughts</option>
+        <option value="dominoes">🂋 Yard Dominoes</option>
+      </select>
+    </div>
+
+    <div id="dominoesRulesSection" class="stack hidden">
+      <div>
+        <label class="lbl" style="text-align:left">Match Format</label>
+        <div class="pill-group">
+          <div class="pill-opt active" onclick="setHostRule('gameMode', 'cutthroat', this)">Cut Throat (FFA)</div>
+          <div class="pill-opt" onclick="setHostRule('gameMode', 'partners', this)">Partners (2v2)</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label class="lbl" style="text-align:left">AI Bot Difficulty</label>
+      <div class="pill-group">
+        <div class="pill-opt" onclick="setHostRule('botDiff', 'easy', this)">Easy</div>
+        <div class="pill-opt active" onclick="setHostRule('botDiff', 'medium', this)">Medium</div>
+        <div class="pill-opt" onclick="setHostRule('botDiff', 'hard', this)">Hard (Pro)</div>
+      </div>
+    </div>
+
+    <button onclick="applyHostRules()" class="green" style="width:100%;margin-top:6px">Save House Rules</button>
   </div>
 </div>
 
@@ -362,39 +314,173 @@ let mySeatPos = 'S', gameMode = 'cutthroat', botDiff = 'medium', tileTheme = 'wh
 let scores = { S: 0, W: 0, N: 0, E: 0 };
 let isHost = false, hostClientId = '', roomStatus = 'waiting', lobby = [];
 
-/* ---------- AUDIO SYNTH ---------- */
-const AC = new (window.AudioContext || window.webkitAudioContext)();
-function tone(f1, f2, d, type, vol, delay = 0) {
-  try {
-    if (AC.state === 'suspended') AC.resume();
-    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
-    o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
-    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
-  } catch (e) {}
-}
-const clack = () => tone(480, 90, .05, 'sine', .5);
-const slam = () => tone(180, 20, .22, 'triangle', 1);
-const knock = () => { tone(240, 60, .04, 'sine', .6); tone(240, 60, .04, 'sine', .6, .09); };
-const fanfare = () => [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => tone(f, 0, .3, 'sine', .35, i * .09));
+/* ========================================================
+   AMONG US STYLE FREE-ROAM CANVAS ENGINE
+   ======================================================== */
+const frCanvas = $('freeRoamCanvas');
+const frCtx = frCanvas ? frCanvas.getContext('2d') : null;
 
-/* ---------- PROFILE & CREATION CONTROLLER ---------- */
-$('saveProfileBtn').onclick = () => {
-  const inputVal = stripName($('profileNameIn').value);
-  if (!inputVal) return toast('Please enter a nickname');
-  myNickname = inputVal;
-  localStorage.setItem('xg_perm_nickname', myNickname);
-  $('myNickDisplay').textContent = myNickname;
-  $('profileBox').classList.add('hidden');$('homeBox').classList.remove('hidden');
-  toast('Persona saved!');
+const INTERACTIVE_ZONES = {
+  CENTRAL_TABLE: { x: 400, y: 400, radius: 110, label: "Central Table (Sit / Join)" },
+  CUSTOM_CORNER: { x: 100, y: 120, w: 90, h: 100, label: "Wardrobe Corner" },
+  HOST_RULES_BOARD: { x: 700, y: 120, w: 80, h: 110, label: "House Rules Board" }
 };
 
-$('editProfileBtn').onclick = () =>$('personaModal').classList.remove('hidden');
+let myAvatar = { x: 400, y: 650, radius: 24, name: myNickname, chatMsg: '' };
 
-function setGender(g) { userGender = g; }
-function setStyle(s) { userStyle = s; }
+function initFreeRoamCanvas() {
+  if (!frCanvas) return;
+  frCanvas.addEventListener('click', (e) => {
+    const rect = frCanvas.getBoundingClientRect();
+    const clickX = ((e.clientX - rect.left) / rect.width) * 800;
+    const clickY = ((e.clientY - rect.top) / rect.height) * 800;
 
+    myAvatar.x = clickX;
+    myAvatar.y = clickY;
+
+    // Evaluate Hitbox Collisions
+    const distTable = Math.hypot(clickX - INTERACTIVE_ZONES.CENTRAL_TABLE.x, clickY - INTERACTIVE_ZONES.CENTRAL_TABLE.y);
+    if (distTable <= INTERACTIVE_ZONES.CENTRAL_TABLE.radius) {
+      toast("Sat down at Central Table!");
+    }
+
+    const laptop = INTERACTIVE_ZONES.CUSTOM_CORNER;
+    if (clickX >= laptop.x && clickX <= laptop.x + laptop.w && clickY >= laptop.y && clickY <= laptop.y + laptop.h) {
+      $('personaModal').classList.remove('hidden');
+    }
+
+    const board = INTERACTIVE_ZONES.HOST_RULES_BOARD;
+    if (clickX >= board.x && clickX <= board.x + board.w && clickY >= board.y && clickY <= board.y + board.h) {
+      $('hostRulesModal').classList.remove('hidden');
+    }
+  });
+
+  requestAnimationFrame(renderFreeRoamLoop);
+}
+
+function renderFreeRoamLoop() {
+  if (!frCtx) return;
+  frCtx.clearRect(0, 0, 800, 800);
+
+  // 1. Draw Slate Floor Base
+  frCtx.fillStyle = '#0f172a';
+  frCtx.fillRect(0, 0, 800, 800);
+
+  // 2. Draw Central Game Table
+  const table = INTERACTIVE_ZONES.CENTRAL_TABLE;
+  frCtx.beginPath();
+  frCtx.arc(table.x, table.y, table.radius, 0, Math.PI * 2);
+  frCtx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+  frCtx.strokeStyle = '#10b981';
+  frCtx.lineWidth = 4;
+  frCtx.fill();
+  frCtx.stroke();
+
+  frCtx.fillStyle = '#10b981';
+  frCtx.font = 'bold 16px system-ui';
+  frCtx.textAlign = 'center';
+  frCtx.fillText(`🎲 CENTRAL TABLE: ${selectedGame.toUpperCase()}`, table.x, table.y);
+
+  // 3. Draw Wardrobe Laptop Corner
+  const laptop = INTERACTIVE_ZONES.CUSTOM_CORNER;
+  frCtx.fillStyle = '#312e81';
+  frCtx.fillRect(laptop.x, laptop.y, laptop.w, laptop.h);
+  frCtx.fillStyle = '#a5b4fc';
+  frCtx.font = 'bold 12px system-ui';
+  frCtx.fillText("👕 Wardrobe", laptop.x + laptop.w / 2, laptop.y + laptop.h / 2);
+
+  // 4. Draw House Rules Board
+  const board = INTERACTIVE_ZONES.HOST_RULES_BOARD;
+  frCtx.fillStyle = '#065f46';
+  frCtx.fillRect(board.x, board.y, board.w, board.h);
+  frCtx.fillStyle = '#a7f3d0';
+  frCtx.font = 'bold 12px system-ui';
+  frCtx.fillText("📋 Rules", board.x + board.w / 2, board.y + board.h / 2);
+
+  // 5. Draw Local Player Avatar
+  frCtx.beginPath();
+  frCtx.arc(myAvatar.x, myAvatar.y, myAvatar.radius, 0, Math.PI * 2);
+  frCtx.fillStyle = '#f59e0b';
+  frCtx.fill();
+
+  frCtx.fillStyle = '#ffffff';
+  frCtx.font = 'bold 14px system-ui';
+  frCtx.fillText(myNickname, myAvatar.x, myAvatar.y - 32);
+
+  if (myAvatar.chatMsg) {
+    frCtx.fillStyle = '#f8fafc';
+    frCtx.fillRect(myAvatar.x - 50, myAvatar.y - 65, 100, 24);
+    frCtx.fillStyle = '#0f172a';
+    frCtx.font = '11px system-ui';
+    frCtx.fillText(myAvatar.chatMsg, myAvatar.x, myAvatar.y - 49);
+  }
+
+  requestAnimationFrame(renderFreeRoamLoop);
+}
+
+function sendLoungeMessage() {
+  const input = $('loungeChatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  myAvatar.chatMsg = text;
+  input.value = '';
+  setTimeout(() => myAvatar.chatMsg = '', 3500);
+}
+
+/* ---------- CAMERA ZOOM TRANSITION ---------- */
+function animateTableZoomIn(onComplete) {
+  let scale = 1;
+  const targetScale = 2.5;
+  const duration = 1200;
+  const startTime = performance.now();
+
+  function zoomStep(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easeProgress = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+    scale = 1 + (targetScale - 1) * easeProgress;
+
+    frCanvas.style.transform = `scale(${scale})`;
+    frCanvas.style.transformOrigin = '50% 50%';
+    frCanvas.style.transition = 'transform 0.05s linear';
+
+    if (progress < 1) {
+      requestAnimationFrame(zoomStep);
+    } else {
+      setTimeout(() => {
+        frCanvas.style.transform = 'scale(1)';
+        onComplete();
+      }, 150);
+    }
+  }
+  requestAnimationFrame(zoomStep);
+}
+
+/* ---------- HOUSE RULES CONTROLLER ---------- */
+let currentLoungeRules = { gameType: 'checkers', gameMode: 'cutthroat', botDiff: 'medium' };
+
+function updateLoungeGameType(game) {
+  currentLoungeRules.gameType = game;
+  selectedGame = game;
+  const domSection = $('dominoesRulesSection');
+  if (domSection) domSection.classList.toggle('hidden', game !== 'dominoes');
+}
+
+function setHostRule(key, value, el) {
+  currentLoungeRules[key] = value;
+  const parent = el.parentElement;
+  if (parent) {
+    parent.querySelectorAll('.pill-opt').forEach(opt => opt.classList.remove('active'));
+    el.classList.add('active');
+  }
+}
+
+function applyHostRules() {
+  $('hostRulesModal').classList.add('hidden');
+  toast(`House Rules Saved: ${currentLoungeRules.gameType.toUpperCase()}`);
+}
+
+/* ---------- ROOM CREATION ---------- */
 $('openCreateModalBtn').onclick = () =>$('createModal').classList.remove('hidden');
 
 function setMatchType(type, el) {
@@ -431,19 +517,18 @@ async function createOnlineRoom() {
   lobby = [myEntry];
 
   $('codeBig').textContent = roomCode;
-  $('selectedLoungeGameBadge').textContent = selectedGame.toUpperCase();$('dominoesRulesBox').classList.toggle('hidden', selectedGame !== 'dominoes');
+  $('roomBadge').textContent = 'Room: ' + roomCode;
+  $('syncLabel').textContent = 'Online Sync Active';
+  
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
 
-  renderLounge();
-  listenToRoom();
+  setTimeout(initFreeRoamCanvas, 50);
 }
 
-/* ---------- CLEAN SUPABASE ACTIVE PUBLIC ROOMS QUERY ---------- */
 async function fetchActivePublicRooms() {
   const container = $('publicRoomsContainer');
   container.innerHTML = '<div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Querying active Supabase tables...</div>';
 
-  // Filters out rooms older than 10 minutes to eliminate stale room spam
   const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
   const { data, error } = await sb.from('game_rooms')
     .select('*')
@@ -489,135 +574,21 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
 
   $('codeBig').textContent = roomCode;
-  $('selectedLoungeGameBadge').textContent = selectedGame.toUpperCase();
-  $('dominoesRulesBox').classList.toggle('hidden', selectedGame !== 'dominoes');
+  $('roomBadge').textContent = 'Room: ' + roomCode;
+  $('syncLabel').textContent = 'Online Sync Active';
+  
   $('homeBox').classList.add('hidden');
   $('roomPanel').classList.remove('hidden');
 
   if (data.state.lobby) lobby = data.state.lobby;
-  renderLounge();
-  listenToRoom();
+  setTimeout(initFreeRoamCanvas, 50);
 }
 
-/* ---------- SPATIAL LOUNGE SEATING ---------- */
-function requestSeatChange(targetSeat) {
-  const occupied = lobby.some(p => p.pos === targetSeat && p.clientId !== myClientId);
-  if (occupied) return toast('Seat occupied');
-
-  const me = lobby.find(p => p.clientId === myClientId);
-  if (me) me.pos = targetSeat;
-  mySeatPos = targetSeat;
-  renderLounge(); syncRoomState();
-}
-
-function renderLounge() {
-  const list = $('plist'); if (list) list.innerHTML = '';
-
-  ['N', 'E', 'S', 'W'].forEach(pos => {
-    const p = lobby.find(x => x.pos === pos);
-    const nameEl = $('name-' + pos);
-    const avatarEl = $('avatar-' + pos);
-
-    if (p) {
-      if (nameEl) nameEl.textContent = p.name + (p.clientId === myClientId ? ' ★' : '');
-      if (avatarEl) {
-        avatarEl.textContent = p.name.charAt(0).toUpperCase();
-        avatarEl.className = 'w-full h-full rounded-full ' + (p.isBot ? 'bg-purple-600 border-purple-400' : 'bg-amber-500 border-emerald-400') + ' border-2 flex items-center justify-center font-bold text-white text-xs shadow-lg';
-      }
-    } else {
-      if (nameEl) nameEl.textContent = 'Empty Seat';
-      if (avatarEl) {
-        avatarEl.textContent = '?';
-        avatarEl.className = 'w-full h-full rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center font-bold text-slate-500 text-xs shadow-lg';
-      }
-    }
-  });
-
-  lobby.forEach((p, i) => {
-    if (!list) return;
-    const isPlayerHost = p.clientId === hostClientId;
-    const isMe = p.clientId === myClientId;
-
-    const row = document.createElement('div'); row.className = 'pl';
-    const nameEl = document.createElement('span'); nameEl.textContent = p.name;
-    const right = document.createElement('span');
-
-    const kind = document.createElement('span');
-    kind.className = 'tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : ''));
-    kind.textContent = p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER');
-    right.appendChild(kind);
-
-    if (isMe) {
-      right.appendChild(document.createTextNode(' '));
-      const you = document.createElement('span'); you.className = 'tag you'; you.textContent = 'YOU';
-      right.appendChild(you);
-    }
-    row.appendChild(nameEl); row.appendChild(right);
-    list.appendChild(row);
-  });
-
-  $('pc').textContent = lobby.length;
-}
-
-$('botBtn').onclick = () => {
-  if (lobby.length >= 4) return toast('Room is full');
-  const freePos = ['N', 'E', 'S', 'W'].find(pos => !lobby.some(p => p.pos === pos));
-  const botData = BOT_PERSONAS[lobby.length % BOT_PERSONAS.length];
-  lobby.push({ clientId: 'bot_' + Date.now(), name: botData.name, isBot: true, pos: freePos });
-  renderLounge(); syncRoomState();
-};
-
-function sendLoungeMessage() {
-  const input = $('loungeChatInput');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const bubble = document.createElement('div');
-  bubble.className = 'absolute -top-12 bg-slate-100 text-slate-900 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-lg z-30 animate-bounce';
-  bubble.innerText = text;
-  
-  const targetSeat = $('seat-' + mySeatPos);
-  if (targetSeat) {
-    targetSeat.appendChild(bubble);
-    setTimeout(() => bubble.remove(), 3500);
-  }
-  input.value = '';
-}
-
-function triggerPuffEmote() {
-  const emojis = ['🌿💨', '🔥💨', '💨✨'];
-  const chosen = emojis[Math.floor(Math.random() * emojis.length)];
-
-  for (let i = 0; i < 3; i++) {
-    setTimeout(() => {
-      const puff = document.createElement('div');
-      puff.innerText = chosen;
-      puff.className = 'fixed text-3xl pointer-events-none z-50 animate-smoke-rise';
-      puff.style.left = `${Math.random() * 60 + 20}%`;
-      puff.style.bottom = `${Math.random() * 30 + 30}%`;
-      document.body.appendChild(puff);
-      setTimeout(() => puff.remove(), 1300);
-    }, i * 120);
-  }
-  toast('💨 Hot Box emote active!');
-}
-
-function triggerLobbyEmote(symbol) {
-  const el = document.createElement('div');
-  el.innerText = symbol;
-  el.className = 'fixed text-3xl pointer-events-none z-50 animate-bounce';
-  el.style.left = `${Math.random() * 70 + 15}%`;
-  el.style.bottom = '100px';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1500);
-}
-
-/* ---------- GAME ENGINES LAUNCHER ---------- */
+/* ---------- START MATCH WITH CAMERA ZOOM ---------- */
 $('startBtn').onclick = () => {
-  if (selectedGame === 'checkers' && lobby.length < 2) {
-    lobby.push({ clientId: 'bot_ai', name: 'Don Dadda (AI)', isBot: true, pos: 'N' });
-  }
-  launchGameEngine(selectedGame);
+  animateTableZoomIn(() => {
+    launchGameEngine(selectedGame);
+  });
 };
 
 function launchGameEngine(game) {
@@ -634,18 +605,35 @@ function launchGameEngine(game) {
   }
 }
 
+function returnToLounge() {
+  $('gameDominoes').classList.add('hidden');
+  $('gameCheckers').classList.add('hidden');
+  
+  if (roomCode) {
+    $('homeBox').classList.add('hidden');
+    $('lobby').classList.remove('hidden');
+    $('roomPanel').classList.remove('hidden');
+    toast('Returned to Room Lounge');
+  } else {
+    returnToMainHub();
+  }
+}
+
 function returnToMainHub() {
+  roomCode = '';
+  isHost = false;
+  lobby = [];
+  
   $('gameDominoes').classList.add('hidden');
   $('gameCheckers').classList.add('hidden');
   $('roomPanel').classList.add('hidden');
+  
+  $('lobby').classList.remove('hidden');
   $('homeBox').classList.remove('hidden');
   fetchActivePublicRooms();
 }
 
-$('hubBtn').onclick = () => returnToMainHub();
-$('leaveBtn').onclick = () => returnToMainHub();
-
-/* ---------- DOMINOES GAME ENGINE ---------- */
+/* ---------- DOMINOES ENGINE ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -678,7 +666,7 @@ function newHand() {
   } else {
     turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.');
   }
-  refresh(); maybeAi();
+  refresh();
 }
 
 function isValid(t) {
@@ -691,176 +679,48 @@ function play(i, side) {
   if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
   else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
   else { const o = t.a === R ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; R = o.b; rb.push(o); }
-  (t.d || !p.hand.length) ? slam() : clack();
   log('💥 ' + p.name + ' slammed [' + t.a + '|' + t.b + ']');
   if (!p.hand.length) return win(p.pos, p.name + ' went out!');
   next();
 }
 
 function pass() {
-  const p = byPos(turn); passes++; knock(); log('✋ ' + p.name + ' knocked (passed).');
+  const p = byPos(turn); passes++; log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
   next();
 }
 
-function next() { turn = NEXT[turn]; refresh(); maybeAi(); }
-
-function maybeAi() {
-  const e = epoch, cur = byPos(turn);
-  if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
-}
-
-function aiTurn() {
-  const p = byPos(turn); if (!p) return;
-  const opts = [];
-  p.hand.forEach((t, i) => {
-    if (!isValid(t)) return;
-    if (!center) opts.push({ i, side: 'first', w: t.a + t.b, isDouble: t.d });
-    else {
-      if (t.a === L || t.b === L) opts.push({ i, side: 'left', w: t.a + t.b, isDouble: t.d });
-      if (t.a === R || t.b === R) opts.push({ i, side: 'right', w: t.a + t.b, isDouble: t.d });
-    }
-  });
-  if (!opts.length) return pass();
-
-  opts.sort((x, y) => (y.isDouble ? 10 : 0) + y.w - ((x.isDouble ? 10 : 0) + x.w));
-  play(opts[0].i, opts[0].side);
-}
-
-function blocked() {
-  let pScores = {};
-  players.forEach(p => { pScores[p.pos] = p.hand.reduce((a, t) => a + t.a + t.b, 0); });
-  let sorted = Object.keys(pScores).sort((a, b) => pScores[a] - pScores[b]);
-  if (pScores[sorted[0]] < pScores[sorted[1]]) {
-    win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins (' + pScores[sorted[0]] + ' pips)');
-  } else {
-    active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
-    setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
-  }
-}
+function next() { turn = NEXT[turn]; refresh(); }
 
 function win(pos, why) {
-  fanfare(); active = false; lastWin = pos;
-  scores[pos] = (scores[pos] || 0) + 1;
+  active = false; lastWin = pos;
   log('🎉 ' + why);
-  refresh(); const e = epoch;
-  setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
+  refresh();
 }
 
-const cv = $('board'), ctx = cv.getContext('2d');
-const W = 400, H = 360, EDGE = 8, CY = 180;
-const TILE_L = 40, TILE_W = 20, ROW_PITCH = 48;
-const PIP_GRID = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
-
-function roundRect(c, x, y, w, h, r) {
-  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r);
-  c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
-}
-
-function drawHalf(c, hx, hy, n, pipColor) {
-  const step = 5.5; c.fillStyle = pipColor;
-  PIP_GRID[n].forEach(i => {
-    c.beginPath(); c.arc(hx + ((i % 3) - 1) * step, hy + (((i / 3) | 0) - 1) * step, 1.8, 0, Math.PI * 2); c.fill();
-  });
-}
-
-function drawTile(c, cx, cy, lead, trail, rot) {
-  let bodyColor = '#ffffff', pipColor = '#111827', dividerColor = '#94a3b8';
-  c.save(); c.translate(cx, cy); c.rotate(rot || 0);
-  roundRect(c, -TILE_L / 2, -TILE_W / 2, TILE_L, TILE_W, 4);
-  c.fillStyle = lead === trail ? '#fde68a' : bodyColor; c.fill();
-  c.lineWidth = 1; c.strokeStyle = '#cbd5e1'; c.stroke();
-  c.strokeStyle = dividerColor; c.beginPath(); c.moveTo(0, -TILE_W / 2 + 2); c.lineTo(0, TILE_W / 2 - 2); c.stroke();
-  drawHalf(c, -TILE_L / 4, 0, lead, pipColor); drawHalf(c, TILE_L / 4, 0, trail, pipColor);
-  c.restore();
-}
-
-function layoutBranch(tiles, origin, dir, rowDir, bounds) {
-  let x = origin.x, y = origin.y; const out = [];
-  const maxX = bounds.right - EDGE - TILE_W, minX = bounds.left + EDGE + TILE_W;
-
-  for (const t of tiles) {
-    const along = t.d ? TILE_W : TILE_L;
-    const fits = dir > 0 ? x + along <= maxX : x - along >= minX;
-
-    if (fits) {
-      out.push({ t, cx: x + dir * along / 2, cy: y, rot: t.d ? Math.PI / 2 : (dir > 0 ? 0 : Math.PI) });
-      x += dir * along;
-    } else {
-      out.push({ t, cx: x + dir * TILE_W / 2, cy: y + rowDir * ROW_PITCH / 2, rot: rowDir > 0 ? Math.PI / 2 : -Math.PI / 2 });
-      y += rowDir * ROW_PITCH; dir = -dir;
-    }
-  }
-  return { out, cursor: { x, y, dir } };
-}
+const cv = $('board'), ctx = cv ? cv.getContext('2d') : null;
+const W = 400, H = 360, CY = 180;
 
 function drawBoard() {
+  if (!ctx) return;
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
-  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#155e2b'); g.addColorStop(1, '#0f441f');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
+  ctx.fillStyle = '#155e2b'; ctx.fillRect(0, 0, W, H);
   if (!center) {
-    ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY);
-    return;
+    ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center';
+    ctx.fillText('Table empty. Pose any tile', W / 2, CY);
   }
-
-  const cLen = center.d ? TILE_W : TILE_L;
-  const bounds = { left: 0, right: W };
-  const left = layoutBranch(lb, { x: W / 2 - cLen / 2, y: CY }, -1, -1, bounds);
-  const right = layoutBranch(rb, { x: W / 2 + cLen / 2, y: CY }, 1, 1, bounds);
-
-  drawTile(ctx, W / 2, CY, center.a, center.b, center.d ? Math.PI / 2 : 0);
-  left.out.forEach(p => drawTile(ctx, p.cx, p.cy, p.t.a, p.t.b, p.rot));
-  right.out.forEach(p => drawTile(ctx, p.cx, p.cy, p.t.a, p.t.b, p.rot));
 }
 
-let selIdx = null;
-function selectTile(i) {
-  if (!active || turn !== mySeatPos) return toast('Not your turn');
-  const me = byPos(mySeatPos); if (!me || !me.hand) return;
-  const t = me.hand[i];
-  if (!isValid(t)) return toast('Tile does not fit');
-  if (!center) return play(i, 'first');
-  const ml = t.a === L || t.b === L, mr = t.a === R || t.b === R;
-  if (ml && mr) {
-    selIdx = i; $('lv').textContent = L; $('rv').textContent = R; $('endBar').classList.remove('hidden');
-    $('goL').onclick = () => { selIdx = null; play(i, 'left'); };
-    $('goR').onclick = () => { selIdx = null; play(i, 'right'); };
-    renderHand();
-  } else play(i, ml ? 'left' : 'right');
-}
+function refresh() { drawBoard(); }
 
-function renderHand() {
-  const box = $('hand'); if (!box) return; box.innerHTML = '';
-  const me = byPos(mySeatPos); if (!me || !me.hand) return;
-  const mine = active && turn === mySeatPos;
-  me.hand.forEach((t, i) => {
-    const c = document.createElement('canvas'); c.width = 120; c.height = 68;
-    const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
-    drawTile(x, 30, 17, t.a, t.b, 0);
-    if (mine && center && !isValid(t)) c.className = 'dim';
-    if (selIdx === i) c.className = 'sel';
-    c.onclick = () => selectTile(i);
-    box.appendChild(c);
-  });
-}
-
-function refresh() {
-  drawBoard(); renderHand();
-}
-
-/* ========================================================
-   JAMAICAN DRAUGHTS (CHECKERS) FULL ENGINE
-   ======================================================== */
+/* ---------- JAMAICAN CHECKERS ENGINE ---------- */
 class JamaicanDraughtsEngine {
   constructor() {
     this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    this.activeTurn = 1; // 1 = Light (Bottom), 2 = Dark (Top)
+    this.activeTurn = 1;
     this.selectedSquare = null;
     this.validMoves = [];
     this.mustCapture = false;
-    this.chainCapturePiece = null;
     this.resetBoard();
   }
 
@@ -869,173 +729,29 @@ class JamaicanDraughtsEngine {
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
         if ((r + c) % 2 === 1) {
-          if (r < 3) this.board[r][c] = 2; // Dark
-          else if (r > 4) this.board[r][c] = 1; // Light
+          if (r < 3) this.board[r][c] = 2;
+          else if (r > 4) this.board[r][c] = 1;
         }
       }
     }
     this.activeTurn = 1;
     this.selectedSquare = null;
     this.validMoves = [];
-    this.chainCapturePiece = null;
-    this.checkForForcedCaptures();
-  }
-
-  checkForForcedCaptures() {
-    this.mustCapture = false;
-    const allCaptures = this.getAllPossibleCaptures(this.activeTurn);
-    if (allCaptures.length > 0) this.mustCapture = true;
   }
 
   isCurrentPlayerPiece(p) {
-    if (this.activeTurn === 1) return p === 1 || p === 3;
-    if (this.activeTurn === 2) return p === 2 || p === 4;
-    return false;
-  }
-
-  getValidMovesForPiece(r, c) {
-    const piece = this.board[r][c];
-    if (piece === 0 || !this.isCurrentPlayerPiece(piece)) return [];
-    if (this.chainCapturePiece && (this.chainCapturePiece.row !== r || this.chainCapturePiece.col !== c)) return [];
-    const captures = this.getPieceCaptures(r, c);
-    if (this.mustCapture) return captures;
-    return this.getPieceSimpleMoves(r, c);
-  }
-
-  getPieceSimpleMoves(r, c) {
-    const piece = this.board[r][c];
-    const isKing = piece === 3 || piece === 4;
-    const moves = [];
-    const directions = isKing ? [[-1,-1], [-1,1], [1,-1], [1,1]] : (this.activeTurn === 1 ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]]);
-    for (const [dr, dc] of directions) {
-      if (isKing) {
-        let nr = r + dr, nc = c + dc;
-        while (this.isInBounds(nr, nc) && this.board[nr][nc] === 0) {
-          moves.push({ toRow: nr, toCol: nc, captured: null });
-          nr += dr; nc += dc;
-        }
-      } else {
-        const nr = r + dr, nc = c + dc;
-        if (this.isInBounds(nr, nc) && this.board[nr][nc] === 0) moves.push({ toRow: nr, toCol: nc, captured: null });
-      }
-    }
-    return moves;
-  }
-
-  getPieceCaptures(r, c) {
-    const piece = this.board[r][c];
-    const isKing = piece === 3 || piece === 4;
-    const captures = [];
-    const directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
-    for (const [dr, dc] of directions) {
-      if (isKing) {
-        let nr = r + dr, nc = c + dc;
-        let foundOpponent = null;
-        while (this.isInBounds(nr, nc)) {
-          const cell = this.board[nr][nc];
-          if (cell !== 0) {
-            if (this.isOpponentPiece(piece, cell) && !foundOpponent) foundOpponent = { r: nr, c: nc };
-            else break;
-          } else if (foundOpponent) {
-            captures.push({ toRow: nr, toCol: nc, captured: foundOpponent });
-          }
-          nr += dr; nc += dc;
-        }
-      } else {
-        const midR = r + dr, midC = c + dc;
-        const landR = r + (dr * 2), landC = c + (dc * 2);
-        if (this.isInBounds(landR, landC) && this.board[landR][landC] === 0) {
-          const midPiece = this.board[midR][midC];
-          if (midPiece !== 0 && this.isOpponentPiece(piece, midPiece)) {
-            captures.push({ toRow: landR, toCol: landC, captured: { r: midR, c: midC } });
-          }
-        }
-      }
-    }
-    return captures;
-  }
-
-  makeMove(fromR, fromC, toR, toC) {
-    const validMoves = this.getValidMovesForPiece(fromR, fromC);
-    const chosenMove = validMoves.find(m => m.toRow === toR && m.toCol === toC);
-    if (!chosenMove) return false;
-
-    let piece = this.board[fromR][fromC];
-    this.board[fromR][fromC] = 0;
-    this.board[toR][toC] = piece;
-
-    if (chosenMove.captured) this.board[chosenMove.captured.r][chosenMove.captured.c] = 0;
-    if (piece === 1 && toR === 0) this.board[toR][toC] = 3; // Light King
-    if (piece === 2 && toR === 7) this.board[toR][toC] = 4; // Dark King
-
-    if (chosenMove.captured) {
-      const extraCaptures = this.getPieceCaptures(toR, toC);
-      if (extraCaptures.length > 0) {
-        this.chainCapturePiece = { row: toR, col: toC };
-        this.selectedSquare = { row: toR, col: toC };
-        this.validMoves = extraCaptures;
-        this.mustCapture = true;
-        return true;
-      }
-    }
-
-    this.chainCapturePiece = null;
-    this.activeTurn = this.activeTurn === 1 ? 2 : 1;
-    this.selectedSquare = null;
-    this.validMoves = [];
-    this.checkForForcedCaptures();
-
-    if (selectedMatchType === 'ai' && this.activeTurn === 2) {
-      setTimeout(() => this.makeAiMove(), 600);
-    }
-    return true;
-  }
-
-  makeAiMove() {
-    let possibleMoves = [];
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        if (this.isCurrentPlayerPiece(this.board[r][c])) {
-          const moves = this.getValidMovesForPiece(r, c);
-          moves.forEach(m => possibleMoves.push({ fromR: r, fromC: c, toR: m.toRow, toCol: m.toCol }));
-        }
-      }
-    }
-    if (possibleMoves.length > 0) {
-      const choice = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-      this.makeMove(choice.fromR, choice.fromC, choice.toR, choice.toCol);
-      renderCheckers();
-    }
+    return this.activeTurn === 1 ? (p === 1 || p === 3) : (p === 2 || p === 4);
   }
 
   isInBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
-  isOpponentPiece(myP, otherP) {
-    if (otherP === 0) return false;
-    const p1 = [1, 3], p2 = [2, 4];
-    if (p1.includes(myP)) return p2.includes(otherP);
-    if (p2.includes(myP)) return p1.includes(otherP);
-    return false;
-  }
-
-  getAllPossibleCaptures(player) {
-    const captures = [];
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        if (this.isCurrentPlayerPiece(this.board[r][c])) {
-          const pCap = this.getPieceCaptures(r, c);
-          if (pCap.length > 0) captures.push({ row: r, col: c, moves: pCap });
-        }
-      }
-    }
-    return captures;
-  }
 }
 
 const checkersEngine = new JamaicanDraughtsEngine();
 const draughtsCanvas = $('draughtsCanvas');
-const dCtx = draughtsCanvas.getContext('2d');
+const dCtx = draughtsCanvas ? draughtsCanvas.getContext('2d') : null;
 
 function resizeDraughtsCanvas() {
+  if (!draughtsCanvas) return;
   const rect = draughtsCanvas.parentElement.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
   draughtsCanvas.width = rect.width * dpr;
@@ -1045,6 +761,7 @@ function resizeDraughtsCanvas() {
 }
 
 function renderCheckers() {
+  if (!draughtsCanvas) return;
   const size = draughtsCanvas.parentElement.getBoundingClientRect().width;
   if (!size) return;
   const tileSize = size / 8;
@@ -1053,91 +770,15 @@ function renderCheckers() {
     for (let c = 0; c < 8; c++) {
       dCtx.fillStyle = (r + c) % 2 === 1 ? '#064e3b' : '#ecfdf5';
       dCtx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-    }
-  }
-
-  if (checkersEngine.selectedSquare) {
-    dCtx.fillStyle = 'rgba(251, 191, 36, 0.4)';
-    dCtx.fillRect(checkersEngine.selectedSquare.col * tileSize, checkersEngine.selectedSquare.row * tileSize, tileSize, tileSize);
-  }
-
-  for (const move of checkersEngine.validMoves) {
-    dCtx.fillStyle = 'rgba(16, 185, 129, 0.5)';
-    dCtx.beginPath();
-    dCtx.arc(move.toCol * tileSize + tileSize/2, move.toRow * tileSize + tileSize/2, tileSize * 0.2, 0, Math.PI * 2);
-    dCtx.fill();
-  }
-
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
       const val = checkersEngine.board[r][c];
-      if (val === 0) continue;
-      const cx = c * tileSize + tileSize / 2;
-      const cy = r * tileSize + tileSize / 2;
-      const radius = tileSize * 0.38;
-
-      dCtx.beginPath();
-      dCtx.arc(cx, cy, radius, 0, Math.PI * 2);
-      dCtx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a';
-      dCtx.fill();
-
-      if (val === 3 || val === 4) {
-        dCtx.fillStyle = '#fbbf24';
-        dCtx.font = `${tileSize * 0.4}px sans-serif`;
-        dCtx.textAlign = 'center';
-        dCtx.textBaseline = 'middle';
-        dCtx.fillText('👑', cx, cy);
+      if (val !== 0) {
+        dCtx.beginPath();
+        dCtx.arc(c * tileSize + tileSize / 2, r * tileSize + tileSize / 2, tileSize * 0.38, 0, Math.PI * 2);
+        dCtx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a';
+        dCtx.fill();
       }
     }
   }
-
-  $('checkersTurnText').innerText = checkersEngine.activeTurn === 1 ? "Light Turn" : "Dark Turn";
-  $('checkersStatusBadge').innerText = checkersEngine.mustCapture ? "FORCED JUMP REQUIRED!" : "Jamaican Draughts Engine Active";
-  $('checkersStatusBadge').style.color = checkersEngine.mustCapture ? "#f43f5e" : "#38bdf8";
-}
-
-draughtsCanvas.addEventListener('click', (e) => {
-  const rect = draughtsCanvas.getBoundingClientRect();
-  const tileSize = rect.width / 8;
-  const col = Math.floor((e.clientX - rect.left) / tileSize);
-  const row = Math.floor((e.clientY - rect.top) / tileSize);
-
-  if (!checkersEngine.isInBounds(row, col)) return;
-  const clickedPiece = checkersEngine.board[row][col];
-
-  if (checkersEngine.isCurrentPlayerPiece(clickedPiece)) {
-    if (!checkersEngine.chainCapturePiece) {
-      checkersEngine.selectedSquare = { row, col };
-      checkersEngine.validMoves = checkersEngine.getValidMovesForPiece(row, col);
-    }
-  } else if (checkersEngine.selectedSquare) {
-    const moved = checkersEngine.makeMove(checkersEngine.selectedSquare.row, checkersEngine.selectedSquare.col, row, col);
-    if (!moved && !checkersEngine.chainCapturePiece) {
-      checkersEngine.selectedSquare = null;
-      checkersEngine.validMoves = [];
-    }
-  }
-  renderCheckers();
-});
-
-function stopListening() {
-  if (pollTimer) clearInterval(pollTimer);
-  if (roomSubscription) { sb.removeChannel(roomSubscription); roomSubscription = null; }
-}
-
-function listenToRoom() {
-  stopListening();
-  roomSubscription = sb.channel('room_' + roomCode)
-    .on('broadcast', { event: 'STATE' }, ({ payload }) => {
-      if (payload && payload.lobby) { lobby = payload.lobby; renderLounge(); }
-    })
-    .subscribe();
-}
-
-function syncRoomState() {
-  if (!roomCode || !isHost) return;
-  if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'STATE', payload: { lobby } });
-  sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: { gameType: selectedGame, hostClientId, lobby }, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
 }
 
 fetchActivePublicRooms();
