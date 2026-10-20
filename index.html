@@ -105,7 +105,10 @@ canvas#board{display:block;width:100%;height:auto}
         <div id="micDot" class="mic-dot"></div>
         <span>🎙️ Yard Voice</span>
       </div>
-      <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px">Enable Mic</button>
+      <div class="row" style="gap:4px">
+        <button id="speakerBtn" class="purple" style="padding:4px 10px;font-size:11px">🔊 Speaker</button>
+        <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px">Enable Mic</button>
+      </div>
     </div>
     <div class="score">
       <div>N/S<span class="pill" id="sNS">0</span></div>
@@ -157,7 +160,7 @@ function tone(f1, f2, d, type, vol, delay = 0) {
     if (AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f1, t + d);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
   } catch (e) {}
@@ -502,10 +505,24 @@ $('startBtn').onclick = () => {
 };
 
 /* ---------- VOICE (LiveKit) ---------- */
+let audioCtx = null, gainNode = null;
+
+function initVoiceAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 2.5;
+    gainNode.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
 async function connectVoice() {
   if (livekitRoom) return true;
   if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
   if (!roomCode) { toast('Join a room first'); return false; }
+
+  initVoiceAudio();
 
   const { data, error } = await sb.functions.invoke('livekit-token', {
     body: { roomCode, clientId: myClientId, name: myNickname }
@@ -516,10 +533,32 @@ async function connectVoice() {
     return false;
   }
 
-  const room = new LivekitClient.Room({ adaptiveStream: true, dynacast: true });
-  room.on(LivekitClient.RoomEvent.TrackSubscribed, track => {
-    if (track.kind === 'audio') $('audioBox').appendChild(track.attach());
+  const room = new LivekitClient.Room({ 
+    adaptiveStream: true, 
+    dynacast: true,
+    audioCaptureDefaults: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    }
   });
+
+  room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+    if (track.kind === 'audio') {
+      const el = track.attach();
+      el.autoplay = true;
+      el.playsInline = true;
+      $('audioBox').appendChild(el);
+      
+      try {
+        const source = audioCtx.createMediaElementSource(el);
+        source.connect(gainNode);
+      } catch(e) { console.log('Direct audio fallback active'); }
+
+      routeToSpeaker(el);
+    }
+  });
+
   room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => track.detach().forEach(el => el.remove()));
   room.on(LivekitClient.RoomEvent.Disconnected, () => {
     if (livekitRoom === room) { livekitRoom = null; micActive = false; updateMicUI(false, true); }
@@ -530,6 +569,26 @@ async function connectVoice() {
   livekitRoom = room;
   return true;
 }
+
+async function routeToSpeaker(audioEl) {
+  if (audioEl && typeof audioEl.setSinkId === 'function') {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const speaker = devices.find(d => d.kind === 'audiooutput' && (d.deviceId === 'speaker' || d.label.toLowerCase().includes('speaker')));
+      if (speaker) await audioEl.setSinkId(speaker.deviceId);
+    } catch(e) { console.log('Sink ID routing unsupported'); }
+  }
+}
+
+$('speakerBtn').onclick = async () => {
+  initVoiceAudio();
+  if (gainNode) {
+    gainNode.gain.value = gainNode.gain.value === 1.0 ? 3.0 : 1.0;
+    toast(gainNode.gain.value > 1.0 ? '🔊 Speaker Boost MAX' : '🔉 Normal Volume');
+  }
+  const elements = document.querySelectorAll('#audioBox audio');
+  elements.forEach(el => routeToSpeaker(el));
+};
 
 function disconnectVoice() {
   const r = livekitRoom; livekitRoom = null;
