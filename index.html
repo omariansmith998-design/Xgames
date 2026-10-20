@@ -82,29 +82,33 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
     </div>
   </div>
 
-  <!-- SPATIAL ROOM LOBBY LOUNGE VIEW -->
-  <div id="roomPanel" class="panel hidden">
+  <!-- FIXED LOBBY LOUNGE VIEW -->
+  <div id="roomPanel" class="panel hidden stack" style="align-items:center;">
     <div class="text-xs text-slate-400 text-center">Room Code</div>
     <div class="codeBig" id="codeBig">XG-T1K50</div>
 
-    <div class="relative w-full aspect-square bg-slate-950 border border-slate-800 rounded-3xl p-6 flex items-center justify-center overflow-hidden my-2">
-      <div class="w-28 h-28 rounded-full bg-amber-900/40 border-4 border-amber-800/60 flex items-center justify-center z-10">
-        <span class="text-[10px] font-bold text-amber-500 uppercase" id="selectedLoungeGameBadge">DOMINOES</span>
+    <div style="width: 100%; background: #0b0c12; border: 1px solid #23273a; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 4px 0;">
+      <!-- North Player Seat -->
+      <div id="seat-N" class="row" style="gap: 8px; background: #141724; padding: 6px 14px; border-radius: 99px; width: 100%; justify-content: center;">
+        <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold text-white text-xs" id="avatar-N">?</div>
+        <span style="font-size: 12px; font-weight: 700; color: #94a3b8" id="name-N">Empty Seat (North)</span>
       </div>
 
-      <div id="seat-N" class="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
-        <div class="w-12 h-12 rounded-full bg-purple-600 border-2 border-purple-400 flex items-center justify-center font-bold text-white text-xs" id="avatar-N">?</div>
-        <span class="text-[10px] mt-1 text-slate-400" id="name-N">Empty Seat</span>
+      <!-- Center Active Table Badge -->
+      <div class="w-24 h-24 rounded-full bg-amber-900/40 border-4 border-amber-800/60 flex flex-col items-center justify-center">
+        <span class="text-[9px] font-bold text-amber-500">GAME</span>
+        <span class="text-[10px] font-extrabold text-white uppercase" id="selectedLoungeGameBadge">DOMINOES</span>
       </div>
 
-      <div id="seat-S" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
-        <div class="w-14 h-14 rounded-full bg-amber-500 border-2 border-emerald-400 flex items-center justify-center font-bold text-slate-950 text-sm" id="avatar-S">T</div>
-        <span class="text-[10px] mt-1 text-emerald-400 font-bold" id="name-S">Tav ★</span>
+      <!-- South Player Seat (You) -->
+      <div id="seat-S" class="row" style="gap: 8px; background: #141724; border: 1px solid #059669; padding: 6px 14px; border-radius: 99px; width: 100%; justify-content: center;">
+        <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center font-bold text-slate-950 text-xs" id="avatar-S">T</div>
+        <span style="font-size: 12px; font-weight: 700; color: #34d399" id="name-S">Tav ★ (Host)</span>
       </div>
     </div>
 
-    <button class="red" onclick="returnToMainHub()" style="width:100%;margin-bottom:8px">Leave Room</button>
-    <button class="purple" id="addBotBtn" onclick="addBotToLounge()" style="width:100%;margin-bottom:8px">+ Add AI Opponent</button>
+    <button class="red" onclick="returnToMainHub()" style="width:100%">Leave Room</button>
+    <button class="purple" id="addBotBtn" onclick="addBotToLounge()" style="width:100%">+ Add AI Opponent</button>
     <button class="green" id="startBtn" onclick="launchGameEngine()" style="width:100%">Start Match</button>
   </div>
 
@@ -116,7 +120,6 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <span class="text-slate-400" id="dominoCountsText">N:0 E:0</span>
     </div>
 
-    <!-- PLAYER TILES HUD -->
     <div class="grid grid-cols-4 gap-1">
       <div class="panel" style="padding:4px; text-align:center"><div id="dom-p0-name" style="font-weight:700; font-size:10px; color:#38bdf8">Tav</div><div id="dom-p0-count" style="font-size:10px; color:#94a3b8">7 tiles</div></div>
       <div class="panel" style="padding:4px; text-align:center"><div id="dom-p1-name" style="font-weight:700; font-size:10px">XBot-743</div><div id="dom-p1-count" style="font-size:10px; color:#94a3b8">6 tiles</div></div>
@@ -140,7 +143,6 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <button class="blue" onclick="returnToMainHub()" style="flex:1">Back to Room Lounge</button>
     </div>
 
-    <!-- EXPRESS EMOTES -->
     <div class="panel stack" style="gap:4px">
       <div class="row between">
         <span style="font-size:10px; font-weight:800; color:#94a3b8">EXPRESS EMOTES</span>
@@ -247,7 +249,7 @@ function toggleBgm() {
 
 function startBgmLoop() {
   stopBgmLoop();
-  const notes = [130.81, 164.81, 196.00, 220.00, 261.63, 329.63]; // Reggae/dub vibe root chord frequencies (C minor/major mix)
+  const notes = [130.81, 164.81, 196.00, 220.00, 261.63, 329.63];
   let step = 0;
   bgmInterval = setInterval(() => {
     if (!bgmActive || !audioCtx) return;
@@ -357,8 +359,7 @@ async function joinRoom(code) {
 
   if (!lobby.some(p => p.clientId === myClientId)) {
     if (lobby.length >= 4) return toast('Room is full');
-    const positions = ['N', 'E', 'W'];
-    const assignedPos = positions[lobby.length - 1] || 'E';
+    const assignedPos = lobby.length === 1 ? 'N' : (lobby.length === 2 ? 'E' : 'W');
     lobby.push({ clientId: myClientId, name: myNickname, isBot: false, pos: assignedPos, isHost: false });
     await sb.from('game_rooms').update({ state: { ...data.state, lobby } }).eq('room_code', code);
   }
@@ -404,26 +405,24 @@ async function fetchActivePublicRooms() {
 }
 
 function renderLounge() {
-  ['N', 'S'].forEach(pos => {
-    const p = lobby.find(x => x.pos === pos);
-    const nameEl = $('name-' + pos);
-    const avatarEl = $('avatar-' + pos);
+  const northPlayer = lobby.find(x => x.pos === 'N');
+  const nameEl = $('name-N');
+  const avatarEl = $('avatar-N');
 
-    if (p) {
-      if (nameEl) nameEl.textContent = p.name;
-      if (avatarEl) avatarEl.textContent = p.name.charAt(0).toUpperCase();
-    } else {
-      if (nameEl) nameEl.textContent = 'Empty Seat';
-      if (avatarEl) avatarEl.textContent = '?';
-    }
-  });
+  if (northPlayer) {
+    nameEl.textContent = northPlayer.name;
+    avatarEl.textContent = northPlayer.name.charAt(0).toUpperCase();
+  } else {
+    nameEl.textContent = 'Empty Seat (North)';
+    avatarEl.textContent = '?';
+  }
 }
 
 function addBotToLounge() {
   if (lobby.length >= 4) return toast('Table full');
   const botNames = ['XBot-743', 'XBot-2', 'XBot-3'];
   const name = botNames[lobby.length - 1] || 'AI Bot';
-  lobby.push({ clientId: 'bot_' + Math.random(), name, isBot: true, pos: 'E' });
+  lobby.push({ clientId: 'bot_' + Math.random(), name, isBot: true, pos: 'N' });
   renderLounge();
 }
 
@@ -465,7 +464,7 @@ function sendEmote(txt) {
 }
 
 /* ========================================================
-   YARD DOMINOES ENGINE (WITH DOUBLE SLAM & TABLE KNOCK)
+   YARD DOMINOES ENGINE
    ======================================================== */
 class YardDominoesEngine {
   constructor() {
@@ -484,7 +483,6 @@ class YardDominoesEngine {
         this.deck.push([i, j]);
       }
     }
-    // Shuffle
     for (let i = this.deck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
@@ -499,9 +497,8 @@ class YardDominoesEngine {
 
     this.tableTiles = [];
     this.boardEnds = [null, null];
-    this.activeTurn = 0; // Player starts or double-6 rule
+    this.activeTurn = 0;
 
-    // Find who has [6,6]
     for (let p = 0; p < 4; p++) {
       const idx = this.hands[p].findIndex(t => t[0] === 6 && t[1] === 6);
       if (idx !== -1) {
@@ -509,7 +506,7 @@ class YardDominoesEngine {
         const tile = this.hands[p].splice(idx, 1)[0];
         this.tableTiles.push({ tile, pos: {x: 0, y: 0}, rotation: 0 });
         this.boardEnds = [6, 6];
-        playSlamSound(); // Double 6 slam!
+        playSlamSound();
         $('dominoActionEvent').textContent = `${lobby[p]?.name || 'Player'} played double [6:6] with a slam!`;
         break;
       }
@@ -526,7 +523,7 @@ class YardDominoesEngine {
       this.hands[0].splice(tileIndex, 1);
       this.tableTiles.push({ tile, pos: {x:0, y:0}, rotation: 0 });
       this.boardEnds = [tile[0], tile[1]];
-      if (tile[0] === tile[1]) playSlamSound(); // Slam on double
+      if (tile[0] === tile[1]) playSlamSound();
       $('dominoActionEvent').textContent = `${myNickname} played [${tile[0]}:${tile[1]}]`;
       this.endTurnCheck();
       return;
@@ -556,7 +553,6 @@ class YardDominoesEngine {
     this.hands[0].splice(tileIndex, 1);
     this.tableTiles.push({ tile, pos: {x: 0, y: 0}, rotation: 0 });
     
-    // Play slam sound STRICTLY if it's a double tile
     if (tile[0] === tile[1]) {
       playSlamSound();
       $('dominoActionEvent').textContent = `${myNickname} slammed double [${tile[0]}:${tile[1]}]!`;
@@ -569,7 +565,7 @@ class YardDominoesEngine {
 
   knockTable() {
     if (this.activeTurn !== 0) return toast('Not your turn!');
-    playKnockSound(); // Realistic table knock for passing
+    playKnockSound();
     $('dominoActionEvent').textContent = `${myNickname} knocked the table (Passed)!`;
     this.activeTurn = (this.activeTurn + 1) % 4;
     this.renderDominoes();
@@ -631,7 +627,7 @@ class YardDominoesEngine {
       }
 
       if (!played) {
-        playKnockSound(); // Table knock on AI pass
+        playKnockSound();
         $('dominoActionEvent').textContent = `${lobby[p]?.name} knocked (passed).`;
       }
 
@@ -669,7 +665,6 @@ class YardDominoesEngine {
       btn.style.cssText = 'background:#1e293b; padding:6px; cursor:pointer; min-width:50px; justify-content:center;';
       btn.innerHTML = `<span style="font-size:12px; font-weight:800; color:#fbbf24">[${tile[0]}:${tile[1]}]</span>`;
       btn.onclick = () => {
-        // Simple prompt or default to matching left/right
         const choice = confirm("Play on Left end? (Cancel for Right)") ? 'left' : 'right';
         this.playTile(idx, choice);
       };
@@ -701,7 +696,6 @@ function renderDominoCanvasBoard() {
   ctx.fillStyle = '#155e2b';
   ctx.fillRect(0, 0, width, height);
 
-  // Render centered table tiles representation
   const tiles = dominoEngine.tableTiles;
   const startX = width / 2 - (tiles.length * 28);
   const startY = height / 2 - 20;
@@ -717,7 +711,6 @@ function renderDominoCanvasBoard() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Divider line
     ctx.beginPath();
     ctx.moveTo(tx + 24, ty);
     ctx.lineTo(tx + 24, ty + 28);
@@ -733,12 +726,12 @@ function renderDominoCanvasBoard() {
 }
 
 /* ========================================================
-   JAMAICAN DRAUGHTS (CHECKERS) FULL ENGINE
+   JAMAICAN DRAUGHTS (CHECKERS) ENGINE
    ======================================================== */
 class JamaicanDraughtsEngine {
   constructor() {
     this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    this.activeTurn = 1; // 1 = Light (Bottom), 2 = Dark (Top)
+    this.activeTurn = 1;
     this.selectedSquare = null;
     this.validMoves = [];
     this.mustCapture = false;
@@ -751,8 +744,8 @@ class JamaicanDraughtsEngine {
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
         if ((r + c) % 2 === 1) {
-          if (r < 3) this.board[r][c] = 2; // Dark
-          else if (r > 4) this.board[r][c] = 1; // Light
+          if (r < 3) this.board[r][c] = 2;
+          else if (r > 4) this.board[r][c] = 1;
         }
       }
     }
@@ -847,8 +840,8 @@ class JamaicanDraughtsEngine {
     this.board[toR][toC] = piece;
 
     if (chosenMove.captured) this.board[chosenMove.captured.r][chosenMove.captured.c] = 0;
-    if (piece === 1 && toR === 0) this.board[toR][toC] = 3; // Light King
-    if (piece === 2 && toR === 7) this.board[toR][toC] = 4; // Dark King
+    if (piece === 1 && toR === 0) this.board[toR][toC] = 3;
+    if (piece === 2 && toR === 7) this.board[toR][toC] = 4;
 
     if (chosenMove.captured) {
       const extraCaptures = this.getPieceCaptures(toR, toC);
@@ -933,7 +926,7 @@ function renderCheckers() {
 
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
-      dCtx.fillStyle = (r + c) % 2 === 1 ? '#5c3a21' : '#f5deb3'; // Brown and white board theme
+      dCtx.fillStyle = (r + c) % 2 === 1 ? '#5c3a21' : '#f5deb3';
       dCtx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
     }
   }
