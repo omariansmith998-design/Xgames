@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Polished Master Edition</title>
+<title>Xgames Arcade - Fully Polished Master Edition</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
@@ -41,11 +41,10 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(6px); }
 .modal-card { width: 90%; max-width: 380px; background: #141724; border: 1px solid #313852; border-radius: 20px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
 
-/* Polished Select Styling */
-.custom-select-wrapper { position: relative; }
 .custom-select-wrapper select { appearance: none; background: #1a1f30 url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.6%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 14px center; background-size: 10px; padding-right: 35px; border: 1px solid #3a4466; font-weight: 700; color: #f8fafc; }
 
-/* Speech Bubble System */
+/* Chat History Log & Speech Bubbles */
+.chat-history-box { max-height: 90px; overflow-y: auto; background: #0b0c12; border: 1px solid #23273a; border-radius: 10px; padding: 6px 10px; font-size: 11px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
 .speech-bubble {
   position: absolute; background: #f8fafc; color: #0f172a; padding: 6px 12px; border-radius: 12px;
   font-size: 11px; font-weight: 800; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 20;
@@ -97,12 +96,11 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       </div>
     </div>
 
-    <!-- ROOM WAITING LOBBY WITH GAME CHANGER -->
+    <!-- ROOM WAITING LOBBY -->
     <div id="roomPanel" class="panel hidden stack">
       <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-FXR0M</div>
 
-      <!-- POLISHED GAME SELECTOR IN LOUNGE -->
       <div class="panel stack" style="background:#111522; border:1px solid #313852; padding:10px">
         <label class="lbl" style="text-align:left; color:#a5b4fc">Active Game Arena</label>
         <div class="custom-select-wrapper">
@@ -163,7 +161,7 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
   </div>
 </div>
 
-<!-- EXPRESS EMOTES & CHAT BAR -->
+<!-- EXPRESS EMOTES & CHAT HISTORY BOX -->
 <div class="card stack" style="gap:8px">
   <div class="row between">
     <div style="font-size:10px;font-weight:800;color:#94a3b8">EXPRESS EMOTES</div>
@@ -173,6 +171,12 @@ canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
       <button onclick="triggerEmote('👑 Crown')" class="gold" style="padding:4px 8px;font-size:11px">👑 Crown</button>
     </div>
   </div>
+  
+  <!-- VISIBLE CHAT HISTORY LOG -->
+  <div id="chatHistoryBox" class="chat-history-box">
+    <div style="color:#64748b; font-style:italic">Table chat initialized...</div>
+  </div>
+
   <div class="row" style="gap:6px">
     <input id="matchChatInput" placeholder="Say something at the table..." maxlength="50" onkeydown="if(event.key==='Enter') sendMatchChat()">
     <button class="blue" onclick="sendMatchChat()" style="padding:8px 14px">Talk</button>
@@ -224,7 +228,7 @@ let playersInRoom = [];
 let isMicEnabled = false, isSpeakerOn = true;
 let channel = null;
 
-// --- WEB AUDIO API SOUND ENGINE ---
+// --- HEAVY DECK-SHAKING WEB AUDIO SYNTHESIZER ---
 let audioCtx = null;
 function initAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -234,32 +238,49 @@ function playSound(type) {
   if (!isSpeakerOn) return;
   initAudio();
   if (!audioCtx) return;
-
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
   const now = audioCtx.currentTime;
 
   if (type === 'slam') {
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(140, now);
-    osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
-    gain.gain.setValueAtTime(0.8, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-    osc.start(now); osc.stop(now + 0.12);
+    // Heavy dual-oscillator slam with sub-bass thud for double plates
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(110, now);
+    osc1.frequency.exponentialRampToValueAtTime(25, now + 0.22);
+
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(65, now);
+    osc2.frequency.exponentialRampToValueAtTime(15, now + 0.22);
+
+    gain.gain.setValueAtTime(1.0, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+    osc1.connect(gain); osc2.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc1.start(now); osc2.start(now);
+    osc1.stop(now + 0.25); osc2.stop(now + 0.25);
   } else if (type === 'click') {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(600, now);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-    osc.start(now); osc.stop(now + 0.05);
+    osc.frequency.setValueAtTime(500, now);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.04);
   } else if (type === 'knock') {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(220, now);
-    osc.frequency.setValueAtTime(180, now + 0.04);
-    gain.gain.setValueAtTime(0.5, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-    osc.start(now); osc.stop(now + 0.08);
+    osc.frequency.setValueAtTime(200, now);
+    osc.frequency.setValueAtTime(150, now + 0.05);
+    gain.gain.setValueAtTime(0.4, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(now); osc.stop(now + 0.09);
   }
 }
 
@@ -419,19 +440,30 @@ function startSelectedGame() {
   }
 }
 
-/* --- POLISHED CHAT & EMOTE TALKING SYSTEM --- */
+/* --- CHAT LOG & SPEECH BUBBLE SYSTEM --- */
 function sendMatchChat() {
   const input = $('matchChatInput');
   const msg = input.value.trim();
   if (!msg) return;
   input.value = '';
+  appendChatLog(myNickname, msg);
   showSpeechBubble(myNickname, msg);
   broadcastAction('chat_message', { name: myNickname, text: msg });
 }
 
 function triggerEmote(emote) {
+  appendChatLog(myNickname, emote);
   showSpeechBubble(myNickname, emote);
   broadcastAction('chat_message', { name: myNickname, text: emote });
+}
+
+function appendChatLog(sender, text) {
+  const box = $('chatHistoryBox');
+  if (!box) return;
+  const line = document.createElement('div');
+  line.innerHTML = `<b style="color:#fbbf24">${sender}:</b> <span style="color:#f8fafc">${text}</span>`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
 }
 
 function showSpeechBubble(senderName, text) {
@@ -452,6 +484,7 @@ function showSpeechBubble(senderName, text) {
 
 function handleIncomingBroadcast(payload) {
   if (payload.type === 'chat_message') {
+    appendChatLog(payload.sender, payload.data.text);
     showSpeechBubble(payload.sender, payload.data.text);
   } else if (payload.type === 'change_game') {
     selectedGame = payload.data.game;
@@ -463,7 +496,7 @@ function handleIncomingBroadcast(payload) {
 
 
 /* ========================================================
-   FULL YARD DOMINOES ENGINE WITH SOUNDS
+   FULL YARD DOMINOES ENGINE WITH HEAVY SLAM SOUNDS
    ======================================================== */
 function fullSet() {
   const t = [];
