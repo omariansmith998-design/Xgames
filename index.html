@@ -135,7 +135,7 @@ const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
 let roomSubscription = null, lobbyPollInterval = null, livekitRoom = null, roomCode = '', mySeatPos = 'S';
-let micActive = false;
+let micActive = false, pollPausedUntil = 0;
 
 /* PERMANENT DEVICE IDENTITY */
 let myClientId = localStorage.getItem('xg_perm_client_id');
@@ -212,9 +212,9 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
-/* ---------- HOST-ONLY SYNC & BROADCAST ---------- */
+/* ---------- REALTIME BROADCAST & DB SYNC ---------- */
 async function syncRoomState() {
-  if (!roomCode || !isHost) return; // Strict Host Guard
+  if (!roomCode || !isHost) return;
   const stateData = { status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
   await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: stateData, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
 }
@@ -225,7 +225,7 @@ function listenToRoom() {
 
   roomSubscription = sb.channel('room_' + roomCode)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
-      handleRoomPayload(payload.new.state);
+      if (Date.now() > pollPausedUntil) handleRoomPayload(payload.new.state);
     })
     .on('broadcast', { event: 'JOIN_EVENT' }, payload => {
       if (isHost && payload.payload) {
@@ -237,8 +237,19 @@ function listenToRoom() {
           lobby.push({ clientId: guest.clientId, name: guest.name, isBot: false, pos: freePos, isHost: false });
           renderLobby();
           syncRoomState();
+          
+          roomSubscription.send({ type: 'broadcast', event: 'LOBBY_UPDATE', payload: { lobby, hostClientId } });
           toast(guest.name + ' joined the table!');
         }
+      }
+    })
+    .on('broadcast', { event: 'LOBBY_UPDATE' }, payload => {
+      if (!isHost && payload.payload) {
+        lobby = payload.payload.lobby;
+        hostClientId = payload.payload.hostClientId;
+        const meInLobby = lobby.find(p => p.clientId === myClientId);
+        if (meInLobby) mySeatPos = meInLobby.pos;
+        renderLobby();
       }
     })
     .on('broadcast', { event: 'ACTION_MOVE' }, payload => {
@@ -255,10 +266,12 @@ function listenToRoom() {
     });
 
   lobbyPollInterval = setInterval(() => {
-    if (!$('roomPanel').classList.contains('hidden') || active) {
-      fetchLatestState();
+    if (Date.now() > pollPausedUntil) {
+      if (!$('roomPanel').classList.contains('hidden') || active) {
+        fetchLatestState();
+      }
     }
-  }, 2000);
+  }, 2500);
 }
 
 async function fetchLatestState() {
@@ -328,6 +341,7 @@ async function joinRoomByCode(code) {
   const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).single();
   if (error || !data) return toast('Room not found');
   
+  pollPausedUntil = Date.now() + 6000;
   roomCode = code; roomStatus = data.status || 'waiting';
   hostClientId = data.state.hostClientId || '';
   isHost = (hostClientId === myClientId);
@@ -360,7 +374,7 @@ async function joinRoomByCode(code) {
         payload: { clientId: myClientId, name: myNickname }
       });
     }
-  }, 300);
+  }, 400);
 }
 
 $('copyBtn').onclick = () => {
