@@ -28,12 +28,14 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
-.wrap{border:6px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative;width:100%;height:380px}
+
+/* GREEN BOARD CANVAS */
+.wrap{border:4px solid #3d2314;border-radius:14px;overflow:hidden;background:#155e2b;position:relative;width:100%;height:320px}
 #boardDomContainer{position:absolute;inset:0;pointer-events:none}
 .shake{animation:shake .25s both}
 @keyframes shake{20%,80%{transform:translate(-3px,-2px)}40%,60%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}}
-#log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:13px;color:#e2e8f0;text-align:center}
-.hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:52px;padding:4px 0}
+#log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:12px;color:#e2e8f0;text-align:center;display:flex;align-items:center;justify-content:center}
+.hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:50px;padding:4px 0}
 .hand .domino-tile{cursor:pointer;transition:transform .12s,opacity .12s}
 .hand .domino-tile.sel{transform:translateY(-8px)}
 .hand .domino-tile.dim{opacity:.4}
@@ -49,13 +51,13 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 
-/* --- DOMINO TILE COMPONENT CSS --- */
+/* DOMINO TILE COMPONENT CSS */
 .domino-tile {
-  width: 52px;
-  height: 26px;
+  width: 48px;
+  height: 24px;
   background: #ffffff;
   border-radius: 4px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #cbd5e1;
   box-shadow: 0 2px 5px rgba(0,0,0,0.4);
   display: flex;
   position: relative;
@@ -71,42 +73,82 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 }
 .domino-tile .divider {
   width: 1px;
-  background: #9ca3af;
-  height: 80%;
+  background: #94a3b8;
+  height: 75%;
   align-self: center;
 }
 .domino-tile .pip {
-  width: 4px;
-  height: 4px;
-  background: #111827;
+  width: 3.5px;
+  height: 3.5px;
+  background: #0f172a;
   border-radius: 50%;
   justify-self: center;
   align-self: center;
 }
 
-/* SEAT OVERLAY BADGES ON TABLE */
-.seat-badge {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid #3a2a14;
+/* OUTSIDE PLAYER SEAT BADGES (MOVED OFF BOARD) */
+.seat-grid-outside {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: #0b0c12;
+  border: 1px solid #23273a;
   border-radius: 10px;
-  padding: 4px 8px;
+  padding: 6px;
+}
+.seat-card-out {
+  background: #141724;
+  border: 1px solid #282e42;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.seat-card-out.active {
+  border-color: #facc15;
+  background: #3a2a14;
+}
+.seat-card-out .p-name {
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.seat-card-out .p-tiles {
+  font-size: 9px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+.seat-card-out .p-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #b45309;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10px;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 9px;
   color: #fff;
-  z-index: 10;
 }
-.seat-badge.active { border-color: #facc15; background: #4a3510; }
-.seat-badge.pos-N { top: 8px; left: 50%; transform: translateX(-50%); }
-.seat-badge.pos-S { bottom: 8px; left: 50%; transform: translateX(-50%); }
-.seat-badge.pos-W { left: 8px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-.seat-badge.pos-E { right: 8px; top: 50%; transform: translateY(-50%); flex-direction: column; }
-.seat-avatar { width: 20px; height: 20px; border-radius: 50%; background: #b45309; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 10px; }
-.seat-avatar.bot { background: #581c87; }
-.seat-mute-btn { background: #dc2626; border: 0; color: #fff; border-radius: 4px; padding: 2px 6px; font-size: 9px; cursor: pointer; pointer-events: auto; }
-.seat-mute-btn.muted { background: #059669; }
+.seat-card-out .p-avatar.bot { background: #581c87; }
+.seat-mute-btn {
+  background: #334155;
+  border: 0;
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 8px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+.seat-mute-btn.muted { background: #dc2626; }
 </style>
 </head>
 <body>
@@ -182,11 +224,14 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
       <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat</i></div>
       <div id="scoreBoxR">E/W<span class="pill" id="sWE">0</span></div>
     </div>
+
+    <!-- SEATS OUTSIDE BOARD -->
+    <div id="seatOverlayOutside" class="seat-grid-outside"></div>
     
+    <!-- CLEAN GREEN FELT BOARD -->
     <div class="wrap" id="wrap">
-      <div id="seatOverlay"></div>
       <div id="boardDomContainer"></div>
-      <div id="centerPrompt" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fcd34d;font-weight:700;font-size:13px;text-align:center;pointer-events:none"></div>
+      <div id="centerPrompt" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fcd34d;font-weight:700;font-size:12px;text-align:center;pointer-events:none;width:80%"></div>
     </div>
 
     <div id="log">Connecting to room...</div>
@@ -235,7 +280,7 @@ function tone(f1, f2, d, type, vol, delay = 0) {
     if (AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f1, t + d);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
   } catch (e) {}
@@ -295,14 +340,14 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
-/* ---------- DOMINO LAYOUT ENGINE (Absolute Coordinate Math) ---------- */
+/* ---------- DOMINO LAYOUT ENGINE (90° Corner Elbow Connections) ---------- */
 class DominoLayoutEngine {
-  constructor(tileWidth = 52, tileHeight = 26) {
+  constructor(tileWidth = 48, tileHeight = 24) {
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
   }
 
-  calculateBranchLayout(centerTile, branchTiles, side, style = 'CLASSIC_S_SNAKE') {
+  calculateBranchLayout(centerTile, branchTiles, side) {
     const placedTiles = [];
     if (!branchTiles || !branchTiles.length) return placedTiles;
 
@@ -311,7 +356,6 @@ class DominoLayoutEngine {
     let dirX = side === 'LEFT' ? -1 : 1;
     let dirY = 0;
     let currentRotation = side === 'LEFT' ? 180 : 0;
-    
     let stepsInCurrentDir = 0;
     let horizontalLimit = 3;
 
@@ -319,31 +363,38 @@ class DominoLayoutEngine {
       const tile = branchTiles[i];
       stepsInCurrentDir++;
 
-      if (style === 'CLASSIC_S_SNAKE') {
-        if (stepsInCurrentDir > horizontalLimit && dirY === 0) {
-          dirX = 0;
-          dirY = 1;
-          currentRotation = 90;
-          stepsInCurrentDir = 0;
-        } else if (stepsInCurrentDir === 1 && dirY === 1) {
-          dirY = 0;
-          dirX = side === 'LEFT' ? 1 : -1;
-          currentRotation = side === 'LEFT' ? 0 : 180;
-          stepsInCurrentDir = 0;
-          horizontalLimit = 6;
-        }
+      const isDouble = tile.a === tile.b;
+
+      // Handle corner turn transition
+      if (stepsInCurrentDir > horizontalLimit && dirY === 0) {
+        // Turning tile acts as vertical elbow connector
+        dirY = 1;
+        currentRotation = 90;
+        currentY += this.tileWidth;
+        
+        placedTiles.push({
+          ...tile,
+          x: currentX,
+          y: currentY - (this.tileWidth / 2),
+          rotation: 90
+        });
+
+        // Flip horizontal direction for next row
+        dirX = -dirX;
+        dirY = 0;
+        currentRotation = dirX < 0 ? 180 : 0;
+        stepsInCurrentDir = 0;
+        horizontalLimit = 6;
+        continue;
       }
 
-      const isDouble = tile.a === tile.b;
       const offsetDistance = isDouble ? this.tileHeight : this.tileWidth;
 
       if (i === 0) {
         const firstStep = (centerTile.a === centerTile.b) ? this.tileHeight : this.tileWidth;
         currentX += dirX * (firstStep / 2 + offsetDistance / 2);
-        currentY += dirY * (firstStep / 2 + offsetDistance / 2);
       } else {
         currentX += dirX * offsetDistance;
-        currentY += dirY * offsetDistance;
       }
 
       let finalRotation = currentRotation;
@@ -363,7 +414,7 @@ class DominoLayoutEngine {
   }
 }
 
-const layoutEngine = new DominoLayoutEngine(52, 26);
+const layoutEngine = new DominoLayoutEngine(48, 24);
 
 /* ---------- PIP GRAPHIC RENDERER ---------- */
 const PIP_POSITIONS = {
@@ -392,7 +443,7 @@ function createPipHalf(pipValue) {
   return half;
 }
 
-function createDominoElement(a, b, rot = 0) {
+function createDominoElement(a, b) {
   const tile = document.createElement('div');
   tile.className = 'domino-tile';
   tile.appendChild(createPipHalf(a));
@@ -879,7 +930,8 @@ function newHand() {
   const deck = fullSet();
   players = ['S', 'W', 'N', 'E'].map((pos, i) => {
     const playerObj = lobby.find(l => l.pos === pos) || { clientId: 'bot_' + (i + 1), name: 'XBot-' + (i + 1), isBot: true };
-    return { clientId: playerObj.clientId, name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
+    const safeName = (playerObj.name && playerObj.name.length > 1) ? playerObj.name : ('XBot-' + (i + 1));
+    return { clientId: playerObj.clientId, name: safeName, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
   });
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
   needD6 = lastWin === null;
@@ -1033,18 +1085,19 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- DOM BOARD RENDERER ---------- */
+/* ---------- RENDER BOARD & SEATS OUTSIDE ---------- */
 function renderBoard() {
   const container = $('boardDomContainer');
   container.innerHTML = '';
-  const overlay = $('seatOverlay');
-  overlay.innerHTML = '';
+  
+  // Render Seat Cards OUTSIDE the green board
+  const seatGrid = $('seatOverlayOutside');
+  seatGrid.innerHTML = '';
 
-  // Render Seat Badges on Table
-  ['N', 'S', 'W', 'E'].forEach(pos => {
+  ['S', 'W', 'N', 'E'].forEach(pos => {
     const p = byPos(pos); if (!p) return;
-    const badge = document.createElement('div');
-    badge.className = 'seat-badge pos-' + pos + (pos === turn && active ? ' active' : '');
+    const card = document.createElement('div');
+    card.className = 'seat-card-out' + (pos === turn && active ? ' active' : '');
     
     const isMuted = mutedPlayers.has(p.clientId);
     const isMe = p.clientId === myClientId;
@@ -1054,10 +1107,13 @@ function renderBoard() {
       muteBtnHtml = '<button class="seat-mute-btn' + (isMuted ? ' muted' : '') + '" onclick="toggleMutePlayer(\'' + p.clientId + '\')">' + (isMuted ? 'Unmute' : 'Mute') + '</button>';
     }
 
-    badge.innerHTML = '<div class="seat-avatar' + (p.ai ? ' bot' : '') + '">' + p.name.charAt(0).toUpperCase() + '</div>' +
-      '<div><b>' + p.name.slice(0, 8) + (pos === mySeatPos ? ' ★' : '') + '</b><br><span style="color:#fbbf24;font-size:9px">' + (p.hand ? p.hand.length : 0) + ' tiles</span></div>' +
+    card.innerHTML = 
+      '<div class="p-avatar' + (p.ai ? ' bot' : '') + '">' + p.name.charAt(0).toUpperCase() + '</div>' +
+      '<div class="p-name">' + p.name + (pos === mySeatPos ? ' ★' : '') + '</div>' +
+      '<div class="p-tiles">' + (p.hand ? p.hand.length : 0) + ' tiles</div>' +
       muteBtnHtml;
-    overlay.appendChild(badge);
+      
+    seatGrid.appendChild(card);
   });
 
   if (!center) {
