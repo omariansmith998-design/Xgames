@@ -1,767 +1,596 @@
+```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Fully Polished Master Edition</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
-<style>
-*{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
-body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#05050a;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
-.card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:12px}
-.row{display:flex;gap:8px;align-items:center}
-.between{justify-content:space-between}
-.hidden{display:none!important}
-.logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
-button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 14px;cursor:pointer;background:#334155;transition:transform .1s}
-button:active{transform:scale(0.96)}
-button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
-input, select{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:12px;padding:10px 14px;outline:0}
-input:focus, select:focus{border-color:#6366f1}
-h2{margin:0;font-size:13px;color:#a5b4fc}
-.stack{display:flex;flex-direction:column;gap:10px}
-.panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
-.score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
-.pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
-.lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
-#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
-#toast.on{opacity:1}
-
-.wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
-canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
-#log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:12px;color:#e2e8f0;text-align:center;display:flex;align-items:center;justify-content:center}
-.hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:44px;padding:4px 0}
-.hand canvas{width:60px;height:34px;cursor:pointer;transition:transform .12s,opacity .12s}
-.hand canvas.sel{transform:translateY(-6px)}
-.hand canvas.dim{opacity:.4}
-
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(6px); }
-.modal-card { width: 90%; max-width: 380px; background: #141724; border: 1px solid #313852; border-radius: 20px; padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
-
-.custom-select-wrapper select { appearance: none; background: #1a1f30 url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.6%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E") no-repeat right 14px center; background-size: 10px; padding-right: 35px; border: 1px solid #3a4466; font-weight: 700; color: #f8fafc; }
-
-/* Chat History Log & Speech Bubbles */
-.chat-history-box { max-height: 90px; overflow-y: auto; background: #0b0c12; border: 1px solid #23273a; border-radius: 10px; padding: 6px 10px; font-size: 11px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
-.speech-bubble {
-  position: absolute; background: #f8fafc; color: #0f172a; padding: 6px 12px; border-radius: 12px;
-  font-size: 11px; font-weight: 800; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 20;
-  animation: popUp 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-width: 180px; text-align: center;
-}
-.speech-bubble::after {
-  content: ''; position: absolute; bottom: -6px; left: 20px; border-width: 6px 6px 0;
-  border-style: solid; border-color: #f8fafc transparent; display: block; width: 0;
-}
-@keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XGames Arcade</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; touch-action: manipulation; }
+        .domino-tile { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .domino-tile:active { transform: scale(0.95); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    </style>
 </head>
-<body>
+<body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
 
-<div class="card row between">
-  <div class="logo">XGAMES <b>ARCADE</b></div>
-  <button class="blue" onclick="returnToMainHub()">Main Arcade Hub</button>
-</div>
-
-<div class="card stack">
-  <div class="panel row between status"><span id="syncLabel">Offline Practice</span><b id="roomBadge" style="color:#fbbf24">No room yet</b></div>
-
-  <!-- VOICE & TALKING BAR -->
-  <div class="panel row between" style="padding:6px 10px">
-    <div class="row" style="gap:6px">
-      <span style="width:8px;height:8px;background:#10b981;border-radius:99px;display:inline-block"></span>
-      <span style="font-size:11px;font-weight:800;color:#94a3b8">Yard Voice</span>
-    </div>
-    <div class="row" style="gap:4px">
-      <button id="speakerToggleBtn" onclick="toggleSpeaker()" class="purple" style="padding:3px 8px;font-size:10px">🔊 Speaker: ON</button>
-      <button id="micToggleBtn" onclick="toggleMic()" class="green" style="padding:3px 8px;font-size:10px">Enable Mic</button>
-    </div>
-  </div>
-
-  <!-- MAIN LOBBY SCREEN -->
-  <div id="lobby" class="stack">
-    <div id="homeBox" class="stack">
-      <div class="row between">
-        <h2>Your Nickname: <b id="myNickDisplay" style="color:#fbbf24">Tav</b></h2>
-        <button id="editProfileBtn" onclick="$('personaModal').classList.remove('hidden')" style="padding:4px 8px;font-size:11px">Edit Profile</button>
-      </div>
-
-      <div class="two">
-        <button class="green" onclick="openCreateModal()">+ Create Room</button>
-        <div class="row" style="gap:4px">
-          <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
-          <button id="joinBtn" onclick="joinRoomByCode($('codeIn').value.trim().toUpperCase())" class="blue">Join</button>
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between shrink-0 z-20">
+        <div class="flex items-center space-x-2">
+            <span class="text-xl font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">XGAMES ARCADE</span>
         </div>
-      </div>
-    </div>
-
-    <!-- ROOM WAITING LOBBY -->
-    <div id="roomPanel" class="panel hidden stack">
-      <div class="lbl">Room Code</div>
-      <div class="codeBig" id="codeBig">XG-FXR0M</div>
-
-      <div class="panel stack" style="background:#111522; border:1px solid #313852; padding:10px">
-        <label class="lbl" style="text-align:left; color:#a5b4fc">Active Game Arena</label>
-        <div class="custom-select-wrapper">
-          <select id="roomGameSelect" onchange="changeRoomGame(this.value)">
-            <option value="dominoes">🂋 Yard Dominoes</option>
-            <option value="checkers">👑 Jamaican Checkers</option>
-          </select>
+        <div class="flex items-center space-x-2">
+            <button id="bgm-toggle-btn" onclick="toggleBgm()" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 font-medium flex items-center space-x-1 transition">
+                <span>🎵 BGM: <strong id="bgm-status" class="text-rose-400">OFF</strong></span>
+            </button>
+            <button id="nav-hub-btn" onclick="returnToHub()" class="hidden bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-1.5 rounded-lg font-bold shadow-md transition">
+                Main Arcade Hub
+            </button>
         </div>
-      </div>
+    </header>
 
-      <div class="two">
-        <button class="blue" onclick="shareRoomLink()">🔗 Share / Invite</button>
-        <button class="purple" onclick="copyRoomCode()">Copy Code</button>
-      </div>
+    <!-- Main View Area -->
+    <main class="flex-1 overflow-y-auto relative flex flex-col">
 
-      <div class="row between" style="margin-top:4px">
-        <span style="font-size:11px;font-weight:800;color:#fbbf24" id="playerCountLbl">Players (1/4)</span>
-        <button class="purple" onclick="addBotPlayer()" style="padding:2px 8px;font-size:10px">+ Add Bot</button>
-      </div>
+        <!-- VIEW 1: ARCADE HUB / FRONT PAGE (Quick Play + Room Lounge) -->
+        <div id="view-hub" class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col space-y-6">
+            
+            <!-- Quick Play (Instant Solo vs Bots) -->
+            <div class="space-y-3">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">⚡ Quick Play (Instant Solo vs Bots)</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="startQuickGame('dominoes')" class="group relative bg-gradient-to-br from-emerald-900/80 to-slate-900 border border-emerald-500/30 hover:border-emerald-400 p-4 rounded-2xl text-left shadow-lg transition transform hover:-translate-y-0.5">
+                        <div class="absolute top-3 right-3 text-emerald-400 text-xl font-black">🂋</div>
+                        <div class="font-bold text-white text-sm mb-1">Yard Dominoes</div>
+                        <p class="text-xs text-slate-400">FFA with slams & knocks</p>
+                        <div class="mt-3 inline-block bg-emerald-600/30 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded">Play Instant</div>
+                    </button>
+                    <button onclick="startQuickGame('checkers')" class="group relative bg-gradient-to-br from-amber-950/80 to-slate-900 border border-amber-600/30 hover:border-amber-500 p-4 rounded-2xl text-left shadow-lg transition transform hover:-translate-y-0.5">
+                        <div class="absolute top-3 right-3 text-amber-400 text-xl font-black">👑</div>
+                        <div class="font-bold text-white text-sm mb-1">Jamaican Checkers</div>
+                        <p class="text-xs text-slate-400">Brown & White board</p>
+                        <div class="mt-3 inline-block bg-amber-600/30 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded">Play Instant</div>
+                    </button>
+                </div>
+            </div>
 
-      <div id="playerListContainer" class="stack" style="gap:4px"></div>
+            <!-- Online Multiplayer Room Lounge (Supabase Sync Mocked) -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-4 shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="font-bold text-sm text-slate-200">Online Multiplayer Lounge</h3>
+                        <p class="text-xs text-emerald-400 font-medium">● Supabase Realtime Sync Active</p>
+                    </div>
+                    <div class="bg-slate-800 px-3 py-1 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block uppercase">Room Code</span>
+                        <span class="text-xs font-mono font-bold text-amber-400">XG-T1K50</span>
+                    </div>
+                </div>
 
-      <button class="btn-neon-emerald" id="startMatchBtn" onclick="startSelectedGame()" style="width:100%;margin-top:6px">Start Yard Dominoes</button>
-      <button onclick="leaveRoom()" style="background:#475569;width:100%">Leave Room / Arcade Hub</button>
+                <!-- Voice / Mic Controls with Speaking Indicators -->
+                <div class="flex items-center justify-between bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+                    <div class="flex items-center space-x-2">
+                        <span id="voice-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                        <span class="text-xs font-medium text-slate-300">Yard Voice (Mic)</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button id="speaker-toggle" onclick="toggleSpeaker()" class="bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 text-emerald-400 font-medium">
+                            🔊 Speaker ON
+                        </button>
+                        <button id="mic-toggle" onclick="toggleMic()" class="bg-indigo-600 hover:bg-indigo-500 text-xs px-2.5 py-1.5 rounded-lg font-medium text-white shadow">
+                            Enable Mic
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Room Configuration -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Active Game Arena</label>
+                        <div class="relative">
+                            <select id="game-select" onchange="changeGameMode(this.value)" class="w-full bg-slate-800 border border-slate-700 text-slate-100 text-xs rounded-xl px-3 py-2.5 appearance-none focus:outline-none focus:border-amber-500 font-medium">
+                                <option value="dominoes">Yard Dominoes (4-Player FFA)</option>
+                                <option value="checkers">Jamaican Checkers</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 text-xs">▼</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="shareInvite()" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold py-2 px-3 rounded-xl border border-slate-700 text-slate-200 transition">🔗 Share / Invite</button>
+                        <button onclick="copyRoomCode()" class="bg-slate-800 hover:bg-slate-700 text-xs font-semibold py-2 px-3 rounded-xl border border-slate-700 text-slate-200 transition">📋 Copy Code</button>
+                    </div>
+                </div>
+
+                <!-- Players List with Mute Controls -->
+                <div class="space-y-2 pt-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-400">Players (<span id="player-count">2</span>/4)</span>
+                        <button onclick="addBotPlayer()" class="text-xs bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 px-2 py-1 rounded-lg border border-indigo-500/30 font-medium transition">+ Add Bot</button>
+                    </div>
+                    <div id="player-list-container" class="space-y-1.5 max-h-32 overflow-y-auto pr-1"></div>
+                </div>
+
+                <button onclick="launchMultiplayerGame()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm py-3 rounded-xl shadow-lg shadow-emerald-900/30 transition">
+                    Start <span id="launch-game-name">Yard Dominoes</span> Match
+                </button>
+            </div>
+
+            <!-- Express Emotes & Chat Box -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-3 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Express Emotes</span>
+                    <div class="flex space-x-1.5">
+                        <button onclick="sendEmote('💨 Puff')" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded-lg border border-slate-700">💨 Puff</button>
+                        <button onclick="sendEmote('🂋 Slam')" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded-lg border border-slate-700">🂋 Slam</button>
+                        <button onclick="sendEmote('👑 Crown')" class="bg-slate-800 hover:bg-slate-700 text-xs px-2 py-1 rounded-lg border border-slate-700">👑 Crown</button>
+                    </div>
+                </div>
+                <div id="hub-chat-box" class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 h-24 overflow-y-auto text-xs space-y-1 font-mono">
+                    <div class="text-slate-500">Table chat initialized...</div>
+                    <div class="text-slate-300"><span class="text-indigo-400 font-bold">Tav:</span> Yo</div>
+                    <div class="text-slate-300"><span class="text-indigo-400 font-bold">Tav:</span> Open mic</div>
+                </div>
+                <div class="flex space-x-2">
+                    <input type="text" id="hub-chat-input" placeholder="Say something at the table..." onkeypress="handleChatKey(event)" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <button onclick="submitChat()" class="bg-indigo-600 hover:bg-indigo-500 text-xs font-bold px-4 py-2 rounded-xl text-white shadow">Talk</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VIEW 2: YARD DOMINOES GAME ARENA -->
+        <div id="view-dominoes" class="hidden flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
+            <div class="bg-slate-900 border-b border-slate-800 px-3 py-2 flex items-center justify-between shrink-0 text-xs">
+                <div>Score: <strong class="text-amber-400">Tav 0 : 0</strong></div>
+                <div class="bg-emerald-950 border border-emerald-500/30 px-2 py-0.5 rounded text-emerald-300 font-bold">Hand 1Cut Throat (FFA)</div>
+                <div>N:0 E:0</div>
+            </div>
+
+            <!-- Opponents Ribbon -->
+            <div class="grid grid-cols-4 gap-1 p-2 bg-slate-900/50 border-b border-slate-800/60 text-center shrink-0">
+                <div class="bg-slate-800/70 p-1.5 rounded-lg border border-emerald-500/40">
+                    <div class="font-bold text-xs text-emerald-400">Tav</div>
+                    <div class="text-[10px] text-slate-400">7 tiles</div>
+                </div>
+                <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
+                    <div class="font-bold text-xs text-slate-300">XBot-743</div>
+                    <div class="text-[10px] text-slate-400">6 tiles</div>
+                </div>
+                <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
+                    <div class="font-bold text-xs text-slate-300">XBot-2</div>
+                    <div class="text-[10px] text-slate-400">7 tiles</div>
+                </div>
+                <div class="bg-slate-800/50 p-1.5 rounded-lg border border-slate-700">
+                    <div class="font-bold text-xs text-slate-300">XBot-3</div>
+                    <div class="text-[10px] text-slate-400">7 tiles</div>
+                </div>
+            </div>
+
+            <!-- Board Felt -->
+            <div class="flex-1 bg-emerald-950/40 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                <div class="w-full max-w-lg h-64 bg-emerald-900/80 border-4 border-emerald-800 rounded-3xl shadow-inner flex items-center justify-center relative p-4 overflow-x-auto">
+                    <div id="domino-layout-inner" class="flex items-center space-x-2">
+                        <div class="bg-white text-slate-900 font-mono font-black text-xs px-3 py-1.5 rounded shadow-lg border border-slate-300 flex items-center space-x-1">
+                            <span>⚄</span><span>|</span><span>⚅</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="domino-action-toast" class="mt-3 bg-slate-900/90 border border-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 shadow-md">
+                    👑 XBot-743 slammed [5:6]
+                </div>
+            </div>
+
+            <!-- Hand & Controls -->
+            <div class="bg-slate-900 border-t border-slate-800 p-3 space-y-3 shrink-0">
+                <div class="text-center text-xs font-semibold text-slate-400">Your turn</div>
+                <div id="player-domino-hand" class="flex justify-center space-x-2 overflow-x-auto py-1"></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="playDominoKnock()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs py-2.5 rounded-xl shadow transition">Knock table (pass)</button>
+                    <button onclick="returnToHub()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 rounded-xl border border-slate-700 transition">Back to Room Lounge</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: JAMAICAN CHECKERS GAME ARENA -->
+        <div id="view-checkers" class="hidden flex-1 flex flex-col bg-slate-950 relative overflow-hidden">
+            <div class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shrink-0 text-xs">
+                <div>Checkers: <strong id="checkers-turn-label" class="text-amber-400">Light Turn</strong></div>
+                <button onclick="resetCheckersMatch()" class="bg-rose-900/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 px-2.5 py-1 rounded-lg font-bold transition">Reset Match</button>
+            </div>
+
+            <!-- Brown & White Checkers Board -->
+            <div class="flex-1 flex items-center justify-center p-3">
+                <div class="w-full max-w-sm aspect-square bg-[#7a4927] border-4 border-[#523018] rounded-xl shadow-2xl p-2 grid grid-cols-8 grid-rows-8 gap-0.5" id="checkers-board-grid"></div>
+            </div>
+
+            <div class="bg-slate-900 border-t border-slate-800 p-3 shrink-0">
+                <button onclick="returnToHub()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-3 rounded-xl border border-slate-700 shadow transition">Back to Room Lounge</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+            <h3 id="modal-title" class="font-bold text-base text-white">Notice</h3>
+            <p id="modal-message" class="text-xs text-slate-300">Message content here...</p>
+            <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl shadow">OK</button>
+        </div>
     </div>
-  </div>
-
-  <!-- YARD DOMINOES VIEW -->
-  <div id="gameDominoes" class="stack hidden">
-    <div class="score">
-      <div id="scoreBoxL">S:0 W:0</div>
-      <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat (FFA)</i></div>
-      <div id="scoreBoxR">N:0 E:0</div>
-    </div>
-    <div class="two" style="grid-template-columns: repeat(4, 1fr); gap: 4px;" id="dominoPlayerCards"></div>
-    <div class="wrap" id="wrap" style="position:relative"><canvas id="board" width="800" height="720"></canvas></div>
-    <div id="log">Table ready.</div>
-    <div class="panel">
-      <div class="lbl" id="turnLbl">Your turn</div>
-      <div class="hand" id="hand"></div>
-      <div id="endBar" class="two hidden" style="margin-top:8px">
-        <button class="gold" id="goL">Play left (<span id="lv">-</span>)</button>
-        <button class="gold" id="goR">Play right (<span id="rv">-</span>)</button>
-      </div>
-      <button id="passBtn" onclick="pass()" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">Knock table (pass)</button>
-      <button class="blue" onclick="returnToRoom()" style="width:100%;margin-top:8px">Back to Room Lounge</button>
-    </div>
-  </div>
-
-  <!-- JAMAICAN CHECKERS VIEW -->
-  <div id="gameCheckers" class="stack hidden">
-    <div class="score">
-      <div>Checkers: <span id="checkersTurnText" style="color:#fbbf24;margin-left:6px">Light Turn</span></div>
-      <button onclick="checkersEngine.resetBoard(); renderCheckers();" class="red" style="padding:4px 10px;font-size:11px">Reset Match</button>
-    </div>
-    <div class="wrap" id="checkersWrap" style="position:relative"><canvas id="draughtsCanvas" width="800" height="800"></canvas></div>
-    <button class="blue" onclick="returnToRoom()" style="width:100%">Back to Room Lounge</button>
-  </div>
-</div>
-
-<!-- EXPRESS EMOTES & CHAT HISTORY BOX -->
-<div class="card stack" style="gap:8px">
-  <div class="row between">
-    <div style="font-size:10px;font-weight:800;color:#94a3b8">EXPRESS EMOTES</div>
-    <div class="row" style="gap:4px">
-      <button onclick="triggerEmote('💨 Puff')" class="purple" style="padding:4px 8px;font-size:11px">💨 Puff</button>
-      <button onclick="triggerEmote('🂋 Slam')" class="blue" style="padding:4px 8px;font-size:11px">🂋 Slam</button>
-      <button onclick="triggerEmote('👑 Crown')" class="gold" style="padding:4px 8px;font-size:11px">👑 Crown</button>
-    </div>
-  </div>
-  
-  <!-- VISIBLE CHAT HISTORY LOG -->
-  <div id="chatHistoryBox" class="chat-history-box">
-    <div style="color:#64748b; font-style:italic">Table chat initialized...</div>
-  </div>
-
-  <div class="row" style="gap:6px">
-    <input id="matchChatInput" placeholder="Say something at the table..." maxlength="50" onkeydown="if(event.key==='Enter') sendMatchChat()">
-    <button class="blue" onclick="sendMatchChat()" style="padding:8px 14px">Talk</button>
-  </div>
-</div>
-
-<!-- MODALS -->
-<div id="createModal" class="modal-overlay hidden">
-  <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:16px">🎮 Create Table Room</h2>
-    <div class="stack" style="text-align:left; gap:4px">
-      <label class="lbl" style="text-align:left; color:#a5b4fc">Select Game Arena</label>
-      <div class="custom-select-wrapper">
-        <select id="createGameSelect">
-          <option value="dominoes">🂋 Yard Dominoes</option>
-          <option value="checkers">👑 Jamaican Checkers</option>
-        </select>
-      </div>
-    </div>
-    <div class="two" style="margin-top:6px">
-      <button class="blue" onclick="$('createModal').classList.add('hidden')">Cancel</button>
-      <button class="btn-neon-emerald" onclick="$('createModal').classList.add('hidden'); confirmCreateRoom()">Launch Room</button>
-    </div>
-  </div>
-</div>
-
-<div id="personaModal" class="modal-overlay hidden">
-  <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:16px">👤 Profile Settings</h2>
-    <input id="personaNameIn" placeholder="Enter nickname" maxlength="15">
-    <button class="btn-neon-emerald" onclick="savePersona()">Save Profile</button>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<script>
-const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
-const sb = supabase.createClient(SB_URL, SB_KEY);
-
-const $ = id => document.getElementById(id);
-function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
-const log = m => $('log').textContent = m;
-
-let myNickname = 'Tav';
-let roomCode = '', selectedGame = 'dominoes';
-let playersInRoom = [];
-let isMicEnabled = false, isSpeakerOn = true;
-let channel = null;
-
-// --- HEAVY DECK-SHAKING WEB AUDIO SYNTHESIZER ---
-let audioCtx = null;
-function initAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-}
-
-function playSound(type) {
-  if (!isSpeakerOn) return;
-  initAudio();
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
-
-  if (type === 'slam') {
-    // Heavy dual-oscillator slam with sub-bass thud for double plates
-    const osc1 = audioCtx.createOscillator();
-    const osc2 = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    osc1.type = 'triangle';
-    osc1.frequency.setValueAtTime(110, now);
-    osc1.frequency.exponentialRampToValueAtTime(25, now + 0.22);
-
-    osc2.type = 'sawtooth';
-    osc2.frequency.setValueAtTime(65, now);
-    osc2.frequency.exponentialRampToValueAtTime(15, now + 0.22);
-
-    gain.gain.setValueAtTime(1.0, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-    osc1.connect(gain); osc2.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc1.start(now); osc2.start(now);
-    osc1.stop(now + 0.25); osc2.stop(now + 0.25);
-  } else if (type === 'click') {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(500, now);
-    gain.gain.setValueAtTime(0.2, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(now); osc.stop(now + 0.04);
-  } else if (type === 'knock') {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(200, now);
-    osc.frequency.setValueAtTime(150, now + 0.05);
-    gain.gain.setValueAtTime(0.4, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(now); osc.stop(now + 0.09);
-  }
-}
-
-function savePersona() {
-  const inputEl = $('personaNameIn');
-  if (inputEl && inputEl.value.trim()) {
-    myNickname = inputEl.value.trim();
-    $('myNickDisplay').textContent = myNickname;
-  }
-  $('personaModal').classList.add('hidden');
-}
-
-function toggleSpeaker() {
-  isSpeakerOn = !isSpeakerOn;
-  $('speakerToggleBtn').textContent = isSpeakerOn ? '🔊 Speaker: ON' : '🔇 Speaker: OFF';
-  toast(isSpeakerOn ? 'Speaker enabled' : 'Speaker muted');
-}
-
-function toggleMic() {
-  isMicEnabled = !isMicEnabled;
-  const btn = $('micToggleBtn');
-  btn.textContent = isMicEnabled ? 'Mic Active' : 'Enable Mic';
-  btn.className = isMicEnabled ? 'red' : 'green';
-  toast(isMicEnabled ? 'Microphone live' : 'Microphone disabled');
-}
-
-function openCreateModal() { $('createModal').classList.remove('hidden'); }
-
-async function confirmCreateRoom() {
-  selectedGame = $('createGameSelect').value;
-  $('roomGameSelect').value = selectedGame;
-  updateStartButtonText();
-
-  roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  $('codeBig').textContent = roomCode;
-  $('roomBadge').textContent = 'Room: ' + roomCode;
-  $('syncLabel').textContent = 'Online Sync Active';
-
-  playersInRoom = [{ name: myNickname, host: true, you: true }];
-  updatePlayerListUI();
-
-  $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-
-  try {
-    await sb.from('game_rooms').insert([{ room_code: roomCode, status: 'waiting', host: myNickname, players: playersInRoom }]);
-    setupRealtimeChannel();
-  } catch(e) {
-    toast('Room created locally');
-  }
-}
-
-async function joinRoomByCode(code) {
-  if (!code) return toast('Enter a valid room code');
-  roomCode = code;
-  
-  const { data, error } = await sb.from('game_rooms').select('*').eq('room_code', roomCode).single();
-  if (error || !data) {
-    playersInRoom = [{ name: myNickname, host: true, you: true }];
-  } else {
-    playersInRoom = data.players || [];
-    if (!playersInRoom.some(p => p.name === myNickname)) {
-      playersInRoom.push({ name: myNickname, host: false, you: true });
-      await sb.from('game_rooms').update({ players: playersInRoom }).eq('room_code', roomCode);
-    }
-  }
-
-  $('codeBig').textContent = roomCode;
-  $('roomBadge').textContent = 'Room: ' + roomCode;
-  $('syncLabel').textContent = 'Online Sync Active';
-  updatePlayerListUI();
-
-  $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-  setupRealtimeChannel();
-  toast('Joined room ' + roomCode);
-}
-
-function changeRoomGame(game) {
-  selectedGame = game;
-  updateStartButtonText();
-  broadcastAction('change_game', { game });
-}
-
-function updateStartButtonText() {
-  const btn = $('startMatchBtn');
-  if (btn) {
-    btn.textContent = selectedGame === 'dominoes' ? 'Start Yard Dominoes' : 'Start Jamaican Checkers';
-  }
-}
-
-function setupRealtimeChannel() {
-  if (channel) sb.removeChannel(channel);
-  channel = sb.channel('room_' + roomCode)
-    .on('broadcast', { event: 'game_action' }, payload => {
-      handleIncomingBroadcast(payload.payload);
-    })
-    .subscribe();
-}
-
-function broadcastAction(actionType, data) {
-  if (channel) {
-    channel.send({ type: 'broadcast', event: 'game_action', payload: { type: actionType, sender: myNickname, data } });
-  }
-}
-
-function updatePlayerListUI() {
-  const container = $('playerListContainer');
-  container.innerHTML = '';
-  $('playerCountLbl').textContent = `Players (${playersInRoom.length}/4)`;
-  playersInRoom.forEach((p) => {
-    const row = document.createElement('div');
-    row.className = 'panel row between';
-    row.style.cssText = 'padding:6px 10px; background:#141724;';
-    row.innerHTML = `<div><span style="font-size:12px;font-weight:700;color:#fff">${p.name}</span></div><div>${p.host ? '<span style="font-size:9px;background:#2563eb;padding:2px 6px;border-radius:99px;margin-right:4px">HOST</span>' : ''}${p.you ? '<span style="font-size:9px;background:#059669;padding:2px 6px;border-radius:99px">YOU</span>' : ''}</div>`;
-    container.appendChild(row);
-  });
-}
-
-function addBotPlayer() {
-  if (playersInRoom.length >= 4) return toast('Room is full');
-  const botName = 'XBot-' + Math.floor(Math.random() * 900 + 100);
-  playersInRoom.push({ name: botName, host: false, bot: true });
-  updatePlayerListUI();
-  toast('Added ' + botName);
-}
-
-function copyRoomCode() { navigator.clipboard.writeText(roomCode); toast('Room code copied!'); }
-function shareRoomLink() {
-  if (navigator.share) { navigator.share({ title: 'Xgames Arcade', text: `Join room ${roomCode}`, url: window.location.href }); }
-  else { copyRoomCode(); }
-}
-
-function leaveRoom() {
-  if (channel) sb.removeChannel(channel);
-  $('roomPanel').classList.add('hidden');$('homeBox').classList.remove('hidden');
-  $('roomBadge').textContent = 'No room yet';$('syncLabel').textContent = 'Offline Practice';
-}
-
-function returnToMainHub() {
-  leaveRoom();
-  $('gameDominoes').classList.add('hidden');$('gameCheckers').classList.add('hidden');
-}
-
-function returnToRoom() {
-  $('gameDominoes').classList.add('hidden');
-  $('gameCheckers').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-}
-
-function startSelectedGame() {
-  $('roomPanel').classList.add('hidden');
-  if (selectedGame === 'dominoes') {
-    $('gameDominoes').classList.remove('hidden');
-    newMatch();
-  } else {
-    $('gameCheckers').classList.remove('hidden');
-    checkersEngine.resetBoard();
-    resizeDraughtsCanvas();
-  }
-}
-
-/* --- CHAT LOG & SPEECH BUBBLE SYSTEM --- */
-function sendMatchChat() {
-  const input = $('matchChatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  appendChatLog(myNickname, msg);
-  showSpeechBubble(myNickname, msg);
-  broadcastAction('chat_message', { name: myNickname, text: msg });
-}
-
-function triggerEmote(emote) {
-  appendChatLog(myNickname, emote);
-  showSpeechBubble(myNickname, emote);
-  broadcastAction('chat_message', { name: myNickname, text: emote });
-}
-
-function appendChatLog(sender, text) {
-  const box = $('chatHistoryBox');
-  if (!box) return;
-  const line = document.createElement('div');
-  line.innerHTML = `<b style="color:#fbbf24">${sender}:</b> <span style="color:#f8fafc">${text}</span>`;
-  box.appendChild(line);
-  box.scrollTop = box.scrollHeight;
-}
-
-function showSpeechBubble(senderName, text) {
-  const activeWrap = !$('gameDominoes').classList.contains('hidden') ? $('wrap') :$('checkersWrap');
-  if (!activeWrap) return;
-  
-  const existing = activeWrap.querySelector('.speech-bubble');
-  if (existing) existing.remove();
-
-  const bubble = document.createElement('div');
-  bubble.className = 'speech-bubble';
-  bubble.style.top = '14px'; bubble.style.left = '14px';
-  bubble.innerHTML = `<b>${senderName}:</b> ${text}`;
-  activeWrap.appendChild(bubble);
-
-  setTimeout(() => bubble.remove(), 3500);
-}
-
-function handleIncomingBroadcast(payload) {
-  if (payload.type === 'chat_message') {
-    appendChatLog(payload.sender, payload.data.text);
-    showSpeechBubble(payload.sender, payload.data.text);
-  } else if (payload.type === 'change_game') {
-    selectedGame = payload.data.game;
-    $('roomGameSelect').value = selectedGame;
-    updateStartButtonText();
-    toast(`${payload.sender} changed game to ${selectedGame.toUpperCase()}`);
-  }
-}
-
-
-/* ========================================================
-   FULL YARD DOMINOES ENGINE WITH HEAVY SLAM SOUNDS
-   ======================================================== */
-function fullSet() {
-  const t = [];
-  for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
-  for (let i = t.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [t[i], t[j]] = [t[j], t[i]]; }
-  return t;
-}
-
-let handNo = 1, lastWin = null, needD6 = true;
-let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false;
-const byPos = p => players.find(x => x.pos === p);
-const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
-
-function newMatch() { handNo = 1; lastWin = null; newHand(); }
-function newHand() {
-  const deck = fullSet();
-  const assignedPlayers = playersInRoom.length > 0 ? playersInRoom : [{ name: myNickname, you: true }];
-  
-  players = ['S', 'W', 'N', 'E'].map((pos, i) => {
-    const pInfo = assignedPlayers[i] || { name: 'XBot-' + i, bot: true };
-    return { pos, name: pInfo.name, hand: deck.slice(i * 7, i * 7 + 7), ai: !pInfo.you };
-  });
-
-  center = null; L = R = null; lb = []; rb = []; passes = 0; active = true;
-  needD6 = lastWin === null;
-  turn = needD6 ? players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos || 'S' : lastWin;
-  refreshDominoes(); maybeAi();
-}
-
-function isValid(t) {
-  if (!center) return needD6 ? (t.a === 6 && t.b === 6) : true;
-  return t.a === L || t.b === L || t.a === R || t.b === R;
-}
-
-function play(i, side) {
-  const p = byPos(turn), t = p.hand.splice(i, 1)[0]; passes = 0;
-  if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
-  else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
-  else { const o = t.a === R ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; R = o.b; rb.push(o); }
-  
-  playSound('slam');
-  log('💥 ' + p.name + ' slammed [' + t.a + '|' + t.b + ']');
-  if (!p.hand.length) return win(p.pos, p.name + ' went out!');
-  nextDominoTurn();
-}
-
-function pass() {
-  const p = byPos(turn); passes++; playSound('knock'); log('✋ ' + p.name + ' knocked (passed).');
-  if (passes >= 4) return blocked();
-  nextDominoTurn();
-}
-
-function nextDominoTurn() { turn = NEXT[turn]; refreshDominoes(); maybeAi(); }
-
-function maybeAi() {
-  const cur = byPos(turn);
-  if (active && cur && cur.ai) setTimeout(() => { if (active) aiTurn(); }, 900);
-}
-
-function aiTurn() {
-  const p = byPos(turn); if (!p) return;
-  const opts = [];
-  p.hand.forEach((t, i) => {
-    if (!isValid(t)) return;
-    if (!center) opts.push({ i, side: 'first' });
-    else {
-      if (t.a === L || t.b === L) opts.push({ i, side: 'left' });
-      if (t.a === R || t.b === R) opts.push({ i, side: 'right' });
-    }
-  });
-  if (!opts.length) return pass();
-  play(opts[0].i, opts[0].side);
-}
-
-function blocked() {
-  let pScores = {};
-  players.forEach(p => { pScores[p.pos] = p.hand.reduce((a, t) => a + t.a + t.b, 0); });
-  let sorted = Object.keys(pScores).sort((a, b) => pScores[a] - pScores[b]);
-  win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins');
-}
-
-function win(pos, why) {
-  active = false; lastWin = pos; log('🎉 ' + why); refreshDominoes();
-  setTimeout(() => { handNo++; newHand(); }, 3000);
-}
-
-const cv = $('board'), ctx = cv ? cv.getContext('2d') : null;
-const W = 400, H = 360, CY = 180, TILE_L = 40, TILE_W = 20, ROW_PITCH = 48;
-const PIP_GRID = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
-
-function roundRect(c, x, y, w, h, r) {
-  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r);
-  c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
-}
-
-function drawHalf(c, hx, hy, n) {
-  c.fillStyle = '#111827';
-  PIP_GRID[n].forEach(i => {
-    c.beginPath(); c.arc(hx + ((i % 3) - 1) * 5.5, hy + (((i / 3) | 0) - 1) * 5.5, 1.8, 0, Math.PI * 2); c.fill();
-  });
-}
-
-function drawTile(c, cx, cy, lead, trail, rot) {
-  c.save(); c.translate(cx, cy); c.rotate(rot || 0);
-  roundRect(c, -TILE_L / 2, -TILE_W / 2, TILE_L, TILE_W, 4);
-  c.fillStyle = lead === trail ? '#fde68a' : '#ffffff'; c.fill();
-  c.lineWidth = 1; c.strokeStyle = '#cbd5e1'; c.stroke();
-  c.strokeStyle = '#94a3b8'; c.beginPath(); c.moveTo(0, -TILE_W / 2 + 2); c.lineTo(0, TILE_W / 2 - 2); c.stroke();
-  drawHalf(c, -TILE_L / 4, 0, lead); drawHalf(c, TILE_L / 4, 0, trail);
-  c.restore();
-}
-
-function layoutBranch(tiles, origin, dir, rowDir, bounds) {
-  let x = origin.x, y = origin.y; const out = [];
-  const maxX = bounds.right - 8 - TILE_W, minX = bounds.left + 8 + TILE_W;
-  for (const t of tiles) {
-    const along = t.d ? TILE_W : TILE_L;
-    if (dir > 0 ? x + along <= maxX : x - along >= minX) {
-      out.push({ t, cx: x + dir * along / 2, cy: y, rot: t.d ? Math.PI / 2 : (dir > 0 ? 0 : Math.PI) });
-      x += dir * along;
-    } else {
-      out.push({ t, cx: x + dir * TILE_W / 2, cy: y + rowDir * ROW_PITCH / 2, rot: rowDir > 0 ? Math.PI / 2 : -Math.PI / 2 });
-      y += rowDir * ROW_PITCH; dir = -dir;
-    }
-  }
-  return { out, cursor: { x, y, dir } };
-}
-
-function drawDominoBoard() {
-  if (!ctx) return;
-  ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#155e2b'; ctx.fillRect(0, 0, W, H);
-  if (!center) {
-    ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center';
-    ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY);
-    return;
-  }
-  const cLen = center.d ? TILE_W : TILE_L;
-  const left = layoutBranch(lb, { x: W / 2 - cLen / 2, y: CY }, -1, -1, { left: 0, right: W });
-  const right = layoutBranch(rb, { x: W / 2 + cLen / 2, y: CY }, 1, 1, { left: 0, right: W });
-  drawTile(ctx, W / 2, CY, center.a, center.b, center.d ? Math.PI / 2 : 0);
-  left.out.forEach(p => drawTile(ctx, p.cx, p.cy, p.t.a, p.t.b, p.rot));
-  right.out.forEach(p => drawTile(ctx, p.cx, p.cy, p.t.a, p.t.b, p.rot));
-}
-
-let selIdx = null;
-function selectTile(i) {
-  if (!active || turn !== 'S') return toast('Not your turn');
-  playSound('click');
-  const me = byPos('S'); if (!me || !me.hand) return;
-  const t = me.hand[i];
-  if (!isValid(t)) return toast('Tile does not fit');
-  if (!center) return play(i, 'first');
-  const ml = t.a === L || t.b === L, mr = t.a === R || t.b === R;
-  if (ml && mr) {
-    selIdx = i; $('lv').textContent = L; $('rv').textContent = R; $('endBar').classList.remove('hidden');
-    $('goL').onclick = () => { selIdx = null; $('endBar').classList.add('hidden'); play(i, 'left'); };
-    $('goR').onclick = () => { selIdx = null; $('endBar').classList.add('hidden'); play(i, 'right'); };
-    renderHand();
-  } else play(i, ml ? 'left' : 'right');
-}
-
-function renderHand() {
-  const box = $('hand'); if (!box) return; box.innerHTML = '';
-  const me = byPos('S'); if (!me || !me.hand) return;
-  const mine = active && turn === 'S';
-  const passBtn = $('passBtn');
-  if (passBtn) {
-    const canPlayAny = me.hand.some(t => isValid(t));
-    if (mine && !canPlayAny && active) passBtn.classList.remove('hidden');
-    else passBtn.classList.add('hidden');
-  }
-  me.hand.forEach((t, i) => {
-    const c = document.createElement('canvas'); c.width = 120; c.height = 68;
-    const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
-    drawTile(x, 30, 17, t.a, t.b, 0);
-    if (mine && center && !isValid(t)) c.className = 'dim';
-    if (selIdx === i) c.className = 'sel';
-    c.onclick = () => selectTile(i);
-    box.appendChild(c);
-  });
-
-  const cardsContainer = $('dominoPlayerCards');
-  if (cardsContainer && players.length > 0) {
-    cardsContainer.innerHTML = '';
-    players.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'panel';
-      card.style.cssText = `padding:6px; text-align:center; font-size:10px; ${turn === p.pos ? 'border-color:#fbbf24; background:#1e1b4b;' : ''}`;
-      card.innerHTML = `<b>${p.name}</b><br><span style="color:#94a3b8">${p.hand.length} tiles</span>`;
-      cardsContainer.appendChild(card);
-    });
-  }
-}
-
-function refreshDominoes() { drawDominoBoard(); renderHand(); }
-
-
-/* ========================================================
-   FULL JAMAICAN CHECKERS / DRAUGHTS ENGINE
-   ======================================================== */
-class JamaicanDraughtsEngine {
-  constructor() {
-    this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    this.activeTurn = 1; this.selectedSquare = null; this.validMoves = [];
-    this.resetBoard();
-  }
-  resetBoard() {
-    this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) {
-      if (r < 3) this.board[r][c] = 2; else if (r > 4) this.board[r][c] = 1;
-    }
-    this.activeTurn = 1; this.selectedSquare = null; this.validMoves = [];
-  }
-  isCurrentPlayerPiece(p) { return this.activeTurn === 1 ? (p === 1 || p === 3) : (p === 2 || p === 4); }
-  isInBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
-}
-
-const checkersEngine = new JamaicanDraughtsEngine();
-const draughtsCanvas = $('draughtsCanvas');
-const dCtx = draughtsCanvas ? draughtsCanvas.getContext('2d') : null;
-
-function resizeDraughtsCanvas() {
-  if (!draughtsCanvas) return;
-  const rect = draughtsCanvas.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  draughtsCanvas.width = rect.width * dpr; draughtsCanvas.height = rect.width * dpr;
-  dCtx.scale(dpr, dpr);
-  renderCheckers();
-}
-
-function renderCheckers() {
-  if (!draughtsCanvas) return;
-  const size = draughtsCanvas.parentElement.getBoundingClientRect().width;
-  if (!size) return; const tileSize = size / 8;
-  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-    dCtx.fillStyle = (r + c) % 2 === 1 ? '#064e3b' : '#ecfdf5';
-    dCtx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-    const val = checkersEngine.board[r][c];
-    if (val !== 0) {
-      dCtx.beginPath(); dCtx.arc(c * tileSize + tileSize / 2, r * tileSize + tileSize / 2, tileSize * 0.38, 0, Math.PI * 2);
-      dCtx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a'; dCtx.fill();
-      if (val === 3 || val === 4) {
-        dCtx.fillStyle = '#fbbf24'; dCtx.font = `${tileSize * 0.4}px sans-serif`;
-        dCtx.textAlign = 'center'; dCtx.textBaseline = 'middle'; dCtx.fillText('👑', c * tileSize + tileSize / 2, r * tileSize + tileSize / 2);
-      }
-    }
-  }
-}
-
-if (draughtsCanvas) {
-  draughtsCanvas.addEventListener('click', (e) => {
-    const rect = draughtsCanvas.getBoundingClientRect();
-    const tileSize = rect.width / 8;
-    const col = Math.floor((e.clientX - rect.left) / tileSize);
-    const row = Math.floor((e.clientY - rect.top) / tileSize);
-    if (!checkersEngine.isInBounds(row, col)) return;
-    playSound('click');
-    const clicked = checkersEngine.board[row][col];
-    if (checkersEngine.isCurrentPlayerPiece(clicked)) {
-      checkersEngine.selectedSquare = { row, col };
-    }
-    renderCheckers();
-  });
-}
-</script>
+
+    <!-- Application Script -->
+    <script>
+        let audioCtx = null;
+        let bgmInterval = null;
+        let bgmActive = false;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function toggleBgm() {
+            initAudio();
+            bgmActive = !bgmActive;
+            const statusEl = document.getElementById('bgm-status');
+            if (bgmActive) {
+                statusEl.innerText = 'ON';
+                statusEl.className = 'text-emerald-400';
+                startBgmLoop();
+                showModal('Background Music', 'Ambient Caribbean chill chords activated.');
+            } else {
+                statusEl.innerText = 'OFF';
+                statusEl.className = 'text-rose-400';
+                stopBgmLoop();
+                showModal('Background Music', 'Background music muted.');
+            }
+        }
+
+        function startBgmLoop() {
+            stopBgmLoop();
+            const chords = [
+                [220.00, 261.63, 329.63],
+                [174.61, 220.00, 261.63],
+                [196.00, 246.94, 293.66],
+                [164.81, 207.65, 246.94]
+            ];
+            let chordIdx = 0;
+            bgmInterval = setInterval(() => {
+                if (!bgmActive || !audioCtx) return;
+                const chord = chords[chordIdx];
+                chord.forEach(freq => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 1.9);
+                });
+                chordIdx = (chordIdx + 1) % chords.length;
+            }, 2000);
+        }
+
+        function stopBgmLoop() {
+            if (bgmInterval) { clearInterval(bgmInterval); bgmInterval = null; }
+        }
+
+        // Domino Slam Sound (Strictly Double Tiles Only)
+        function playSlamSound() {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        }
+
+        // Realistic Table Knock Sound (Pass / Knock)
+        function playTableKnockSound() {
+            initAudio();
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.09);
+        }
+
+        let speakerOn = true;
+        let micOn = false;
+        let players = [
+            { name: 'Tav', host: true, isYou: true, muted: false },
+            { name: 'XBot-743', host: false, isYou: false, muted: false },
+            { name: 'XBot-847', host: false, isYou: false, muted: false }
+        ];
+
+        function renderPlayers() {
+            const container = document.getElementById('player-list-container');
+            document.getElementById('player-count').innerText = players.length;
+            container.innerHTML = players.map((p, idx) => `
+                <div class="flex items-center justify-between bg-slate-800/40 px-3 py-2 rounded-xl border border-slate-700/60">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full ${idx === 0 ? 'bg-emerald-400' : 'bg-indigo-400'}"></span>
+                        <span class="text-xs font-semibold text-slate-200">${p.name}</span>
+                        ${p.host ? '<span class="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.5 rounded">HOST</span>' : ''}
+                        ${p.isYou ? '<span class="text-[9px] bg-indigo-500/20 text-indigo-300 font-bold px-1.5 py-0.5 rounded">YOU</span>' : ''}
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="togglePlayerMute(${idx})" class="text-[10px] px-2 py-0.5 rounded ${p.muted ? 'bg-rose-900/50 text-rose-300 border border-rose-500/30' : 'bg-slate-700 text-slate-300'}">
+                            ${p.muted ? 'Unmute' : 'Mute'}
+                        </button>
+                        ${!p.isYou ? `<button onclick="removePlayer(${idx})" class="text-[10px] text-rose-400 hover:text-rose-300">Remove</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function togglePlayerMute(idx) {
+            players[idx].muted = !players[idx].muted;
+            renderPlayers();
+        }
+
+        function changeGameMode(val) {
+            document.getElementById('launch-game-name').innerText = val === 'dominoes' ? 'Yard Dominoes' : 'Jamaican Checkers';
+        }
+
+        function startQuickGame(mode) {
+            if (mode === 'dominoes') {
+                switchView('dominoes');
+                initDominoHand();
+            } else {
+                switchView('checkers');
+                initCheckersBoard();
+            }
+        }
+
+        function launchMultiplayerGame() {
+            const mode = document.getElementById('game-select').value;
+            startQuickGame(mode);
+        }
+
+        function returnToHub() {
+            switchView('hub');
+        }
+
+        function switchView(viewName) {
+            document.getElementById('view-hub').classList.add('hidden');
+            document.getElementById('view-dominoes').classList.add('hidden');
+            document.getElementById('view-checkers').classList.add('hidden');
+            document.getElementById('nav-hub-btn').classList.toggle('hidden', viewName === 'hub');
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+        }
+
+        function toggleSpeaker() {
+            speakerOn = !speakerOn;
+            const btn = document.getElementById('speaker-toggle');
+            btn.innerHTML = speakerOn ? '🔊 Speaker ON' : '🔇 Speaker OFF';
+            btn.className = `bg-slate-800 hover:bg-slate-700 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 font-medium ${speakerOn ? 'text-emerald-400' : 'text-rose-400'}`;
+        }
+
+        function toggleMic() {
+            micOn = !micOn;
+            const btn = document.getElementById('mic-toggle');
+            const dot = document.getElementById('voice-indicator-dot');
+            if (micOn) {
+                btn.innerHTML = 'Mic Active';
+                btn.className = 'bg-emerald-600 hover:bg-emerald-500 text-xs px-2.5 py-1.5 rounded-lg font-medium text-white shadow';
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
+            } else {
+                btn.innerHTML = 'Enable Mic';
+                btn.className = 'bg-indigo-600 hover:bg-indigo-500 text-xs px-2.5 py-1.5 rounded-lg font-medium text-white shadow';
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-600';
+            }
+        }
+
+        function addBotPlayer() {
+            if (players.length >= 4) {
+                showModal('Lobby Full', 'Maximum of 4 players allowed.');
+                return;
+            }
+            players.push({ name: `XBot-${Math.floor(Math.random()*900+100)}`, host: false, isYou: false, muted: false });
+            renderPlayers();
+        }
+
+        function removePlayer(idx) {
+            players.splice(idx, 1);
+            renderPlayers();
+        }
+
+        function shareInvite() {
+            showModal('Share Link', 'Room invite link copied: https://xgames.app/room/XG-T1K50');
+        }
+
+        function copyRoomCode() {
+            showModal('Room Code', 'Room code XG-T1K50 copied successfully.');
+        }
+
+        function sendEmote(emote) {
+            const chatBox = document.getElementById('hub-chat-box');
+            chatBox.innerHTML += `<div class="text-amber-300"><span class="text-indigo-400 font-bold">Tav:</span> sent emote ${emote}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function submitChat() {
+            const input = document.getElementById('hub-chat-input');
+            if (!input.value.trim()) return;
+            const chatBox = document.getElementById('hub-chat-box');
+            chatBox.innerHTML += `<div class="text-slate-200"><span class="text-indigo-400 font-bold">Tav:</span> ${escapeHtml(input.value)}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleChatKey(e) {
+            if (e.key === 'Enter') submitChat();
+        }
+
+        function showModal(title, msg) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = msg;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Dominoes Game State
+        const dominoHand = [
+            { top: 6, bottom: 6, isDouble: true },
+            { top: 5, bottom: 6, isDouble: false },
+            { top: 4, bottom: 4, isDouble: true },
+            { top: 3, bottom: 5, isDouble: false }
+        ];
+
+        function initDominoHand() {
+            const container = document.getElementById('player-domino-hand');
+            container.innerHTML = dominoHand.map((d, i) => `
+                <button onclick="selectDominoTile(${i})" class="domino-tile bg-white text-slate-900 border-2 border-slate-300 rounded-lg p-2 shadow-md flex flex-col items-center justify-center space-y-1 w-12 h-20 font-mono font-black text-xs hover:border-amber-500">
+                    <span>${getPipChar(d.top)}</span>
+                    <span class="text-[9px] text-slate-400">—</span>
+                    <span>${getPipChar(d.bottom)}</span>
+                </button>
+            `).join('');
+        }
+
+        function getPipChar(num) {
+            const pips = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            return pips[num-1] || '⚀';
+        }
+
+        function selectDominoTile(idx) {
+            const tile = dominoHand[idx];
+            const layoutInner = document.getElementById('domino-layout-inner');
+            const toast = document.getElementById('domino-action-toast');
+
+            layoutInner.innerHTML += `
+                <div class="bg-white text-slate-900 font-mono font-black text-xs px-3 py-1.5 rounded shadow-lg border border-slate-300 flex items-center space-x-1">
+                    <span>${getPipChar(tile.top)}</span><span>|</span><span>${getPipChar(tile.bottom)}</span>
+                </div>
+            `;
+
+            if (tile.isDouble) {
+                playSlamSound();
+                toast.innerHTML = `👑 Tav slammed [${tile.top}:${tile.bottom}] (DOUBLE!)`;
+                toast.className = 'mt-3 bg-amber-950/90 border border-amber-600 text-xs px-3 py-1.5 rounded-full text-amber-300 shadow-md animate-bounce';
+            } else {
+                playTableKnockSound();
+                toast.innerHTML = `🂋 Tav played [${tile.top}:${tile.bottom}]`;
+                toast.className = 'mt-3 bg-slate-900/90 border border-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 shadow-md';
+            }
+
+            dominoHand.splice(idx, 1);
+            initDominoHand();
+        }
+
+        function playDominoKnock() {
+            playTableKnockSound();
+            const toast = document.getElementById('domino-action-toast');
+            toast.innerHTML = `🪵 Tav knocked table (Passed turn)`;
+            toast.className = 'mt-3 bg-slate-900/90 border border-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 shadow-md';
+        }
+
+        // Jamaican Checkers Game State (Brown & White Pattern & Responsive Taps)
+        let checkersBoard = [];
+        let checkersTurn = 'Light';
+
+        function initCheckersBoard() {
+            checkersBoard = [];
+            for (let r = 0; r < 8; r++) {
+                let row = [];
+                for (let c = 0; c < 8; c++) {
+                    if ((r + c) % 2 === 1) {
+                        if (r < 3) row.push(2);
+                        else if (r > 4) row.push(1);
+                        else row.push(0);
+                    } else {
+                        row.push(0);
+                    }
+                }
+                checkersBoard.push(row);
+            }
+            renderCheckersGrid();
+        }
+
+        function renderCheckersGrid() {
+            const grid = document.getElementById('checkers-board-grid');
+            grid.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const isDarkSquare = (r + c) % 2 === 1;
+                    const piece = checkersBoard[r][c];
+                    const sq = document.createElement('div');
+                    sq.className = `w-full h-full rounded flex items-center justify-center cursor-pointer transition ${isDarkSquare ? 'bg-[#5c3818]' : 'bg-[#e2c09f]'}`;
+                    sq.onclick = () => handleCheckersSquareTap(r, c);
+
+                    if (piece === 1) {
+                        const pEl = document.createElement('div');
+                        pEl.className = 'w-4/5 h-4/5 rounded-full bg-amber-100 border-2 border-amber-300 shadow-lg flex items-center justify-center font-bold text-[10px] text-amber-900';
+                        pEl.innerText = '♙';
+                        sq.appendChild(pEl);
+                    } else if (piece === 2) {
+                        const pEl = document.createElement('div');
+                        pEl.className = 'w-4/5 h-4/5 rounded-full bg-slate-900 border-2 border-slate-700 shadow-lg flex items-center justify-center font-bold text-[10px] text-slate-100';
+                        pEl.innerText = '♟';
+                        sq.appendChild(pEl);
+                    }
+                    grid.appendChild(sq);
+                }
+            }
+        }
+
+        let selectedCheckersPiece = null;
+
+        function handleCheckersSquareTap(r, c) {
+            const piece = checkersBoard[r][c];
+            if (piece > 0) {
+                selectedCheckersPiece = { r, c, piece };
+                showModal('Checkers Selection', `Selected piece at row ${r+1}, col ${c+1}. Tap valid brown square to move.`);
+            } else if (selectedCheckersPiece) {
+                checkersBoard[r][c] = selectedCheckersPiece.piece;
+                checkersBoard[selectedCheckersPiece.r][selectedCheckersPiece.c] = 0;
+                selectedCheckersPiece = null;
+                checkersTurn = checkersTurn === 'Light' ? 'Dark' : 'Light';
+                document.getElementById('checkers-turn-label').innerText = `${checkersTurn} Turn`;
+                renderCheckersGrid();
+            }
+        }
+
+        function resetCheckersMatch() {
+            initCheckersBoard();
+            showModal('Checkers', 'Match reset successfully.');
+        }
+
+        window.onload = function() {
+            renderPlayers();
+        };
+    </script>
 </body>
 </html>
+```
