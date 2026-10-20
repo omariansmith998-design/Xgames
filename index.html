@@ -14,7 +14,7 @@ body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,
 .between{justify-content:space-between}
 .hidden{display:none!important}
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
-button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#334155}
+button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 12px;cursor:pointer;background:#334155}
 button:disabled{opacity:.5}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
 input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0;text-transform:none}
@@ -28,7 +28,7 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
-.wrap{border:6px solid #5a3a1a;border-radius:16px;overflow:hidden;background:#120a04;position:relative}
+.wrap{border:6px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
 canvas#board{display:block;width:100%;height:auto}
 .shake{animation:shake .25s both}
 @keyframes shake{20%,80%{transform:translate(-3px,-2px)}40%,60%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}}
@@ -87,6 +87,13 @@ canvas#board{display:block;width:100%;height:auto}
         <button class="blue" id="shareBtn">🔗 Share / Invite</button>
         <button class="purple" id="copyBtn">Copy Code</button>
       </div>
+      <div class="row between" style="margin-bottom:8px">
+        <label style="font-size:12px;color:#a5b4fc;font-weight:700">Game Rules:</label>
+        <select id="modeSelect" style="background:#1e2433;color:#fff;border:1px solid #334155;border-radius:6px;padding:4px 8px;font-size:12px">
+          <option value="partners">Partners (2v2)</option>
+          <option value="cutthroat" selected>Cut Throat (FFA)</option>
+        </select>
+      </div>
       <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave Room / Arcade Hub</button>
       <div class="row between" style="margin-bottom:4px">
         <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b>
@@ -111,9 +118,9 @@ canvas#board{display:block;width:100%;height:auto}
       </div>
     </div>
     <div class="score">
-      <div>N/S<span class="pill" id="sNS">0</span></div>
-      <div class="mid"><span id="handLbl">Hand 1</span><i>Six love</i></div>
-      <div>E/W<span class="pill" id="sWE">0</span></div>
+      <div id="scoreBoxL">N/S<span class="pill" id="sNS">0</span></div>
+      <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat</i></div>
+      <div id="scoreBoxR">E/W<span class="pill" id="sWE">0</span></div>
     </div>
     <div class="wrap" id="wrap"><canvas id="board" width="800" height="860"></canvas></div>
     <div id="log">Connecting to room...</div>
@@ -143,7 +150,8 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
 let roomCode = '', mySeatPos = 'S', micActive = false;
 let stateVersion = 0, lastAppliedVersion = -1, joinConfirmed = false, syncing = false, syncDirty = false;
-let mutedPlayers = new Set();
+let mutedPlayers = new Set(), gameMode = 'cutthroat';
+let scores = { S: 0, W: 0, N: 0, E: 0 };
 
 /* PERMANENT DEVICE IDENTITY */
 let myClientId = localStorage.getItem('xg_perm_client_id');
@@ -223,7 +231,7 @@ $('editProfileBtn').onclick = () => {
 
 /* ---------- ROOM SYNC ---------- */
 function snapshot() {
-  return { version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+  return { version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
 }
 
 async function syncRoomState() {
@@ -253,6 +261,8 @@ function applyState(st, force) {
   roomStatus = pick(st.status, roomStatus);
   hostClientId = pick(st.hostClientId, hostClientId);
   handNo = pick(st.handNo, handNo); sNS = pick(st.sNS, sNS); sWE = pick(st.sWE, sWE);
+  gameMode = pick(st.gameMode, gameMode);
+  if (st.scores) scores = st.scores;
   lastWin = pick(st.lastWin, lastWin); needD6 = pick(st.needD6, needD6);
   if (st.players && st.players.length) players = st.players;
   turn = pick(st.turn, turn); L = pick(st.L, L); R = pick(st.R, R); center = pick(st.center, center);
@@ -371,11 +381,12 @@ $('createBtn').onclick = async () => {
 
   const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true };
+  gameMode = $('modeSelect').value;
 
   const { error } = await sb.from('game_rooms').insert([{
     room_code: code,
     status: 'waiting',
-    state: { version: 0, status: 'waiting', hostClientId: myClientId, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0 }
+    state: { version: 0, status: 'waiting', hostClientId: myClientId, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores }
   }]);
   if (error) { console.error(error); toast('Error creating room'); return; }
 
@@ -453,6 +464,7 @@ async function leaveToHome(message) {
   lobby = []; players = []; roomCode = ''; isHost = false; hostClientId = ''; joinConfirmed = false;
   lastAppliedVersion = -1; stateVersion = 0; roomStatus = 'waiting'; matchOver = false;
   center = null; lb = []; rb = []; L = R = null; botN = 0;
+  scores = { S: 0, W: 0, N: 0, E: 0 };
 
   $('roomBadge').textContent = 'No room yet';
   $('game').classList.add('hidden'); $('roomPanel').classList.add('hidden');
@@ -483,7 +495,7 @@ function toggleMutePlayer(targetClientId) {
     if (audioEl) audioEl.muted = true;
     toast('Muted player locally');
   }
-  renderLobby();
+  renderLobby(); refresh();
 }
 
 function renderLobby() {
@@ -501,7 +513,7 @@ function renderLobby() {
       actionBtns += '<button style="padding:2px 6px;margin-right:4px;font-size:10px;" class="' + (isMuted ? 'red' : 'purple') + '" onclick="toggleMutePlayer(\'' + p.clientId + '\')">' + (isMuted ? 'Unmute' : 'Mute') + '</button>';
     }
     if (isHost && !isPlayerHost) {
-      actionBtns += '<button style="padding:2px 6px;background:none;color:#fb7185;font-weight:900;" data-i="' + i + '">×</button>';
+      actionBtns += '<button style="padding:2px 6px;background:none;color:#fb7185;font-weight:900;" data-i="' + i + '">×' + '</button>';
     }
 
     d.innerHTML = '<span></span><span>' +
@@ -618,10 +630,13 @@ $('micBtn').onclick = async () => {
     if (wantOn) {
       if (!(await connectVoice())) return;
       await livekitRoom.localParticipant.setMicrophoneEnabled(true);
+      micActive = true;
     } else if (livekitRoom) {
       await livekitRoom.localParticipant.setMicrophoneEnabled(false);
+      const audioTracks = livekitRoom.localParticipant.audioTrackPublications;
+      audioTracks.forEach(pub => { if (pub.track) pub.track.stop(); });
+      micActive = false;
     }
-    micActive = wantOn;
     updateMicUI(micActive);
   } catch (e) {
     console.error('Voice error', e);
@@ -656,7 +671,7 @@ window.addEventListener('load', () => {
   }
 });
 
-/* ---------- GAME CORE (runs on host only) ---------- */
+/* ---------- GAME CORE ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -666,7 +681,7 @@ function fullSet() {
 
 function newMatch() {
   $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
-  sNS = 0; sWE = 0; handNo = 1; lastWin = null; matchOver = false;
+  sNS = 0; sWE = 0; scores = { S: 0, W: 0, N: 0, E: 0 }; handNo = 1; lastWin = null; matchOver = false;
   newHand();
 }
 
@@ -748,26 +763,47 @@ function aiTurn() {
 }
 
 function blocked() {
-  let ns = 0, we = 0;
-  players.forEach(p => { const s = p.hand.reduce((a, t) => a + t.a + t.b, 0); (p.pos === 'N' || p.pos === 'S') ? ns += s : we += s; });
-  if (ns < we) win('S', 'Blocked! N/S win (' + ns + ' vs ' + we + ' pips)');
-  else if (we < ns) win('E', 'Blocked! E/W win (' + we + ' vs ' + ns + ' pips)');
-  else {
-    active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
-    syncRoomState();
-    setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
+  let pScores = {};
+  players.forEach(p => { pScores[p.pos] = p.hand.reduce((a, t) => a + t.a + t.b, 0); });
+  if (gameMode === 'partners') {
+    const ns = pScores.N + pScores.S, we = pScores.W + pScores.E;
+    if (ns < we) win('S', 'Blocked! N/S win (' + ns + ' vs ' + we + ' pips)');
+    else if (we < ns) win('E', 'Blocked! E/W win (' + we + ' vs ' + ns + ' pips)');
+    else {
+      active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
+      syncRoomState();
+      setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
+    }
+  } else {
+    let sorted = Object.keys(pScores).sort((a,b) => pScores[a] - pScores[b]);
+    if (pScores[sorted[0]] < pScores[sorted[1]]) {
+      win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins (' + pScores[sorted[0]] + ' pips)');
+    } else {
+      active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
+      syncRoomState();
+      setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
+    }
   }
 }
 
 function win(pos, why) {
   fanfare(); active = false; lastWin = pos;
-  const ns = pos === 'N' || pos === 'S';
-  if (ns) { if (sWE > 0 && sNS === 0) { toast('BREAK! Score reset to 0-0'); sWE = 0; } sNS++; }
-  else { if (sNS > 0 && sWE === 0) { toast('BREAK! Score reset to 0-0'); sNS = 0; } sWE++; }
-  log('🎉 ' + why);
-  if (sNS >= 6 || sWE >= 6) {
-    matchOver = true; log('🏆 Match over: Team ' + (sNS >= 6 ? 'N/S' : 'E/W') + ' wins six love!');
-    refresh(); syncRoomState(); return;
+  if (gameMode === 'partners') {
+    const ns = pos === 'N' || pos === 'S';
+    if (ns) { if (sWE > 0 && sNS === 0) { toast('BREAK! Score reset to 0-0'); sWE = 0; } sNS++; }
+    else { if (sNS > 0 && sWE === 0) { toast('BREAK! Score reset to 0-0'); sNS = 0; } sWE++; }
+    log('🎉 ' + why);
+    if (sNS >= 6 || sWE >= 6) {
+      matchOver = true; log('🏆 Match over: Team ' + (sNS >= 6 ? 'N/S' : 'E/W') + ' wins six love!');
+      refresh(); syncRoomState(); return;
+    }
+  } else {
+    scores[pos] = (scores[pos] || 0) + 1;
+    log('🎉 ' + why);
+    if (scores[pos] >= 6) {
+      matchOver = true; log('🏆 Match over: ' + byPos(pos).name + ' wins six love!');
+      refresh(); syncRoomState(); return;
+    }
   }
   refresh(); syncRoomState(); const e = epoch;
   setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
@@ -810,9 +846,9 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- CANVAS ENGINE ---------- */
+/* ---------- CLEAN DOMINO CANVAS ENGINE ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
-const W = 400, H = 430, PITCH = 36, MARGIN = 44, CORNER = 20, CY = 218;
+const W = 400, H = 430, MARGIN = 40, CY = 215;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function rr(c, x, y, w, h, r) {
@@ -822,64 +858,99 @@ function rr(c, x, y, w, h, r) {
 function pips(c, x, y, w, h, n, s) {
   c.fillStyle = '#111827';
   PIPS[n].forEach(i => {
-    c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.9 * s, 0, 7); c.fill();
+    c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.8 * s, 0, 7); c.fill();
   });
 }
 function drawTile(c, x, y, a, b, vert, s) {
-  s = s || 1; const w = 40 * s, h = 20 * s, dbl = a === b;
-  c.save(); c.translate(x, y); if (vert) c.rotate(Math.PI / 2);
-  c.shadowColor = 'rgba(0,0,0,.65)'; c.shadowBlur = 4 * s; c.shadowOffsetY = 2 * s;
-  rr(c, -w / 2, -h / 2, w, h, 4 * s); c.fillStyle = dbl ? '#fde68a' : '#f5f1e6'; c.fill();
+  s = s || 1; 
+  const w = vert ? 20 * s : 40 * s;
+  const h = vert ? 40 * s : 20 * s;
+  
+  c.save(); 
+  c.translate(x, y);
+  
+  c.shadowColor = 'rgba(0,0,0,0.4)'; 
+  c.shadowBlur = 4 * s; 
+  c.shadowOffsetY = 2 * s;
+  
+  rr(c, -w / 2, -h / 2, w, h, 4 * s); 
+  c.fillStyle = '#ffffff'; 
+  c.fill();
+  
   c.shadowColor = 'transparent';
-  c.lineWidth = 1; c.strokeStyle = dbl ? '#ca8a04' : '#a8a291'; c.stroke();
-  c.strokeStyle = '#8b8574'; c.beginPath(); c.moveTo(0, -h / 2 + 3 * s); c.lineTo(0, h / 2 - 3 * s); c.stroke();
-  pips(c, -w / 2, -h / 2, w / 2, h, a, s); pips(c, 0, -h / 2, w / 2, h, b, s);
+  c.lineWidth = 1; 
+  c.strokeStyle = '#d1d5db'; 
+  c.stroke();
+  
+  c.strokeStyle = '#9ca3af'; 
+  c.beginPath(); 
+  if (vert) {
+    c.moveTo(-w / 2 + 2 * s, 0); 
+    c.lineTo(w / 2 - 2 * s, 0);
+  } else {
+    c.moveTo(0, -h / 2 + 2 * s); 
+    c.lineTo(0, h / 2 - 2 * s);
+  }
+  c.stroke();
+  
+  if (vert) {
+    pips(c, -w / 2, -h / 2, w, h / 2, a, s);
+    pips(c, -w / 2, 0, w, h / 2, b, s);
+  } else {
+    pips(c, -w / 2, -h / 2, w / 2, h, a, s);
+    pips(c, 0, -h / 2, w / 2, h, b, s);
+  }
+  
   c.restore();
 }
-function layout(tiles, startX, y0, dir, rowDir) {
-  let x = startX, y = y0; const out = [];
-  const limitR = W - MARGIN - CORNER, limitL = MARGIN + CORNER;
+
+function layoutChain(tiles, startX, y0, dir, rowDir) {
+  let x = startX, y = y0; 
+  const out = [];
+  const limitR = W - MARGIN;
+  const limitL = MARGIN;
+
   tiles.forEach(t => {
-    const ew = t.d ? 20 : 40;
-    const fits = dir > 0 ? x + ew <= limitR : x - ew >= limitL;
+    const isVert = t.d;
+    const tw = isVert ? 20 : 40;
+    
+    const fits = dir > 0 ? (x + dir * tw <= limitR) : (x + dir * tw >= limitL);
     if (fits) {
-      out.push({ t, cx: x + dir * ew / 2, cy: y, dir, corner: false });
-      x += dir * ew;
+      out.push({ t, cx: x + dir * (tw / 2), cy: y, vert: isVert });
+      x += dir * tw;
     } else {
-      out.push({ t, cx: x + dir * CORNER / 2, cy: y + rowDir * PITCH / 2, rowDir, corner: true });
-      y += rowDir * PITCH; dir = -dir;
+      y += rowDir * 36; 
+      dir = -dir;
+      out.push({ t, cx: x + dir * (tw / 2), cy: y, vert: isVert });
+      x += dir * tw;
     }
   });
   return { out, x, y, dir };
 }
-function drawLinked(o) {
-  if (o.corner) {
-    const top = o.rowDir > 0 ? o.t.a : o.t.b, bottom = o.rowDir > 0 ? o.t.b : o.t.a;
-    drawTile(ctx, o.cx, o.cy, top, bottom, true, 1);
-  } else {
-    drawTile(ctx, o.cx, o.cy, o.dir > 0 ? o.t.a : o.t.b, o.dir > 0 ? o.t.b : o.t.a, o.t.d, 1);
-  }
-}
+
 function endTag(x, y, dir, txt) {
   const w = 26, h = 13;
-  let cx = x + dir * (w / 2 + 3);
+  let cx = x + dir * (w / 2 + 4);
   cx = Math.min(W - MARGIN - w / 2, Math.max(MARGIN + w / 2, cx));
   rr(ctx, cx - w / 2, y - h / 2, w, h, 6);
-  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fill();
   ctx.lineWidth = 1; ctx.strokeStyle = '#7c5a1c'; ctx.stroke();
   ctx.fillStyle = '#fcd34d'; ctx.font = '700 8px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(txt, cx, y + .5);
+  ctx.fillText(txt, cx, y + 0.5);
 }
+
 const SEATS = {
   N: { x: 145, y: 6, w: 110, h: 32, horiz: true },
   S: { x: 145, y: 392, w: 110, h: 32, horiz: true },
   W: { x: 3, y: 183, w: 38, h: 70, horiz: false },
   E: { x: 359, y: 183, w: 38, h: 70, horiz: false }
 };
+
 function drawSeat(pos) {
   const p = byPos(pos); if (!p) return;
   const s = SEATS[pos], act = pos === turn && active;
   const nm = p.name, n = p.hand ? p.hand.length : 0;
+  
   rr(ctx, s.x, s.y, s.w, s.h, 9);
   ctx.fillStyle = act ? '#4a3510' : 'rgba(0,0,0,.55)'; ctx.fill();
   ctx.lineWidth = act ? 2 : 1; ctx.strokeStyle = act ? '#facc15' : '#3a2a14'; ctx.stroke();
@@ -887,6 +958,7 @@ function drawSeat(pos) {
   ctx.beginPath(); ctx.arc(ax, ay, 11, 0, 7); ctx.fillStyle = p.ai ? '#581c87' : '#b45309'; ctx.fill();
   ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
   ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui'; ctx.fillText(nm.charAt(0).toUpperCase(), ax, ay + .5);
+  
   const count = n + (n === 1 ? ' tile' : ' tiles');
   if (s.horiz) {
     ctx.textAlign = 'left';
@@ -897,20 +969,32 @@ function drawSeat(pos) {
     ctx.fillStyle = '#fbbf24'; ctx.font = '600 9px system-ui'; ctx.fillText(count, s.x + s.w / 2, s.y + 54);
   }
 }
+
 function drawBoard() {
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
-  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#1d1108'); g.addColorStop(1, '#0d0703');
+  
+  const g = ctx.createLinearGradient(0, 0, 0, H); 
+  g.addColorStop(0, '#155e2b'); 
+  g.addColorStop(1, '#0f441f');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  
   ['N', 'W', 'E', 'S'].forEach(drawSeat);
+  
   if (!center) {
     ctx.fillStyle = '#fcd34d'; ctx.font = '700 13px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY + 4); return;
+    ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY + 4); 
+    return;
   }
+  
   const cx = W / 2, cy = CY, cw = center.d ? 20 : 40;
-  const lay = layout(lb, cx - cw / 2, cy, -1, -1), ray = layout(rb, cx + cw / 2, cy, 1, 1);
+  const lay = layoutChain(lb, cx - cw / 2, cy, -1, -1);
+  const ray = layoutChain(rb, cx + cw / 2, cy, 1, 1);
+  
   drawTile(ctx, cx, cy, center.a, center.b, center.d, 1);
-  lay.out.forEach(drawLinked);
-  ray.out.forEach(drawLinked);
+  
+  lay.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1));
+  ray.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1));
+  
   endTag(lay.x, lay.y, lay.dir, 'L ' + L);
   endTag(ray.x, ray.y, ray.dir, 'R ' + R);
 }
@@ -918,7 +1002,18 @@ function drawBoard() {
 /* ---------- REFRESH ---------- */
 function refresh() {
   $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Practice';
-  $('sNS').textContent = sNS; $('sWE').textContent = sWE; $('handLbl').textContent = 'Hand ' + handNo;
+  
+  if (gameMode === 'partners') {
+    $('scoreBoxL').innerHTML = 'N/S<span class="pill" id="sNS">' + sNS + '</span>';
+    $('scoreBoxR').innerHTML = 'E/W<span class="pill" id="sWE">' + sWE + '</span>';
+    $('modeLbl').textContent = 'Partners (2v2)';
+  } else {
+    $('scoreBoxL').innerHTML = 'S:' + scores.S + ' W:' + scores.W;
+    $('scoreBoxR').innerHTML = 'N:' + scores.N + ' E:' + scores.E;
+    $('modeLbl').textContent = 'Cut Throat (FFA)';
+  }
+  
+  $('handLbl').textContent = 'Hand ' + handNo;
   const currPlayer = byPos(turn);
   $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (currPlayer ? currPlayer.name : 'Waiting...'));
   selIdx = null; drawBoard(); renderHand();
