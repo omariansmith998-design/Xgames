@@ -79,7 +79,6 @@ canvas#board{display:block;width:100%;height:auto}
   border-color: #facc15;
   background: #3a2a14;
 }
-/* Talking pulse aura for seats */
 .seat-card-out.speaking::after {
   content: '';
   position: absolute; inset: -2px; border-radius: 9px;
@@ -523,8 +522,11 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
   joinConfirmed = false; lastApplied = { term: -1, version: -1 };
 
-  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId)
-      && (data.state.lobby || []).length >= 4) {
+  // Set my seat position from lobby state if we are already seated
+  const foundMe = (data.state.lobby || []).find(p => p.clientId === myClientId);
+  if (foundMe) mySeatPos = foundMe.pos;
+
+  if (!isHost && !foundMe && (data.state.lobby || []).length >= 4) {
     roomCode = '';
     return toast('That room is full');
   }
@@ -573,6 +575,7 @@ async function leaveToHome(message) {
   lastApplied = { term: -1, version: -1 }; hostTerm = 0; stateVersion = 0; roomStatus = 'waiting'; matchOver = false;
   center = null; lb = []; rb = []; L = R = null; botN = 0;
   scores = { S: 0, W: 0, N: 0, E: 0 };
+  mySeatPos = 'S';
 
   $('roomBadge').textContent = 'No room yet';
   $('game').classList.add('hidden'); $('roomPanel').classList.add('hidden');
@@ -619,6 +622,7 @@ function renderLobby() {
   lobby.forEach((p, i) => {
     const isPlayerHost = p.clientId === hostClientId;
     const isMe = p.clientId === myClientId;
+    if (isMe) mySeatPos = p.pos; // Keep seat position locked to actual assigned slot
     const isMuted = mutedPlayers.has(p.clientId);
 
     const row = document.createElement('div'); row.className = 'pl';
@@ -712,7 +716,6 @@ async function connectVoice() {
       $('audioBox').appendChild(el);
       if (speakerEnabled) routeToSpeaker(el);
 
-      // Web Audio API Analyser for Speaking Pulse
       setupAudioAnalyser(el, participant.identity);
     }
   });
@@ -751,7 +754,7 @@ function setupAudioAnalyser(audioEl, participantId) {
       for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
       let average = sum / bufferLength;
 
-      const isSpeaking = average > 12; // Threshold for active speech
+      const isSpeaking = average > 12;
       const wasSpeaking = speakingParticipants.has(participantId);
 
       if (isSpeaking !== wasSpeaking) {
@@ -899,6 +902,7 @@ function newHand() {
   const deck = fullSet();
   players = ['S', 'W', 'N', 'E'].map((pos, i) => {
     const playerObj = lobby.find(l => l.pos === pos) || { clientId: 'bot_' + (i + 1), name: 'XBot-' + (i + 1), isBot: true };
+    if (playerObj.clientId === myClientId) mySeatPos = pos; // Ensure local position sync
     return { clientId: playerObj.clientId, name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
   });
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
@@ -1090,7 +1094,6 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   c.strokeStyle = '#cbd5e1';
   c.stroke();
 
-  // RESTORED GOLD/YELLOW ACCENT FOR DOUBLE TILES
   if (a === b) {
     c.strokeStyle = '#fbbf24';
     c.lineWidth = 1.5;
@@ -1184,7 +1187,7 @@ function renderOutsideSeats() {
   ['S', 'W', 'N', 'E'].forEach(pos => {
     const p = byPos(pos); if (!p) return;
     const isMuted = mutedPlayers.has(p.clientId);
-    const isMe = p.clientId === myClientId;
+    const isMe = (p.clientId === myClientId) || (pos === mySeatPos);
     const isSpeaking = speakingParticipants.has(p.clientId);
     const name = String(p.name || '?');
 
@@ -1197,7 +1200,7 @@ function renderOutsideSeats() {
 
     const nameEl = document.createElement('div');
     nameEl.className = 'p-name';
-    nameEl.textContent = name + (pos === mySeatPos ? ' ★' : '');
+    nameEl.textContent = name + (isMe ? ' ★' : '');
 
     const tiles = document.createElement('div');
     tiles.className = 'p-tiles';
