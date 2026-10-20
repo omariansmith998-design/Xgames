@@ -116,7 +116,7 @@ canvas#board{display:block;width:100%;height:auto}
     <button class="green" id="saveProfileBtn">Save Profile & Continue</button>
   </div>
 
-  <!-- LOBBY MAIN -->
+  <!-- DYNAMIC STREET LOBBY MAIN -->
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
       <div class="row between">
@@ -124,17 +124,56 @@ canvas#board{display:block;width:100%;height:auto}
         <button id="editProfileBtn" style="padding:4px 8px;font-size:11px">Edit Profile</button>
       </div>
 
-      <!-- GAME SELECTOR TABS -->
-      <div class="pill-group" style="margin:4px 0">
-        <div class="pill-opt active" id="tabGameDominoes">🂋 Yard Dominoes</div>
-        <div class="pill-opt" id="tabGameCheckers">👑 Checkers</div>
+      <!-- STREET ARCADE BANNER -->
+      <div class="panel" style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid #4f46e5; text-align: center; padding: 10px; margin-top: 4px;">
+        <p style="font-size: 12px; font-weight: 900; color: #a5b4fc; letter-spacing: 0.05em;">🔥 STREET ARCADE LOUNGE</p>
+        <p style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Join an active public table or create your own room</p>
       </div>
 
-      <!-- DOMINOES LOBBY CONTROLS -->
+      <!-- GAME SELECTOR TABS -->
+      <div class="pill-group" style="margin:4px 0">
+        <div class="pill-opt active" id="tabGameDominoes" onclick="switchGameTab('dominoes')">🂋 Yard Dominoes</div>
+        <div class="pill-opt" id="tabGameCheckers" onclick="switchGameTab('checkers')">👑 Checkers</div>
+      </div>
+
+      <!-- DOMINOES LOBBY & LIVE TABLES -->
       <div id="dominoesLobbyControls" class="stack">
         <div class="two">
-          <button class="green" id="createBtn">+ Create Room</button>
-          <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
+          <button class="green" id="createBtn">+ Create Table</button>
+          <div class="row" style="gap:4px">
+            <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
+            <button id="joinBtn" class="blue">Join</button>
+          </div>
+        </div>
+
+        <!-- LIVE PUBLIC TABLES FEED -->
+        <div class="panel">
+          <div class="row between" style="margin-bottom:6px">
+            <span style="font-size:11px;font-weight:800;color:#fbbf24">🎲 LIVE PUBLIC TABLES</span>
+            <span style="font-size:10px;color:#22c55e">● 1,402 Online</span>
+          </div>
+          <div class="stack" style="gap:6px">
+            <div class="panel row between" style="background:#141724; border-color:#282e42; padding:8px 10px; cursor:pointer;" onclick="toast('Connecting to Table #04...')">
+              <div>
+                <div style="font-size:11px; font-weight:800; color:#fff">Table #04: Yard Dominoes</div>
+                <div style="font-size:9px; color:#94a3b8">Host: Tavar • Cut Throat FFA</div>
+              </div>
+              <div class="row" style="gap:6px">
+                <span style="font-size:9px; background:#312e81; color:#c7d2fe; padding:2px 6px; border-radius:4px">3/4 Seats</span>
+                <button class="green" style="padding:4px 8px; font-size:10px">Join</button>
+              </div>
+            </div>
+            <div class="panel row between" style="background:#141724; border-color:#282e42; padding:8px 10px; cursor:pointer;" onclick="toast('Spectating Table #12...')">
+              <div>
+                <div style="font-size:11px; font-weight:800; color:#fff">Table #12: Partners 2v2</div>
+                <div style="font-size:9px; color:#94a3b8">Host: Javid • High Stakes</div>
+              </div>
+              <div class="row" style="gap:6px">
+                <span style="font-size:9px; background:#581c87; color:#e9d5ff; padding:2px 6px; border-radius:4px">👁️ 12 Specs</span>
+                <button class="purple" style="padding:4px 8px; font-size:10px">Spectate</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -158,13 +197,57 @@ canvas#board{display:block;width:100%;height:auto}
       </div>
     </div>
 
-    <!-- ROOM LOBBY PANEL -->
+    <!-- ROOM LOBBY PANEL (VIRTUAL LIVING ROOM) -->
     <div id="roomPanel" class="panel hidden">
       <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-XXXXX</div>
       <div class="two" style="margin:8px 0">
         <button class="blue" id="shareBtn">🔗 Share / Invite</button>
         <button class="purple" id="copyBtn">Copy Code</button>
+      </div>
+
+      <!-- VIRTUAL LIVING ROOM SPATIAL SEATING VIEW -->
+      <div class="stack" style="margin-bottom:8px">
+        <div class="panel" style="text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid #4f46e5; padding: 6px;">
+          <p style="font-size: 11px; font-weight: 900; color: #a5b4fc;">🛋️ THE LOUNGE ROOM (Waiting for Players...)</p>
+        </div>
+
+        <div class="relative w-full aspect-square bg-slate-950 border border-slate-800 rounded-3xl p-6 flex items-center justify-center overflow-hidden my-2">
+          <!-- Central Coffee Table -->
+          <div class="w-32 h-32 rounded-full bg-amber-900/40 border-4 border-amber-800/60 shadow-inner flex items-center justify-center z-10">
+            <span class="text-xs font-bold tracking-wider text-amber-500 uppercase opacity-60">Arcade Table</span>
+          </div>
+
+          <!-- SEAT 1: TOP OPPONENT (North) -->
+          <div id="lobby-seat-1" class="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div class="w-14 h-14 rounded-full bg-purple-600 border-2 border-purple-400 flex items-center justify-center font-bold text-white shadow-lg">XB-1</div>
+            <span class="text-xs mt-1 text-slate-400 font-medium">XBot-1</span>
+          </div>
+
+          <!-- SEAT 2: RIGHT OPPONENT (East) -->
+          <div id="lobby-seat-2" class="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col items-center">
+            <div class="w-14 h-14 rounded-full bg-indigo-600 border-2 border-indigo-400 flex items-center justify-center font-bold text-white shadow-lg">XB-2</div>
+            <span class="text-xs mt-1 text-slate-400 font-medium">XBot-2</span>
+          </div>
+
+          <!-- SEAT 3: BOTTOM PLAYER (Your Seat - South) -->
+          <div id="lobby-seat-3" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-amber-500 border-4 border-emerald-400 flex items-center justify-center font-bold text-slate-950 text-lg shadow-xl ring-4 ring-emerald-500/20 animate-pulse" id="myAvatarInitial">O</div>
+            <span class="text-xs mt-1 text-emerald-400 font-bold flex items-center gap-0.5"><span id="myLobbyNameDisplay">Omarian</span> ★ <span class="text-[10px] text-slate-500">(You)</span></span>
+          </div>
+
+          <!-- SEAT 4: LEFT OPPONENT (West) -->
+          <div id="lobby-seat-4" class="absolute left-6 top-1/2 -translate-y-1/2 flex flex-col items-center">
+            <div class="w-14 h-14 rounded-full bg-pink-600 border-2 border-pink-400 flex items-center justify-center font-bold text-white shadow-lg">XB-3</div>
+            <span class="text-xs mt-1 text-slate-400 font-medium">XBot-3</span>
+          </div>
+        </div>
+
+        <!-- Lounge Quick Chat Input Bar -->
+        <div class="row" style="gap:6px">
+          <input id="loungeChatInput" placeholder="Say something to the lounge..." maxlength="40">
+          <button class="blue" onclick="sendLoungeMessage()">Send</button>
+        </div>
       </div>
 
       <!-- GAME MODE PILL TOGGLE -->
@@ -412,12 +495,21 @@ function buyCosmetic(id, cost) {
 }
 
 function triggerPuffEmote() {
-  const puff = document.createElement('span');
-  puff.innerText = '💨';
-  puff.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl pointer-events-none z-50 animate-smoke-rise';
-  document.body.appendChild(puff);
-  setTimeout(() => puff.remove(), 1200);
-  toast('Omarian exhaled a smoke puff');
+  const emojis = ['🌿💨', '🔥💨', '💨✨', '🍃💨'];
+  const chosen = emojis[Math.floor(Math.random() * emojis.length)];
+
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const puff = document.createElement('div');
+      puff.innerText = chosen;
+      puff.className = 'fixed text-3xl pointer-events-none z-50 animate-smoke-rise';
+      puff.style.left = `${Math.random() * 60 + 20}%`;
+      puff.style.bottom = `${Math.random() * 30 + 30}%`;
+      document.body.appendChild(puff);
+      setTimeout(() => puff.remove(), 1300);
+    }, i * 120);
+  }
+  toast('💨 Hot Box session active!');
 }
 
 function triggerLobbyEmote(symbol) {
@@ -437,6 +529,8 @@ function initProfile() {
     $('profileBox').classList.remove('hidden');
   } else {
     $('myNickDisplay').textContent = myNickname;
+    $('myLobbyNameDisplay').textContent = myNickname;
+    $('myAvatarInitial').textContent = myNickname.charAt(0).toUpperCase();
     $('profileBox').classList.add('hidden');
     $('homeBox').classList.remove('hidden');
   }
@@ -448,6 +542,8 @@ $('saveProfileBtn').onclick = () => {
   myNickname = inputVal;
   localStorage.setItem('xg_perm_nickname', myNickname);
   $('myNickDisplay').textContent = myNickname;
+  $('myLobbyNameDisplay').textContent = myNickname;
+  $('myAvatarInitial').textContent = myNickname.charAt(0).toUpperCase();
   $('profileBox').classList.add('hidden');
   $('homeBox').classList.remove('hidden');
   toast('Profile saved!');
@@ -462,6 +558,35 @@ $('editProfileBtn').onclick = () => {
   $('homeBox').classList.add('hidden');
   $('profileBox').classList.remove('hidden');
 };
+
+/* ---------- VIRTUAL LIVING ROOM CHAT BUBBLE ENGINE ---------- */
+function displayLobbyChatBubble(seatNumber, textMessage) {
+    const targetSeat = document.getElementById(`lobby-seat-${seatNumber}`);
+    if (!targetSeat) return;
+
+    const existingBubble = targetSeat.querySelector('.lobby-speech-bubble');
+    if (existingBubble) existingBubble.remove();
+
+    const bubble = document.createElement('div');
+    bubble.className = 'lobby-speech-bubble absolute -top-12 bg-slate-100 text-slate-900 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-lg border border-white max-w-[140px] break-words text-center transition-all duration-300 z-30 animate-bounce';
+    bubble.innerText = textMessage;
+
+    targetSeat.appendChild(bubble);
+
+    setTimeout(() => {
+        bubble.style.opacity = '0';
+        setTimeout(() => bubble.remove(), 300);
+    }, 4000);
+}
+
+function sendLoungeMessage() {
+    const input = document.getElementById('loungeChatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    displayLobbyChatBubble(3, text);
+    input.value = '';
+}
 
 /* ---------- PILL TOGGLE CONTROLLERS ---------- */
 function bindPillGroup(containerId, onChange) {
@@ -790,10 +915,31 @@ function toggleMutePlayer(targetClientId) {
 function renderLobby() {
   const list = $('plist'); list.innerHTML = '';
 
+  const seatPosMap = { N: 1, E: 2, S: 3, W: 4 };
+  ['1', '2', '3', '4'].forEach(id => {
+    const seatEl = document.getElementById('lobby-seat-' + id);
+    if (seatEl) seatEl.style.opacity = '0.3';
+  });
+
   lobby.forEach((p, i) => {
     const isPlayerHost = p.clientId === hostClientId;
     const isMe = p.clientId === myClientId;
     const isMuted = mutedPlayers.has(p.clientId);
+
+    const seatNum = seatPosMap[p.pos];
+    if (seatNum) {
+      const seatEl = document.getElementById('lobby-seat-' + seatNum);
+      if (seatEl) {
+        seatEl.style.opacity = '1';
+        const nameSpan = seatEl.querySelector('span:last-of-type');
+        if (nameSpan) nameSpan.textContent = p.name + (isMe ? ' ★ (You)' : '');
+        const avatarDiv = seatEl.querySelector('div:first-of-type');
+        if (avatarDiv) {
+          avatarDiv.textContent = p.name.charAt(0).toUpperCase();
+          avatarDiv.className = 'w-14 h-14 rounded-full ' + (p.isBot ? 'bg-purple-600 border-purple-400' : 'bg-amber-500 border-emerald-400') + ' border-2 flex items-center justify-center font-bold text-white shadow-lg';
+        }
+      }
+    }
 
     const row = document.createElement('div'); row.className = 'pl';
     const nameEl = document.createElement('span'); nameEl.textContent = p.name;
