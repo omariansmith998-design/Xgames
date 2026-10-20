@@ -52,7 +52,7 @@ canvas#board{display:block;width:100%;height:auto}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 
-/* OUTSIDE PLAYER SEAT BADGES */
+/* OUTSIDE PLAYER SEAT BADGES (CLEAN TOP BAR) */
 .seat-grid-outside {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -73,24 +73,11 @@ canvas#board{display:block;width:100%;height:auto}
   align-items: center;
   gap: 2px;
   text-align: center;
-  position: relative;
 }
 .seat-card-out.active {
   border-color: #facc15;
   background: #3a2a14;
 }
-.seat-card-out.speaking::after {
-  content: '';
-  position: absolute; inset: -2px; border-radius: 9px;
-  border: 2px solid #22c55e;
-  animation: speakPulse 0.8s infinite alternate;
-  pointer-events: none;
-}
-@keyframes speakPulse {
-  0% { opacity: 0.3; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.03); box-shadow: 0 0 10px #22c55e; }
-}
-
 .seat-card-out .p-name {
   font-size: 10px;
   font-weight: 800;
@@ -229,23 +216,31 @@ canvas#board{display:block;width:100%;height:auto}
 <div id="audioBox"></div>
 
 <script>
+/* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
+// The key below is the PUBLIC anon key (safe in the browser). Never put a service_role key,
+// a "sb_secret_" key, or the LiveKit API secret in this file.
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
+/* ---------- INPUT SAFETY ---------- */
+// Anything another player sends is checked before it is used, and only ever shown with textContent.
 const ID_RE = /^p_[a-z0-9]{4,16}$/;
 const stripName = s => String(s || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 15);
 const cleanName = s => stripName(s) || 'Player';
 
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
 let roomCode = '', mySeatPos = 'S', micActive = false, speakerEnabled = false;
+// Ordering: (term, version). The host bumps version on every update. A host that comes back after a
+// refresh bumps the TERM, so guests accept it even if it restored from an older saved copy.
 let hostTerm = 0, stateVersion = 0, lastApplied = { term: -1, version: -1 };
 let joinConfirmed = false, syncing = false, syncDirty = false;
-let mutedPlayers = new Set(), speakingParticipants = new Set(), gameMode = 'cutthroat';
+let mutedPlayers = new Set(), gameMode = 'cutthroat';
 let scores = { S: 0, W: 0, N: 0, E: 0 };
 
+/* PERMANENT DEVICE IDENTITY */
 let myClientId = localStorage.getItem('xg_perm_client_id');
 if (!myClientId || !ID_RE.test(myClientId)) {
   myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
@@ -254,16 +249,18 @@ if (!myClientId || !ID_RE.test(myClientId)) {
 
 let myNickname = stripName(localStorage.getItem('xg_perm_nickname'));
 
+/* ---------- REFRESH-PROOF SESSION (who you are + which room you were in; never the game itself) ---------- */
 const SESSION_KEY = 'xg_session_v1';
 const MAX_SESSION_AGE = 6 * 3600 * 1000;
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
-  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } },
 };
 function saveSession() { store.set(SESSION_KEY, { roomCode, role: isHost ? 'host' : 'guest', savedAt: Date.now() }); }
 function clearSession() { store.del(SESSION_KEY); }
 
+/* ---------- AUDIO SOUND EFFECTS ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
 function tone(f1, f2, d, type, vol, delay = 0) {
   try {
@@ -284,6 +281,7 @@ function shake() {
   setTimeout(() => w.classList.remove('shake'), 260);
 }
 
+/* ---------- HELPERS ---------- */
 const $ = id => document.getElementById(id);
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
@@ -293,11 +291,14 @@ const isNewer = st => {
   return term !== lastApplied.term ? term > lastApplied.term : version > lastApplied.version;
 };
 
+/* ---------- STATE ---------- */
+const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 let lobby = [], botN = 0, isHost = false, hostClientId = '', roomStatus = 'waiting';
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
 const byPos = p => players.find(x => x.pos === p);
 
+/* ---------- PROFILE CONTROLLER ---------- */
 function initProfile() {
   if (!myNickname) {
     $('homeBox').classList.add('hidden');
@@ -330,6 +331,9 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
+/* ---------- ROOM SYNC ----------
+   THE HOST OWNS THE GAME. Only the host changes the table, and the host never takes state back from the
+   network (except once, to restore after a refresh). Guests only apply NEWER (term, version) states. */
 function snapshot() {
   return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
 }
@@ -406,6 +410,7 @@ function listenToRoom() {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
       if (!isHost && payload.new) applyState(payload.new.state);
     })
+    // Only accept a broadcast table that names the real host (a basic check; real protection needs accounts)
     .on('broadcast', { event: 'STATE' }, ({ payload }) => {
       if (!isHost && payload && payload.hostClientId === hostClientId) applyState(payload);
     })
@@ -445,6 +450,7 @@ function denyJoin(clientId, reason) {
 }
 
 function handleJoin(g) {
+  // The id must look exactly like one our app makes, and the name is cleaned before it is stored
   if (!g || typeof g.clientId !== 'string' || !ID_RE.test(g.clientId)) return;
   if (!lobby.some(p => p.clientId === g.clientId)) {
     if (roomStatus === 'playing') return denyJoin(g.clientId, 'That match has already started.');
@@ -478,6 +484,7 @@ function handleMove(mv) {
   }
 }
 
+/* ---------- LOBBY CONTROLLER ---------- */
 $('createBtn').onclick = async () => {
   if (!myNickname) return initProfile();
 
@@ -522,11 +529,8 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
   joinConfirmed = false; lastApplied = { term: -1, version: -1 };
 
-  // Set my seat position from lobby state if we are already seated
-  const foundMe = (data.state.lobby || []).find(p => p.clientId === myClientId);
-  if (foundMe) mySeatPos = foundMe.pos;
-
-  if (!isHost && !foundMe && (data.state.lobby || []).length >= 4) {
+  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId)
+      && (data.state.lobby || []).length >= 4) {
     roomCode = '';
     return toast('That room is full');
   }
@@ -534,12 +538,12 @@ async function joinRoomByCode(code) {
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
 
-  if (isHost) { hostTerm = (data.state.term || 0) + 1; stateVersion = 0; }
+  if (isHost) { hostTerm = (data.state.term || 0) + 1; stateVersion = 0; } // host coming back: new term, carry on from the saved table
   applyState(data.state, isHost);
   renderLobby(); refresh();
   saveSession();
   listenToRoom();
-  if (isHost) syncRoomState();
+  if (isHost) syncRoomState(); // tell everyone the host is back
 }
 
 $('copyBtn').onclick = () => {
@@ -562,6 +566,7 @@ $('shareBtn').onclick = () => {
   }
 };
 
+// Everything that takes you back to the home screen goes through here
 async function leaveToHome(message) {
   clearSession();
   epoch++; active = false;
@@ -575,7 +580,6 @@ async function leaveToHome(message) {
   lastApplied = { term: -1, version: -1 }; hostTerm = 0; stateVersion = 0; roomStatus = 'waiting'; matchOver = false;
   center = null; lb = []; rb = []; L = R = null; botN = 0;
   scores = { S: 0, W: 0, N: 0, E: 0 };
-  mySeatPos = 'S';
 
   $('roomBadge').textContent = 'No room yet';
   $('game').classList.add('hidden'); $('roomPanel').classList.add('hidden');
@@ -596,6 +600,7 @@ $('botBtn').onclick = () => {
   renderLobby(); syncRoomState();
 };
 
+// The host picks the rules in the lobby. The choice is sent to everyone and used when the match starts.
 $('modeSelect').onchange = () => {
   if (!isHost) return;
   gameMode = $('modeSelect').value;
@@ -616,13 +621,13 @@ function toggleMutePlayer(targetClientId) {
   renderLobby(); refresh();
 }
 
+// Lobby rows are built with DOM calls and textContent only, so a player's name can never run as code
 function renderLobby() {
   const list = $('plist'); list.innerHTML = '';
 
   lobby.forEach((p, i) => {
     const isPlayerHost = p.clientId === hostClientId;
     const isMe = p.clientId === myClientId;
-    if (isMe) mySeatPos = p.pos; // Keep seat position locked to actual assigned slot
     const isMuted = mutedPlayers.has(p.clientId);
 
     const row = document.createElement('div'); row.className = 'pl';
@@ -663,13 +668,13 @@ function renderLobby() {
   $('startBtn').classList.toggle('hidden', !isHost);
   $('botBtn').classList.toggle('hidden', !isHost);
   $('guestWaitMsg').classList.toggle('hidden', isHost);
-  $('modeSelect').disabled = !isHost;
-  $('modeSelect').value = gameMode;
+  $('modeSelect').disabled = !isHost;   // only the host picks the rules
+  $('modeSelect').value = gameMode;     // everyone sees the rules that are really set
 }
 
 $('startBtn').onclick = () => {
   if (!isHost) return toast('Only host can start');
-  gameMode = $('modeSelect').value;
+  gameMode = $('modeSelect').value;     // use exactly what is shown on screen
   ['S', 'W', 'N', 'E'].forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) {
       botN++;
@@ -680,7 +685,7 @@ $('startBtn').onclick = () => {
   newMatch();
 };
 
-/* ---------- VOICE & TALKING PULSE ANALYZER ---------- */
+/* ---------- VOICE (LiveKit WebRTC) ---------- */
 async function connectVoice() {
   if (livekitRoom) return true;
   if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
@@ -712,18 +717,17 @@ async function connectVoice() {
       el.autoplay = true;
       el.playsInline = true;
 
-      if (mutedPlayers.has(participant.identity)) el.muted = true;
+      if (mutedPlayers.has(participant.identity)) {
+        el.muted = true;
+      }
+
       $('audioBox').appendChild(el);
       if (speakerEnabled) routeToSpeaker(el);
-
-      setupAudioAnalyser(el, participant.identity);
     }
   });
 
-  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
     track.detach().forEach(el => el.remove());
-    speakingParticipants.delete(participant.identity);
-    renderOutsideSeats();
   });
 
   room.on(LivekitClient.RoomEvent.Disconnected, () => {
@@ -731,43 +735,9 @@ async function connectVoice() {
   });
 
   await room.connect(LIVEKIT_URL, data.token);
-  try { await room.startAudio(); } catch (e) {}
+  try { await room.startAudio(); } catch (e) { console.log('Audio autoplay prompt needed'); }
   livekitRoom = room;
   return true;
-}
-
-function setupAudioAnalyser(audioEl, participantId) {
-  try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioCtx.createAnalyser();
-    const source = audioCtx.createMediaElementSource(audioEl);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    const checkAudioLevel = () => {
-      if (!livekitRoom) return;
-      analyser.getByteFrequencyData(dataArray);
-      let sum = 0;
-      for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
-      let average = sum / bufferLength;
-
-      const isSpeaking = average > 12;
-      const wasSpeaking = speakingParticipants.has(participantId);
-
-      if (isSpeaking !== wasSpeaking) {
-        if (isSpeaking) speakingParticipants.add(participantId);
-        else speakingParticipants.delete(participantId);
-        renderOutsideSeats();
-      }
-      requestAnimationFrame(checkAudioLevel);
-    };
-    checkAudioLevel();
-  } catch (e) {
-    console.error('Analyser setup error:', e);
-  }
 }
 
 async function routeToSpeaker(audioEl) {
@@ -781,6 +751,7 @@ async function routeToSpeaker(audioEl) {
 }
 
 $('speakerBtn').onclick = async () => {
+  // Most phone browsers can't switch the audio output from a web page, so say so instead of pretending
   const supported = typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
   if (!supported) {
     toast("This browser can't switch speakers. Use your volume buttons or headphones.");
@@ -803,9 +774,7 @@ function disconnectVoice() {
   const r = livekitRoom; livekitRoom = null;
   if (r) { try { r.disconnect(); } catch (e) {} }
   $('audioBox').innerHTML = '';
-  speakingParticipants.clear();
   if (micActive) { micActive = false; updateMicUI(false, true); }
-  renderOutsideSeats();
 }
 
 $('micBtn').onclick = async () => {
@@ -817,17 +786,15 @@ $('micBtn').onclick = async () => {
       if (!(await connectVoice())) return;
       await livekitRoom.localParticipant.setMicrophoneEnabled(true);
       micActive = true;
-      speakingParticipants.add(myClientId);
     } else if (livekitRoom) {
       await livekitRoom.localParticipant.setMicrophoneEnabled(false);
+      // Release the mic fully so Safari stops showing it as in use
       livekitRoom.localParticipant.audioTrackPublications.forEach(pub => {
         if (pub.track) pub.track.stop();
       });
       micActive = false;
-      speakingParticipants.delete(myClientId);
     }
     updateMicUI(micActive);
-    renderOutsideSeats();
   } catch (e) {
     console.error('Voice error', e);
     toast('Mic blocked or voice failed. Check mic permission.');
@@ -851,6 +818,7 @@ function updateMicUI(on, silent) {
   }
 }
 
+/* ---------- RESUME AFTER A REFRESH, SLEEP, OR SIGNAL DROP ---------- */
 async function resumeSession() {
   const s = store.get(SESSION_KEY);
   if (!s || !s.roomCode || !myNickname) return false;
@@ -859,15 +827,17 @@ async function resumeSession() {
   const { data } = await sb.from('game_rooms').select('updated_at').eq('room_code', s.roomCode).maybeSingle();
   if (!data || Date.now() - Date.parse(data.updated_at) > MAX_SESSION_AGE) { clearSession(); return false; }
 
+  // joinRoomByCode already handles both roles: a host restores the saved table, a guest picks up where they were
   await joinRoomByCode(s.roomCode);
   return true;
 }
 
 async function reconnect() {
   if (!roomCode) return;
+  // The live channel can silently die while the phone sleeps
   if (!roomSubscription || roomSubscription.state !== 'joined') listenToRoom();
-  if (isHost) syncRoomState();
-  else await fetchLatestState();
+  if (isHost) syncRoomState();       // re-broadcast the table so guests catch up
+  else await fetchLatestState();     // pull anything missed
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reconnect(); });
 window.addEventListener('online', reconnect);
@@ -884,6 +854,7 @@ window.addEventListener('load', async () => {
   }
 });
 
+/* ---------- GAME CORE ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -902,7 +873,6 @@ function newHand() {
   const deck = fullSet();
   players = ['S', 'W', 'N', 'E'].map((pos, i) => {
     const playerObj = lobby.find(l => l.pos === pos) || { clientId: 'bot_' + (i + 1), name: 'XBot-' + (i + 1), isBot: true };
-    if (playerObj.clientId === myClientId) mySeatPos = pos; // Ensure local position sync
     return { clientId: playerObj.clientId, name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
   });
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
@@ -1022,6 +992,7 @@ function win(pos, why) {
   setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
 }
 
+/* ---------- HAND UI ---------- */
 let selIdx = null;
 function selectTile(i) {
   if (!active || turn !== mySeatPos) return toast('Not your turn');
@@ -1058,6 +1029,7 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
+/* ---------- CANVAS BOARD ENGINE (DIRECTIONAL PIP ORIENTATION) ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -1094,15 +1066,7 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   c.strokeStyle = '#cbd5e1';
   c.stroke();
 
-  if (a === b) {
-    c.strokeStyle = '#fbbf24';
-    c.lineWidth = 1.5;
-    rr(c, -w / 2 + 1, -h / 2 + 1, w - 2, h - 2, 3 * s);
-    c.stroke();
-  }
-
   c.strokeStyle = '#94a3b8';
-  c.lineWidth = 1;
   c.beginPath();
   if (vert) {
     c.moveTo(-w / 2 + 2 * s, 0);
@@ -1113,6 +1077,7 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   }
   c.stroke();
 
+  // Flip pip order so 'a' always touches the preceding tile
   const firstPip = flip ? b : a;
   const secondPip = flip ? a : b;
 
@@ -1127,41 +1092,55 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   c.restore();
 }
 
+/* Dynamic Snake Layout Engine with Fixed Vertical Row Clearance */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0;
   const out = [];
   const limitR = W - MARGIN - 12;
   const limitL = MARGIN + 12;
+
+  // Vertical step clearance accounting for vertical tile length (40px) + row padding (24px)
   const verticalStep = 64;
 
   tiles.forEach(t => {
     let isVert = t.d;
     let tw = isVert ? 20 : 40;
+
+    // Check if standard tile exceeds board boundary
     const willOverflow = dir > 0 ? (x + dir * tw > limitR) : (x + dir * tw < limitL);
 
     if (willOverflow) {
       if (t.d) {
+        // Double tile at corner (already vertical)
         const cx = x + dir * 10;
         const cy = y;
         out.push({ t, cx, cy, vert: true, flip: false });
+
         y += rowDir * verticalStep;
         dir = -dir;
         x = cx + dir * 10;
       } else {
+        // Non-double tile turning corner vertically
         isVert = true;
         tw = 20;
         const cx = x + dir * 10;
         const cy = y + rowDir * (verticalStep / 2);
-        const flip = rowDir < 0;
+        const flip = rowDir < 0; // Flip when going upward
+
         out.push({ t, cx, cy, vert: true, flip });
+
         y += rowDir * verticalStep;
         dir = -dir;
         x = cx + dir * 10;
       }
     } else {
+      // Normal row placement
       const cx = x + dir * (tw / 2);
       const cy = y;
+
+      // When moving LEFT (dir < 0), flip horizontal non-double tiles so 'a' touches inner end
       const flip = !isVert && (dir < 0);
+
       out.push({ t, cx, cy, vert: isVert, flip });
       x += dir * tw;
     }
@@ -1180,6 +1159,7 @@ function endTag(x, y, dir, txt) {
   ctx.fillText(txt, cx, y + 0.5);
 }
 
+// Seat cards are built with DOM calls and textContent only, so a player's name can never run as code
 function renderOutsideSeats() {
   const seatGrid = $('seatOverlayOutside');
   seatGrid.innerHTML = '';
@@ -1187,12 +1167,11 @@ function renderOutsideSeats() {
   ['S', 'W', 'N', 'E'].forEach(pos => {
     const p = byPos(pos); if (!p) return;
     const isMuted = mutedPlayers.has(p.clientId);
-    const isMe = (p.clientId === myClientId) || (pos === mySeatPos);
-    const isSpeaking = speakingParticipants.has(p.clientId);
+    const isMe = p.clientId === myClientId;
     const name = String(p.name || '?');
 
     const card = document.createElement('div');
-    card.className = 'seat-card-out' + (pos === turn && active ? ' active' : '') + (isSpeaking ? ' speaking' : '');
+    card.className = 'seat-card-out' + (pos === turn && active ? ' active' : '');
 
     const avatar = document.createElement('div');
     avatar.className = 'p-avatar' + (p.ai ? ' bot' : '');
@@ -1200,7 +1179,7 @@ function renderOutsideSeats() {
 
     const nameEl = document.createElement('div');
     nameEl.className = 'p-name';
-    nameEl.textContent = name + (isMe ? ' ★' : '');
+    nameEl.textContent = name + (pos === mySeatPos ? ' ★' : '');
 
     const tiles = document.createElement('div');
     tiles.className = 'p-tiles';
@@ -1248,6 +1227,7 @@ function drawBoard() {
   endTag(ray.x, ray.y, ray.dir, 'R ' + R);
 }
 
+/* ---------- REFRESH ---------- */
 function refresh() {
   $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Practice';
 
