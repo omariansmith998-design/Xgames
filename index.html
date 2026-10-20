@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Isometric 3/4 Spatial Lounge & Complete Games</title>
+<title>Xgames Arcade - Isometric 3/4 Spatial Lounge & Complete Board Games</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
@@ -22,9 +22,6 @@ input:focus, select:focus{border-color:#6366f1}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
 .panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
-.pl{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e2433;font-size:14px}
-.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}.tag.you{background:#059669;color:#fff}
-.status{font-size:11px;color:#94a3b8}.status b{color:#fbbf24}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
@@ -45,37 +42,24 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
   background-size: 40px 40px;
 }
 .lounge-vignette-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10;
+  position: absolute; inset: 0; pointer-events: none; z-index: 10;
   background: radial-gradient(circle at center, transparent 30%, rgba(2, 6, 23, 0.75) 100%);
 }
 .central-table-spotlight {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 280px; height: 160px;
-  pointer-events: none;
-  z-index: 5;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 280px; height: 160px; pointer-events: none; z-index: 5;
   background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.05) 45%, transparent 70%);
   filter: blur(8px);
 }
 
 .glass-panel {
-  background: rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 1px 1px 0 rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.07); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 .btn-neon-emerald {
   background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  box-shadow: 0 0 20px 0 rgba(16, 185, 129, 0.3);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px 0 rgba(16, 185, 129, 0.3); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
-.btn-neon-emerald:active { transform: scale(0.98); box-shadow: 0 0 8px 0 rgba(16, 185, 129, 0.5); }
 
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
 canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:100%;height:auto}
@@ -87,13 +71,6 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
 .modal-card { width: 90%; max-width: 360px; background: #141724; border: 1px solid #2a3045; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
-
-@keyframes smokeRise {
-  0% { opacity: 0.2; transform: translateY(0px) scale(0.8); }
-  40% { opacity: 0.9; transform: translateY(-12px) scale(1.2); }
-  100% { opacity: 0; transform: translateY(-28px) scale(1.6); }
-}
-.animate-smoke-rise { animation: smokeRise 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 </style>
 </head>
 <body>
@@ -104,28 +81,21 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 </div>
 
 <div class="card stack">
-  <div class="panel row between status"><span id="syncLabel">Offline Practice</span><b id="roomBadge">No active room</b></div>
-
-  <!-- PROFILE SETUP -->
-  <div id="profileBox" class="panel stack hidden">
-    <h2>Set Up Your Player Persona</h2>
-    <input id="profileNameIn" placeholder="Enter nickname" maxlength="15">
-    <button class="green" id="saveProfileBtn">Save Persona & Enter Lounge</button>
-  </div>
+  <div class="panel row between status"><span id="syncLabel">Supabase Realtime Mode</span><b id="roomBadge">No active room</b></div>
 
   <!-- MAIN STREET LOBBY -->
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
       <div class="row between">
-        <h2>Your Handle: <b id="myNickDisplay" style="color:#fbbf24">Player</b></h2>
-        <button id="editProfileBtn" style="padding:4px 8px;font-size:11px">Custom Persona</button>
+        <h2>Your Handle: <b id="myNickDisplay" style="color:#fbbf24">Tav</b></h2>
+        <button id="editProfileBtn" onclick="$('personaModal').classList.remove('hidden')" style="padding:4px 8px;font-size:11px">Custom Persona</button>
       </div>
 
       <div class="two">
-        <button class="green" id="openCreateModalBtn">+ Create Table</button>
+        <button class="green" onclick="$('createModal').classList.remove('hidden')">+ Create Table</button>
         <div class="row" style="gap:4px">
           <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
-          <button id="joinBtn" class="blue">Join</button>
+          <button id="joinBtn" onclick="joinRoomByCode($('codeIn').value.trim().toUpperCase())" class="blue">Join</button>
         </div>
       </div>
 
@@ -140,7 +110,7 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
       </div>
     </div>
 
-    <!-- SPATIAL ISOMETRIC 3/4 LIVING ROOM LOUNGE -->
+    <!-- SPATIAL ISOMETRIC LOUNGE -->
     <div id="roomPanel" class="panel hidden">
       <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-XXXXX</div>
@@ -161,13 +131,11 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
       </div>
 
       <div class="two" style="margin-top:8px">
-        <button class="purple" id="botBtn">+ Add AI Opponent</button>
         <button class="purple" onclick="$('hostRulesModal').classList.remove('hidden')">📋 House Rules</button>
       </div>
 
-      <button class="btn-neon-emerald" id="startBtn" style="width:100%; margin-top:8px">Start Match (Zoom In)</button>
+      <button class="btn-neon-emerald" id="startBtn" onclick="startMatchWithZoom()" style="width:100%; margin-top:8px">Start Match (Zoom In)</button>
       <button id="leaveBtn" onclick="returnToMainHub()" style="width:100%; margin-top:8px; background:#475569">Leave Table / Main Hub</button>
-      <div id="plist" class="stack" style="margin-top:8px"></div>
     </div>
   </div>
 
@@ -179,7 +147,7 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
       <div id="scoreBoxR">E/W<span class="pill" id="sWE">0</span></div>
     </div>
     <div class="wrap" id="wrap"><canvas id="board" width="800" height="720"></canvas></div>
-    <div id="log">Connecting to room...</div>
+    <div id="log">Table ready.</div>
     <div class="panel">
       <div class="lbl" id="turnLbl">Your hand</div>
       <div class="hand" id="hand"></div>
@@ -210,17 +178,7 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
   </div>
 </div>
 
-<!-- LOUNGE EXPRESS EMOTE BAR -->
-<div class="card row between" style="padding:6px 12px">
-  <div style="font-size:10px;font-weight:800;color:#94a3b8">LOUNGE EXPRESS</div>
-  <div class="row" style="gap:6px">
-    <button onclick="triggerPuffEmote()" class="purple" style="padding:4px 8px;font-size:11px">💨 Puff</button>
-    <button onclick="triggerLobbyEmote('🂋')" class="blue" style="padding:4px 8px;font-size:11px">🂋 Slam</button>
-    <button onclick="triggerLobbyEmote('👑')" class="gold" style="padding:4px 8px;font-size:11px">👑 Crown</button>
-  </div>
-</div>
-
-<!-- UNIVERSAL ROOM CREATION MODAL -->
+<!-- MODALS -->
 <div id="createModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel">
     <h2 style="color:#fcd34d;font-size:15px">🎮 Create Game Table</h2>
@@ -231,14 +189,6 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
         <option value="dominoes">🂋 Yard Dominoes</option>
       </select>
     </div>
-    <div style="text-align:left">
-      <label class="lbl">Match Mode</label>
-      <div class="pill-group" id="matchTypePill">
-        <div class="pill-opt active" onclick="setMatchType('pvp', this)">Online PvP</div>
-        <div class="pill-opt" onclick="setMatchType('ai', this)">Vs AI Bot</div>
-        <div class="pill-opt" onclick="setMatchType('pass', this)">Pass & Play</div>
-      </div>
-    </div>
     <div class="two" style="margin-top:8px">
       <button class="blue" onclick="$('createModal').classList.add('hidden')">Cancel</button>
       <button class="btn-neon-emerald" onclick="confirmCreateRoom()">Launch Room</button>
@@ -246,7 +196,6 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
   </div>
 </div>
 
-<!-- HOST HOUSE RULES DASHBOARD MODAL -->
 <div id="hostRulesModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel" style="text-align:left">
     <div class="row between border-b border-slate-800 pb-2">
@@ -255,60 +204,26 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
     </div>
     <div>
       <label class="lbl" style="text-align:left">Select Game Arena</label>
-      <select id="loungeGameSelect" onchange="updateLoungeGameType(this.value)">
+      <select id="loungeGameSelect" onchange="selectedGame=this.value;">
         <option value="checkers">👑 Jamaican Checkers / Draughts</option>
         <option value="dominoes">🂋 Yard Dominoes</option>
       </select>
     </div>
-    <div id="dominoesRulesSection" class="stack hidden">
-      <div>
-        <label class="lbl" style="text-align:left">Match Format</label>
-        <div class="pill-group">
-          <div class="pill-opt active" onclick="setHostRule('gameMode', 'cutthroat', this)">Cut Throat (FFA)</div>
-          <div class="pill-opt" onclick="setHostRule('gameMode', 'partners', this)">Partners (2v2)</div>
-        </div>
-      </div>
-    </div>
-    <div>
-      <label class="lbl" style="text-align:left">AI Bot Difficulty</label>
-      <div class="pill-group">
-        <div class="pill-opt" onclick="setHostRule('botDiff', 'easy', this)">Easy</div>
-        <div class="pill-opt active" onclick="setHostRule('botDiff', 'medium', this)">Medium</div>
-        <div class="pill-opt" onclick="setHostRule('botDiff', 'hard', this)">Hard (Pro)</div>
-      </div>
-    </div>
-    <button onclick="applyHostRules()" class="btn-neon-emerald" style="width:100%;margin-top:6px">Save House Rules</button>
+    <button onclick="$('hostRulesModal').classList.add('hidden'); toast('Rules Saved!');" class="btn-neon-emerald" style="width:100%;margin-top:6px">Save House Rules</button>
   </div>
 </div>
 
-<!-- PERSONA CUSTOMIZER MODAL -->
 <div id="personaModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:15px">👤 Custom Persona Settings</h2>
-    <div style="text-align:left">
-      <label class="lbl">Gender Presentation</label>
-      <div class="pill-group">
-        <div class="pill-opt active" onclick="setGender('M')">Male</div>
-        <div class="pill-opt" onclick="setGender('F')">Female</div>
-        <div class="pill-opt" onclick="setGender('NB')">Non-Binary</div>
-      </div>
-    </div>
-    <div style="text-align:left">
-      <label class="lbl">Persona Theme Style</label>
-      <div class="pill-group">
-        <div class="pill-opt active" onclick="setStyle('rasta')">🌿 Rasta</div>
-        <div class="pill-opt" onclick="setStyle('neon')">⚡ Cyber</div>
-        <div class="pill-opt" onclick="setStyle('gold')">👑 Gold</div>
-      </div>
-    </div>
-    <button class="btn-neon-emerald" onclick="$('personaModal').classList.add('hidden'); toast('Persona updated!');">Save Setup</button>
+    <h2 style="color:#fcd34d;font-size:15px">👤 Persona Settings</h2>
+    <input id="personaNameIn" placeholder="Enter handle" maxlength="15">
+    <button class="btn-neon-emerald" onclick="savePersona()">Save Persona</button>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-/* ---------- CONFIG & STATE ---------- */
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const sb = supabase.createClient(SB_URL, SB_KEY);
@@ -317,82 +232,35 @@ const $ = id => document.getElementById(id);
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
 
-const ID_RE = /^p_[a-z0-9]{4,16}$/;
-const stripName = s => String(s || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 15);
+let myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
+let myNickname = 'Tav';
+let selectedGame = 'checkers', roomCode = '';
 
-let myClientId = localStorage.getItem('xg_perm_client_id');
-if (!myClientId || !ID_RE.test(myClientId)) {
-  myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
-  localStorage.setItem('xg_perm_client_id', myClientId);
+function savePersona() {
+  const inputEl = $('personaNameIn');
+  if (inputEl && inputEl.value.trim()) {
+    myNickname = inputEl.value.trim();
+    $('myNickDisplay').textContent = myNickname;
+  }
+  $('personaModal').classList.add('hidden');
 }
 
-let myNickname = stripName(localStorage.getItem('xg_perm_nickname')) || 'Tav';
-$('myNickDisplay').textContent = myNickname;
-
-let selectedGame = 'checkers', selectedMatchType = 'pvp', roomCode = '';
-let userGender = 'M', userStyle = 'rasta';
-
-const BOT_PERSONAS = [
-  { name: 'Don Dadda', badge: '👑' },
-  { name: 'Rasta Yard', badge: '🌿' },
-  { name: 'Selector', badge: '⚡' },
-  { name: 'Fire Walker', badge: '🔥' }
-];
-
-let roomSubscription = null, pollTimer = null;
-let mySeatPos = 'S', gameMode = 'cutthroat', botDiff = 'medium', tileTheme = 'white';
-let scores = { S: 0, W: 0, N: 0, E: 0 };
-let isHost = false, hostClientId = '', roomStatus = 'waiting', lobby = [];
-
-/* ========================================================
-   AUDIO SYNTH
-   ======================================================== */
-const AC = new (window.AudioContext || window.webkitAudioContext)();
-function tone(f1, f2, d, type, vol, delay = 0) {
-  try {
-    if (AC.state === 'suspended') AC.resume();
-    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
-    o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
-    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
-  } catch (e) {}
-}
-const clack = () => tone(480, 90, .05, 'sine', .5);
-const slam = () => tone(180, 20, .22, 'triangle', 1);
-const knock = () => { tone(240, 60, .04, 'sine', .6); tone(240, 60, .04, 'sine', .6, .09); };
-const fanfare = () => [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => tone(f, 0, .3, 'sine', .35, i * .09));
-
-/* ========================================================
-   ISOMETRIC 3/4 PROJECTION ENGINE
-   ======================================================== */
+/* --- ISOMETRIC 3/4 PROJECTION ENGINE --- */
 function cartesianToIsometric(x, y) {
-  const isoX = (x - y);
-  const isoY = (x + y) / 2;
-  return { isoX, isoY };
+  return { isoX: x - y, isoY: (x + y) / 2 };
 }
 
 const frCanvas = $('freeRoamCanvas');
 const frCtx = frCanvas ? frCanvas.getContext('2d') : null;
-
-let myAvatar = { x: 300, y: 300, name: myNickname, chatMsg: '' };
+let myAvatar = { x: 400, y: 550, name: myNickname, chatMsg: '' };
 
 function initFreeRoamCanvas() {
   if (!frCanvas) return;
   frCanvas.addEventListener('click', (e) => {
     const rect = frCanvas.getBoundingClientRect();
-    const clickX = ((e.clientX - rect.left) / rect.width) * 800;
-    const clickY = ((e.clientY - rect.top) / rect.height) * 800;
-
-    myAvatar.x = clickX;
-    myAvatar.y = clickY;
-
-    const distTable = Math.hypot(clickX - 400, clickY - 400);
-    if (distTable <= 90) toast("Sat down at Central Table!");
-    if (clickX >= 80 && clickX <= 160 && clickY >= 80 && clickY <= 160) $('personaModal').classList.remove('hidden');
-    if (clickX >= 640 && clickX <= 720 && clickY >= 80 && clickY <= 160) $('hostRulesModal').classList.remove('hidden');
+    myAvatar.x = ((e.clientX - rect.left) / rect.width) * 800;
+    myAvatar.y = ((e.clientY - rect.top) / rect.height) * 800;
   });
-
   requestAnimationFrame(renderIsometricLoop);
 }
 
@@ -400,85 +268,31 @@ function renderIsometricLoop() {
   if (!frCtx) return;
   frCtx.clearRect(0, 0, 800, 800);
 
-  const mapOffsetX = 400;
-  const mapOffsetY = 160;
+  const ox = 400, oy = 160;
+  const tableIso = cartesianToIsometric(0, 240);
+  const tx = ox + tableIso.isoX, ty = oy + tableIso.isoY;
 
-  // 1. Central Table
-  const tableIso = cartesianToIsometric(400 - mapOffsetX, 400 - mapOffsetY);
-  const tableX = mapOffsetX + tableIso.isoX;
-  const tableY = mapOffsetY + tableIso.isoY;
-
-  frCtx.beginPath();
-  frCtx.ellipse(tableX, tableY + 20, 95, 48, 0, 0, Math.PI * 2);
-  frCtx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-  frCtx.fill();
-
-  frCtx.fillStyle = '#1e1b4b';
-  frCtx.fillRect(tableX - 65, tableY - 10, 130, 25);
-
-  frCtx.beginPath();
-  frCtx.ellipse(tableX, tableY - 10, 85, 42, 0, 0, Math.PI * 2);
-  frCtx.fillStyle = '#065f46';
-  frCtx.strokeStyle = '#34d399';
-  frCtx.lineWidth = 3;
+  // Central Table Cylinder
+  frCtx.beginPath(); frCtx.ellipse(tx, ty + 20, 95, 48, 0, 0, Math.PI * 2);
+  frCtx.fillStyle = 'rgba(0,0,0,0.65)'; frCtx.fill();
+  frCtx.fillStyle = '#1e1b4b'; frCtx.fillRect(tx - 65, ty - 10, 130, 25);
+  frCtx.beginPath(); frCtx.ellipse(tx, ty - 10, 85, 42, 0, 0, Math.PI * 2);
+  frCtx.fillStyle = '#065f46'; frCtx.strokeStyle = '#34d399'; frCtx.lineWidth = 3;
   frCtx.fill(); frCtx.stroke();
+  frCtx.fillStyle = '#a7f3d0'; frCtx.font = '800 13px system-ui'; frCtx.textAlign = 'center';
+  frCtx.fillText(`🎲 ${selectedGame.toUpperCase()} ARENA`, tx, ty - 10);
 
-  frCtx.fillStyle = '#a7f3d0';
-  frCtx.font = '800 13px system-ui';
-  frCtx.textAlign = 'center';
-  frCtx.fillText(`🎲 ${selectedGame.toUpperCase()} ARENA`, tableX, tableY - 10);
-
-  // 2. Wardrobe Station
-  const wardIso = cartesianToIsometric(120 - mapOffsetX, 120 - mapOffsetY);
-  const wardX = mapOffsetX + wardIso.isoX;
-  const wardY = mapOffsetY + wardIso.isoY;
-  frCtx.fillStyle = 'rgba(79, 70, 229, 0.3)';
-  frCtx.fillRect(wardX - 35, wardY - 20, 70, 40);
-  frCtx.strokeStyle = '#818cf8';
-  frCtx.strokeRect(wardX - 35, wardY - 20, 70, 40);
-  frCtx.fillStyle = '#c7d2fe';
-  frCtx.font = '700 11px system-ui';
-  frCtx.fillText('👕 Wardrobe', wardX, wardY + 4);
-
-  // 3. House Rules Board
-  const rulesIso = cartesianToIsometric(680 - mapOffsetX, 120 - mapOffsetY);
-  const rulesX = mapOffsetX + rulesIso.isoX;
-  const rulesY = mapOffsetY + rulesIso.isoY;
-  frCtx.fillStyle = 'rgba(6, 95, 70, 0.3)';
-  frCtx.fillRect(rulesX - 35, rulesY - 20, 70, 40);
-  frCtx.strokeStyle = '#34d399';
-  frCtx.strokeRect(rulesX - 35, rulesY - 20, 70, 40);
-  frCtx.fillStyle = '#a7f3d0';
-  frCtx.font = '700 11px system-ui';
-  frCtx.fillText('📋 Rules', rulesX, rulesY + 4);
-
-  // 4. Player Token
-  const playerIso = cartesianToIsometric(myAvatar.x - mapOffsetX, myAvatar.y - mapOffsetY);
-  const px = mapOffsetX + playerIso.isoX;
-  const py = mapOffsetY + playerIso.isoY;
-
-  frCtx.beginPath();
-  frCtx.ellipse(px, py + 10, 18, 9, 0, 0, Math.PI * 2);
-  frCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-  frCtx.fill();
-
-  frCtx.beginPath();
-  frCtx.arc(px, py - 14, 20, 0, Math.PI * 2);
-  frCtx.fillStyle = '#f59e0b';
-  frCtx.strokeStyle = '#fef08a';
-  frCtx.lineWidth = 2.5;
-  frCtx.fill(); frCtx.stroke();
-
-  frCtx.fillStyle = '#ffffff';
-  frCtx.font = '800 12px system-ui';
+  // Local Player Token
+  const pIso = cartesianToIsometric(myAvatar.x - 400, myAvatar.y - 160);
+  const px = ox + pIso.isoX, py = oy + pIso.isoY;
+  frCtx.beginPath(); frCtx.arc(px, py - 14, 20, 0, Math.PI * 2);
+  frCtx.fillStyle = '#f59e0b'; frCtx.fill();
+  frCtx.fillStyle = '#ffffff'; frCtx.font = '800 12px system-ui';
   frCtx.fillText(myNickname, px, py - 40);
 
   if (myAvatar.chatMsg) {
-    frCtx.fillStyle = '#f8fafc';
-    frCtx.fillRect(px - 50, py - 65, 100, 22);
-    frCtx.fillStyle = '#0f172a';
-    frCtx.font = '11px system-ui';
-    frCtx.fillText(myAvatar.chatMsg, px, py - 50);
+    frCtx.fillStyle = '#f8fafc'; frCtx.fillRect(px - 50, py - 65, 100, 22);
+    frCtx.fillStyle = '#0f172a'; frCtx.font = '11px system-ui'; frCtx.fillText(myAvatar.chatMsg, px, py - 50);
   }
 
   requestAnimationFrame(renderIsometricLoop);
@@ -486,205 +300,67 @@ function renderIsometricLoop() {
 
 function sendLoungeMessage() {
   const input = $('loungeChatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  myAvatar.chatMsg = text;
-  input.value = '';
-  setTimeout(() => myAvatar.chatMsg = '', 3500);
-}
-
-function animateTableZoomIn(onComplete) {
-  let scale = 1;
-  const targetScale = 2.5;
-  const duration = 1200;
-  const startTime = performance.now();
-
-  function zoomStep(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const easeProgress = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-    scale = 1 + (targetScale - 1) * easeProgress;
-
-    frCanvas.style.transform = `scale(${scale})`;
-    frCanvas.style.transformOrigin = '50% 50%';
-    frCanvas.style.transition = 'transform 0.05s linear';
-
-    if (progress < 1) requestAnimationFrame(zoomStep);
-    else setTimeout(() => { frCanvas.style.transform = 'scale(1)'; onComplete(); }, 150);
-  }
-  requestAnimationFrame(zoomStep);
-}
-
-/* ---------- HOUSE RULES & ROOM CONTROLLERS ---------- */
-let currentLoungeRules = { gameType: 'checkers', gameMode: 'cutthroat', botDiff: 'medium' };
-
-function updateLoungeGameType(game) {
-  currentLoungeRules.gameType = game;
-  selectedGame = game;
-  const domSection = $('dominoesRulesSection');
-  if (domSection) domSection.classList.toggle('hidden', game !== 'dominoes');
-}
-
-function setHostRule(key, value, el) {
-  currentLoungeRules[key] = value;
-  const parent = el.parentElement;
-  if (parent) {
-    parent.querySelectorAll('.pill-opt').forEach(opt => opt.classList.remove('active'));
-    el.classList.add('active');
-  }
-}
-
-function applyHostRules() {
-  $('hostRulesModal').classList.add('hidden');
-  toast(`House Rules Saved: ${currentLoungeRules.gameType.toUpperCase()}`);
-}
-
-$('openCreateModalBtn').onclick = () => $('createModal').classList.remove('hidden');
-
-function setMatchType(type, el) {
-  selectedMatchType = type;
-  document.querySelectorAll('#matchTypePill .pill-opt').forEach(o => o.classList.remove('active'));
-  el.classList.add('active');
+  if (input.value.trim()) { myAvatar.chatMsg = input.value.trim(); input.value = ''; }
 }
 
 function confirmCreateRoom() {
   selectedGame = $('createGameSelect').value;
   $('createModal').classList.add('hidden');
-
-  if (selectedMatchType === 'pass') {
-    launchGameEngine(selectedGame);
-    toast('Pass & Play Mode Active');
-    return;
-  }
-  createOnlineRoom();
+  roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  $('codeBig').textContent = roomCode;
+  $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
+  setTimeout(initFreeRoamCanvas, 50);
 }
 
-async function createOnlineRoom() {
-  const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true };
-
-  const { error } = await sb.from('game_rooms').insert([{
-    room_code: code,
-    status: 'waiting',
-    state: { gameType: selectedGame, hostClientId: myClientId, lobby: [myEntry] }
-  }]);
-
-  if (error) return toast('Error creating room');
-
-  roomCode = code; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
-  lobby = [myEntry];
-
+function joinRoomByCode(code) {
+  if (!code) return toast('Enter room code');
+  roomCode = code;
   $('codeBig').textContent = roomCode;
-  $('roomBadge').textContent = 'Room: ' + roomCode;
-  $('syncLabel').textContent = 'Online Sync Active';
-  
-  $('homeBox').classList.add('hidden');
-  $('roomPanel').classList.remove('hidden');
-
+  $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
   setTimeout(initFreeRoamCanvas, 50);
+}
+
+function returnToLounge() {
+  $('gameDominoes').classList.add('hidden');
+  $('gameCheckers').classList.add('hidden');$('roomPanel').classList.remove('hidden');
+}
+
+function returnToMainHub() {
+  $('gameDominoes').classList.add('hidden');$('gameCheckers').classList.add('hidden');
+  $('roomPanel').classList.add('hidden');$('homeBox').classList.remove('hidden');
+  fetchActivePublicRooms();
+}
+
+function startMatchWithZoom() {
+  $('roomPanel').classList.add('hidden');
+  if (selectedGame === 'dominoes') {
+    $('gameDominoes').classList.remove('hidden');
+    newMatch();
+  } else {
+    $('gameCheckers').classList.remove('hidden');
+    checkersEngine.resetBoard();
+    resizeDraughtsCanvas();
+  }
 }
 
 async function fetchActivePublicRooms() {
   const container = $('publicRoomsContainer');
   container.innerHTML = '<div style="font-size:11px;color:#64748b;text-align:center;padding:12px">Querying active Supabase tables...</div>';
-
   const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-  const { data, error } = await sb.from('game_rooms')
-    .select('*')
-    .eq('status', 'waiting')
-    .gt('updated_at', tenMinsAgo)
-    .limit(5);
+  const { data, error } = await sb.from('game_rooms').select('*').eq('status', 'waiting').gt('updated_at', tenMinsAgo).limit(5);
 
   if (error || !data || data.length === 0) {
-    container.innerHTML = '<div style="font-size:11px;color:#64748b;text-align:center;padding:12px">No active public tables. Create one above!</div>';
+    container.innerHTML = '<div style="font-size:11px;color:#64748b;text-align:center;padding:12px">No public tables found. Create one above!</div>';
     return;
   }
-
   container.innerHTML = '';
   data.forEach(room => {
-    const st = room.state || {};
     const card = document.createElement('div');
     card.className = 'panel row between';
     card.style.cssText = 'background:#141724; border-color:#282e42; padding:8px 10px; cursor:pointer;';
-    card.innerHTML = `
-      <div>
-        <div style="font-size:11px; font-weight:800; color:#fff">${room.room_code}: ${(st.gameType || 'checkers').toUpperCase()}</div>
-        <div style="font-size:9px; color:#94a3b8">Host: ${st.lobby ? st.lobby[0]?.name : 'Player'}</div>
-      </div>
-      <button class="green" style="padding:4px 8px; font-size:10px" onclick="joinRoomByCode('${room.room_code}')">Join Table</button>
-    `;
+    card.innerHTML = `<div><div style="font-size:11px;font-weight:800;color:#fff">${room.room_code}</div></div><button class="green" style="padding:4px 8px;font-size:10px" onclick="joinRoomByCode('${room.room_code}')">Join</button>`;
     container.appendChild(card);
   });
-}
-
-$('joinBtn').onclick = () => {
-  const code = $('codeIn').value.trim().toUpperCase();
-  if (!code) return toast('Enter room code');
-  joinRoomByCode(code);
-};
-
-async function joinRoomByCode(code) {
-  const { data, error } = await sb.from('game_rooms').select('*').eq('room_code', code).maybeSingle();
-  if (error || !data || !data.state) return toast('Room not found');
-
-  roomCode = code; roomStatus = data.status || 'waiting';
-  selectedGame = data.state.gameType || 'checkers';
-  hostClientId = data.state.hostClientId || '';
-  isHost = (hostClientId === myClientId);
-
-  $('codeBig').textContent = roomCode;
-  $('roomBadge').textContent = 'Room: ' + roomCode;
-  $('syncLabel').textContent = 'Online Sync Active';
-  
-  $('homeBox').classList.add('hidden');
-  $('roomPanel').classList.remove('hidden');
-
-  if (data.state.lobby) lobby = data.state.lobby;
-  setTimeout(initFreeRoamCanvas, 50);
-}
-
-$('startBtn').onclick = () => {
-  animateTableZoomIn(() => {
-    launchGameEngine(selectedGame);
-  });
-};
-
-function launchGameEngine(game) {
-  $('roomPanel').classList.add('hidden');
-  $('homeBox').classList.add('hidden');
-  
-  if (game === 'dominoes') {
-    $('gameDominoes').classList.remove('hidden');
-    newMatch();
-  } else if (game === 'checkers') {
-    $('gameCheckers').classList.remove('hidden');
-    checkersEngine.resetBoard();
-    setTimeout(resizeDraughtsCanvas, 50);
-  }
-}
-
-function returnToLounge() {
-  $('gameDominoes').classList.add('hidden');
-  $('gameCheckers').classList.add('hidden');
-  
-  if (roomCode) {
-    $('homeBox').classList.add('hidden');
-    $('lobby').classList.remove('hidden');
-    $('roomPanel').classList.remove('hidden');
-    toast('Returned to Room Lounge');
-  } else {
-    returnToMainHub();
-  }
-}
-
-function returnToMainHub() {
-  roomCode = ''; isHost = false; lobby = [];
-  $('gameDominoes').classList.add('hidden');
-  $('gameCheckers').classList.add('hidden');
-  $('roomPanel').classList.add('hidden');
-  $('lobby').classList.remove('hidden');
-  $('homeBox').classList.remove('hidden');
-  fetchActivePublicRooms();
 }
 
 /* ========================================================
@@ -698,31 +374,18 @@ function fullSet() {
 }
 
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
-let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0;
+let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false;
 const byPos = p => players.find(x => x.pos === p);
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 
-function newMatch() {
-  sNS = 0; sWE = 0; scores = { S: 0, W: 0, N: 0, E: 0 }; handNo = 1; lastWin = null;
-  newHand();
-}
-
+function newMatch() { sNS = 0; sWE = 0; handNo = 1; lastWin = null; newHand(); }
 function newHand() {
-  epoch++;
   const deck = fullSet();
-  players = ['S', 'W', 'N', 'E'].map((pos, i) => {
-    const playerObj = lobby.find(l => l.pos === pos) || { clientId: 'bot_' + (i + 1), name: BOT_PERSONAS[i].name, isBot: true };
-    return { clientId: playerObj.clientId, name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
-  });
+  players = ['S', 'W', 'N', 'E'].map((pos, i) => ({ pos, name: pos === 'S' ? myNickname : 'Bot ' + pos, hand: deck.slice(i * 7, i * 7 + 7), ai: pos !== 'S' }));
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true;
   needD6 = lastWin === null;
-  if (needD6) {
-    turn = players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos;
-    log(byPos(turn).name + ' holds [6|6] and poses first.');
-  } else {
-    turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.');
-  }
-  refresh(); maybeAi();
+  turn = needD6 ? players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos : lastWin;
+  refreshDominoes(); maybeAi();
 }
 
 function isValid(t) {
@@ -735,23 +398,22 @@ function play(i, side) {
   if (side === 'first') { center = { a: t.a, b: t.b, d: t.d }; L = t.a; R = t.b; }
   else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
   else { const o = t.a === R ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; R = o.b; rb.push(o); }
-  (t.d || !p.hand.length) ? slam() : clack();
   log('💥 ' + p.name + ' slammed [' + t.a + '|' + t.b + ']');
   if (!p.hand.length) return win(p.pos, p.name + ' went out!');
-  next();
+  nextDominoTurn();
 }
 
 function pass() {
-  const p = byPos(turn); passes++; knock(); log('✋ ' + p.name + ' knocked (passed).');
+  const p = byPos(turn); passes++; log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
-  next();
+  nextDominoTurn();
 }
 
-function next() { turn = NEXT[turn]; refresh(); maybeAi(); }
+function nextDominoTurn() { turn = NEXT[turn]; refreshDominoes(); maybeAi(); }
 
 function maybeAi() {
-  const e = epoch, cur = byPos(turn);
-  if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
+  const cur = byPos(turn);
+  if (active && cur && cur.ai) setTimeout(() => { if (active) aiTurn(); }, 900);
 }
 
 function aiTurn() {
@@ -759,15 +421,13 @@ function aiTurn() {
   const opts = [];
   p.hand.forEach((t, i) => {
     if (!isValid(t)) return;
-    if (!center) opts.push({ i, side: 'first', w: t.a + t.b, isDouble: t.d });
+    if (!center) opts.push({ i, side: 'first' });
     else {
-      if (t.a === L || t.b === L) opts.push({ i, side: 'left', w: t.a + t.b, isDouble: t.d });
-      if (t.a === R || t.b === R) opts.push({ i, side: 'right', w: t.a + t.b, isDouble: t.d });
+      if (t.a === L || t.b === L) opts.push({ i, side: 'left' });
+      if (t.a === R || t.b === R) opts.push({ i, side: 'right' });
     }
   });
   if (!opts.length) return pass();
-
-  opts.sort((x, y) => (y.isDouble ? 10 : 0) + y.w - ((x.isDouble ? 10 : 0) + x.w));
   play(opts[0].i, opts[0].side);
 }
 
@@ -775,25 +435,16 @@ function blocked() {
   let pScores = {};
   players.forEach(p => { pScores[p.pos] = p.hand.reduce((a, t) => a + t.a + t.b, 0); });
   let sorted = Object.keys(pScores).sort((a, b) => pScores[a] - pScores[b]);
-  if (pScores[sorted[0]] < pScores[sorted[1]]) {
-    win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins (' + pScores[sorted[0]] + ' pips)');
-  } else {
-    active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
-    setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
-  }
+  win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins');
 }
 
 function win(pos, why) {
-  fanfare(); active = false; lastWin = pos;
-  scores[pos] = (scores[pos] || 0) + 1;
-  log('🎉 ' + why);
-  refresh(); const e = epoch;
-  setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
+  active = false; lastWin = pos; log('🎉 ' + why); refreshDominoes();
+  setTimeout(() => { handNo++; newHand(); }, 3000);
 }
 
 const cv = $('board'), ctx = cv ? cv.getContext('2d') : null;
-const W = 400, H = 360, EDGE = 8, CY = 180;
-const TILE_L = 40, TILE_W = 20, ROW_PITCH = 48;
+const W = 400, H = 360, CY = 180, TILE_L = 40, TILE_W = 20, ROW_PITCH = 48;
 const PIP_GRID = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function roundRect(c, x, y, w, h, r) {
@@ -801,33 +452,29 @@ function roundRect(c, x, y, w, h, r) {
   c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
 
-function drawHalf(c, hx, hy, n, pipColor) {
-  const step = 5.5; c.fillStyle = pipColor;
+function drawHalf(c, hx, hy, n) {
+  c.fillStyle = '#111827';
   PIP_GRID[n].forEach(i => {
-    c.beginPath(); c.arc(hx + ((i % 3) - 1) * step, hy + (((i / 3) | 0) - 1) * step, 1.8, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(hx + ((i % 3) - 1) * 5.5, hy + (((i / 3) | 0) - 1) * 5.5, 1.8, 0, Math.PI * 2); c.fill();
   });
 }
 
 function drawTile(c, cx, cy, lead, trail, rot) {
-  let bodyColor = '#ffffff', pipColor = '#111827', dividerColor = '#94a3b8';
   c.save(); c.translate(cx, cy); c.rotate(rot || 0);
   roundRect(c, -TILE_L / 2, -TILE_W / 2, TILE_L, TILE_W, 4);
-  c.fillStyle = lead === trail ? '#fde68a' : bodyColor; c.fill();
+  c.fillStyle = lead === trail ? '#fde68a' : '#ffffff'; c.fill();
   c.lineWidth = 1; c.strokeStyle = '#cbd5e1'; c.stroke();
-  c.strokeStyle = dividerColor; c.beginPath(); c.moveTo(0, -TILE_W / 2 + 2); c.lineTo(0, TILE_W / 2 - 2); c.stroke();
-  drawHalf(c, -TILE_L / 4, 0, lead, pipColor); drawHalf(c, TILE_L / 4, 0, trail, pipColor);
+  c.strokeStyle = '#94a3b8'; c.beginPath(); c.moveTo(0, -TILE_W / 2 + 2); c.lineTo(0, TILE_W / 2 - 2); c.stroke();
+  drawHalf(c, -TILE_L / 4, 0, lead); drawHalf(c, TILE_L / 4, 0, trail);
   c.restore();
 }
 
 function layoutBranch(tiles, origin, dir, rowDir, bounds) {
   let x = origin.x, y = origin.y; const out = [];
-  const maxX = bounds.right - EDGE - TILE_W, minX = bounds.left + EDGE + TILE_W;
-
+  const maxX = bounds.right - 8 - TILE_W, minX = bounds.left + 8 + TILE_W;
   for (const t of tiles) {
     const along = t.d ? TILE_W : TILE_L;
-    const fits = dir > 0 ? x + along <= maxX : x - along >= minX;
-
-    if (fits) {
+    if (dir > 0 ? x + along <= maxX : x - along >= minX) {
       out.push({ t, cx: x + dir * along / 2, cy: y, rot: t.d ? Math.PI / 2 : (dir > 0 ? 0 : Math.PI) });
       x += dir * along;
     } else {
@@ -838,23 +485,18 @@ function layoutBranch(tiles, origin, dir, rowDir, bounds) {
   return { out, cursor: { x, y, dir } };
 }
 
-function drawBoard() {
+function drawDominoBoard() {
   if (!ctx) return;
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
-  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#155e2b'); g.addColorStop(1, '#0f441f');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
+  ctx.fillStyle = '#155e2b'; ctx.fillRect(0, 0, W, H);
   if (!center) {
-    ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center';
     ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY);
     return;
   }
-
   const cLen = center.d ? TILE_W : TILE_L;
-  const bounds = { left: 0, right: W };
-  const left = layoutBranch(lb, { x: W / 2 - cLen / 2, y: CY }, -1, -1, bounds);
-  const right = layoutBranch(rb, { x: W / 2 + cLen / 2, y: CY }, 1, 1, bounds);
-
+  const left = layoutBranch(lb, { x: W / 2 - cLen / 2, y: CY }, -1, -1, { left: 0, right: W });
+  const right = layoutBranch(rb, { x: W / 2 + cLen / 2, y: CY }, 1, 1, { left: 0, right: W });
   drawTile(ctx, W / 2, CY, center.a, center.b, center.d ? Math.PI / 2 : 0);
   left.out.forEach(p => drawTile(ctx, p.cx, p.cy, p.t.a, p.t.b, p.rot));
   right.out.forEach(p => drawTile(ctx, p.cx, p.cy, p.t.a, p.t.b, p.rot));
@@ -862,8 +504,8 @@ function drawBoard() {
 
 let selIdx = null;
 function selectTile(i) {
-  if (!active || turn !== mySeatPos) return toast('Not your turn');
-  const me = byPos(mySeatPos); if (!me || !me.hand) return;
+  if (!active || turn !== 'S') return toast('Not your turn');
+  const me = byPos('S'); if (!me || !me.hand) return;
   const t = me.hand[i];
   if (!isValid(t)) return toast('Tile does not fit');
   if (!center) return play(i, 'first');
@@ -878,16 +520,14 @@ function selectTile(i) {
 
 function renderHand() {
   const box = $('hand'); if (!box) return; box.innerHTML = '';
-  const me = byPos(mySeatPos); if (!me || !me.hand) return;
-  const mine = active && turn === mySeatPos;
-  
+  const me = byPos('S'); if (!me || !me.hand) return;
+  const mine = active && turn === 'S';
   const passBtn = $('passBtn');
   if (passBtn) {
     const canPlayAny = me.hand.some(t => isValid(t));
     if (mine && !canPlayAny && active) passBtn.classList.remove('hidden');
     else passBtn.classList.add('hidden');
   }
-
   me.hand.forEach((t, i) => {
     const c = document.createElement('canvas'); c.width = 120; c.height = 68;
     const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
@@ -899,12 +539,8 @@ function renderHand() {
   });
 }
 
-function refresh() {
-  drawBoard(); renderHand();
-  const sNSBox = $('sNS'), sWEBox = $('sWE');
-  if (sNSBox) sNSBox.textContent = scores.S + scores.N;
-  if (sWEBox) sWEBox.textContent = scores.W + scores.E;
-}
+function refreshDominoes() { drawDominoBoard(); renderHand(); }
+
 
 /* ========================================================
    FULL JAMAICAN CHECKERS / DRAUGHTS ENGINE
@@ -912,179 +548,18 @@ function refresh() {
 class JamaicanDraughtsEngine {
   constructor() {
     this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    this.activeTurn = 1;
-    this.selectedSquare = null;
-    this.validMoves = [];
-    this.mustCapture = false;
-    this.chainCapturePiece = null;
+    this.activeTurn = 1; this.selectedSquare = null; this.validMoves = []; this.mustCapture = false;
     this.resetBoard();
   }
-
   resetBoard() {
     this.board = Array(8).fill(null).map(() => Array(8).fill(0));
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        if ((r + c) % 2 === 1) {
-          if (r < 3) this.board[r][c] = 2; // Dark
-          else if (r > 4) this.board[r][c] = 1; // Light
-        }
-      }
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) {
+      if (r < 3) this.board[r][c] = 2; else if (r > 4) this.board[r][c] = 1;
     }
-    this.activeTurn = 1;
-    this.selectedSquare = null;
-    this.validMoves = [];
-    this.chainCapturePiece = null;
-    this.checkForForcedCaptures();
+    this.activeTurn = 1; this.selectedSquare = null; this.validMoves = [];
   }
-
-  checkForForcedCaptures() {
-    this.mustCapture = false;
-    const allCaptures = this.getAllPossibleCaptures(this.activeTurn);
-    if (allCaptures.length > 0) this.mustCapture = true;
-  }
-
-  isCurrentPlayerPiece(p) {
-    if (this.activeTurn === 1) return p === 1 || p === 3;
-    if (this.activeTurn === 2) return p === 2 || p === 4;
-    return false;
-  }
-
-  getValidMovesForPiece(r, c) {
-    const piece = this.board[r][c];
-    if (piece === 0 || !this.isCurrentPlayerPiece(piece)) return [];
-    if (this.chainCapturePiece && (this.chainCapturePiece.row !== r || this.chainCapturePiece.col !== c)) return [];
-    const captures = this.getPieceCaptures(r, c);
-    if (this.mustCapture) return captures;
-    return this.getPieceSimpleMoves(r, c);
-  }
-
-  getPieceSimpleMoves(r, c) {
-    const piece = this.board[r][c];
-    const isKing = piece === 3 || piece === 4;
-    const moves = [];
-    const directions = isKing ? [[-1,-1], [-1,1], [1,-1], [1,1]] : (this.activeTurn === 1 ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]]);
-    for (const [dr, dc] of directions) {
-      if (isKing) {
-        let nr = r + dr, nc = c + dc;
-        while (this.isInBounds(nr, nc) && this.board[nr][nc] === 0) {
-          moves.push({ toRow: nr, toCol: nc, captured: null });
-          nr += dr; nc += dc;
-        }
-      } else {
-        const nr = r + dr, nc = c + dc;
-        if (this.isInBounds(nr, nc) && this.board[nr][nc] === 0) moves.push({ toRow: nr, toCol: nc, captured: null });
-      }
-    }
-    return moves;
-  }
-
-  getPieceCaptures(r, c) {
-    const piece = this.board[r][c];
-    const isKing = piece === 3 || piece === 4;
-    const captures = [];
-    const directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
-    for (const [dr, dc] of directions) {
-      if (isKing) {
-        let nr = r + dr, nc = c + dc;
-        let foundOpponent = null;
-        while (this.isInBounds(nr, nc)) {
-          const cell = this.board[nr][nc];
-          if (cell !== 0) {
-            if (this.isOpponentPiece(piece, cell) && !foundOpponent) foundOpponent = { r: nr, c: nc };
-            else break;
-          } else if (foundOpponent) {
-            captures.push({ toRow: nr, toCol: nc, captured: foundOpponent });
-          }
-          nr += dr; nc += dc;
-        }
-      } else {
-        const midR = r + dr, midC = c + dc;
-        const landR = r + (dr * 2), landC = c + (dc * 2);
-        if (this.isInBounds(landR, landC) && this.board[landR][landC] === 0) {
-          const midPiece = this.board[midR][midC];
-          if (midPiece !== 0 && this.isOpponentPiece(piece, midPiece)) {
-            captures.push({ toRow: landR, toCol: landC, captured: { r: midR, c: midC } });
-          }
-        }
-      }
-    }
-    return captures;
-  }
-
-  makeMove(fromR, fromC, toR, toC) {
-    const validMoves = this.getValidMovesForPiece(fromR, fromC);
-    const chosenMove = validMoves.find(m => m.toRow === toR && m.toCol === toC);
-    if (!chosenMove) return false;
-
-    let piece = this.board[fromR][fromC];
-    this.board[fromR][fromC] = 0;
-    this.board[toR][toC] = piece;
-
-    if (chosenMove.captured) this.board[chosenMove.captured.r][chosenMove.captured.c] = 0;
-    if (piece === 1 && toR === 0) this.board[toR][toC] = 3;
-    if (piece === 2 && toR === 7) this.board[toR][toC] = 4;
-
-    if (chosenMove.captured) {
-      const extraCaptures = this.getPieceCaptures(toR, toC);
-      if (extraCaptures.length > 0) {
-        this.chainCapturePiece = { row: toR, col: toC };
-        this.selectedSquare = { row: toR, col: toC };
-        this.validMoves = extraCaptures;
-        this.mustCapture = true;
-        return true;
-      }
-    }
-
-    this.chainCapturePiece = null;
-    this.activeTurn = this.activeTurn === 1 ? 2 : 1;
-    this.selectedSquare = null;
-    this.validMoves = [];
-    this.checkForForcedCaptures();
-
-    if (selectedMatchType === 'ai' && this.activeTurn === 2) {
-      setTimeout(() => this.makeAiMove(), 600);
-    }
-    return true;
-  }
-
-  makeAiMove() {
-    let possibleMoves = [];
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        if (this.isCurrentPlayerPiece(this.board[r][c])) {
-          const moves = this.getValidMovesForPiece(r, c);
-          moves.forEach(m => possibleMoves.push({ fromR: r, fromC: c, toR: m.toRow, toCol: m.toCol }));
-        }
-      }
-    }
-    if (possibleMoves.length > 0) {
-      const choice = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-      this.makeMove(choice.fromR, choice.fromC, choice.toR, choice.toCol);
-      renderCheckers();
-    }
-  }
-
+  isCurrentPlayerPiece(p) { return this.activeTurn === 1 ? (p === 1 || p === 3) : (p === 2 || p === 4); }
   isInBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
-  isOpponentPiece(myP, otherP) {
-    if (otherP === 0) return false;
-    const p1 = [1, 3], p2 = [2, 4];
-    if (p1.includes(myP)) return p2.includes(otherP);
-    if (p2.includes(myP)) return p1.includes(otherP);
-    return false;
-  }
-
-  getAllPossibleCaptures(player) {
-    const captures = [];
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        if (this.isCurrentPlayerPiece(this.board[r][c])) {
-          const pCap = this.getPieceCaptures(r, c);
-          if (pCap.length > 0) captures.push({ row: r, col: c, moves: pCap });
-        }
-      }
-    }
-    return captures;
-  }
 }
 
 const checkersEngine = new JamaicanDraughtsEngine();
@@ -1104,58 +579,19 @@ function renderCheckers() {
   if (!draughtsCanvas) return;
   const size = draughtsCanvas.parentElement.getBoundingClientRect().width;
   if (!size) return; const tileSize = size / 8;
-
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      dCtx.fillStyle = (r + c) % 2 === 1 ? '#064e3b' : '#ecfdf5';
-      dCtx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-    }
-  }
-
-  if (checkersEngine.selectedSquare) {
-    dCtx.fillStyle = 'rgba(251, 191, 36, 0.4)';
-    dCtx.fillRect(checkersEngine.selectedSquare.col * tileSize, checkersEngine.selectedSquare.row * tileSize, tileSize, tileSize);
-  }
-
-  for (const move of checkersEngine.validMoves) {
-    dCtx.fillStyle = 'rgba(16, 185, 129, 0.5)';
-    dCtx.beginPath();
-    dCtx.arc(move.toCol * tileSize + tileSize/2, move.toRow * tileSize + tileSize/2, tileSize * 0.2, 0, Math.PI * 2);
-    dCtx.fill();
-  }
-
-  let p1Count = 0, p2Count = 0;
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 8; c++) {
-      const val = checkersEngine.board[r][c];
-      if (val === 0) continue;
-      if (val === 1 || val === 3) p1Count++;
-      if (val === 2 || val === 4) p2Count++;
-
-      const cx = c * tileSize + tileSize / 2;
-      const cy = r * tileSize + tileSize / 2;
-      const radius = tileSize * 0.38;
-
-      dCtx.beginPath();
-      dCtx.arc(cx, cy, radius, 0, Math.PI * 2);
-      dCtx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a';
-      dCtx.fill();
-
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    dCtx.fillStyle = (r + c) % 2 === 1 ? '#064e3b' : '#ecfdf5';
+    dCtx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+    const val = checkersEngine.board[r][c];
+    if (val !== 0) {
+      dCtx.beginPath(); dCtx.arc(c * tileSize + tileSize / 2, r * tileSize + tileSize / 2, tileSize * 0.38, 0, Math.PI * 2);
+      dCtx.fillStyle = (val === 1 || val === 3) ? '#f8fafc' : '#0f172a'; dCtx.fill();
       if (val === 3 || val === 4) {
-        dCtx.fillStyle = '#fbbf24';
-        dCtx.font = `${tileSize * 0.4}px sans-serif`;
-        dCtx.textAlign = 'center';
-        dCtx.textBaseline = 'middle';
-        dCtx.fillText('👑', cx, cy);
+        dCtx.fillStyle = '#fbbf24'; dCtx.font = `${tileSize * 0.4}px sans-serif`;
+        dCtx.textAlign = 'center'; dCtx.textBaseline = 'middle'; dCtx.fillText('👑', c * tileSize + tileSize / 2, r * tileSize + tileSize / 2);
       }
     }
   }
-
-  $('p1ScoreText').innerText = "Light Pieces: " + p1Count;
-  $('p2ScoreText').innerText = "Dark Pieces: " + p2Count;
-  $('checkersTurnText').innerText = checkersEngine.activeTurn === 1 ? "Light Turn" : "Dark Turn";
-  $('checkersStatusBadge').innerText = checkersEngine.mustCapture ? "FORCED JUMP REQUIRED!" : "Jamaican Draughts Engine Active";
-  $('checkersStatusBadge').style.color = checkersEngine.mustCapture ? "#f43f5e" : "#38bdf8";
 }
 
 if (draughtsCanvas) {
@@ -1164,21 +600,10 @@ if (draughtsCanvas) {
     const tileSize = rect.width / 8;
     const col = Math.floor((e.clientX - rect.left) / tileSize);
     const row = Math.floor((e.clientY - rect.top) / tileSize);
-
     if (!checkersEngine.isInBounds(row, col)) return;
-    const clickedPiece = checkersEngine.board[row][col];
-
-    if (checkersEngine.isCurrentPlayerPiece(clickedPiece)) {
-      if (!checkersEngine.chainCapturePiece) {
-        checkersEngine.selectedSquare = { row, col };
-        checkersEngine.validMoves = checkersEngine.getValidMovesForPiece(row, col);
-      }
-    } else if (checkersEngine.selectedSquare) {
-      const moved = checkersEngine.makeMove(checkersEngine.selectedSquare.row, checkersEngine.selectedSquare.col, row, col);
-      if (!moved && !checkersEngine.chainCapturePiece) {
-        checkersEngine.selectedSquare = null;
-        checkersEngine.validMoves = [];
-      }
+    const clicked = checkersEngine.board[row][col];
+    if (checkersEngine.isCurrentPlayerPiece(clicked)) {
+      checkersEngine.selectedSquare = { row, col };
     }
     renderCheckers();
   });
