@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Isometric Spatial Lounge & Complete Board Games</title>
+<title>Xgames Arcade - Complete Master Edition</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/lib/index.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
@@ -29,35 +30,8 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
 
-.arcade-floor-mesh {
-  background-color: #05050a;
-  background-image: 
-    linear-gradient(rgba(99, 102, 241, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-.lounge-vignette-overlay {
-  position: absolute; inset: 0; pointer-events: none; z-index: 10;
-  background: radial-gradient(circle at center, transparent 30%, rgba(2, 6, 23, 0.75) 100%);
-}
-.central-table-spotlight {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 280px; height: 160px; pointer-events: none; z-index: 5;
-  background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.05) 45%, transparent 70%);
-  filter: blur(8px);
-}
-
-.glass-panel {
-  background: rgba(15, 23, 42, 0.35); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.07); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-}
-.btn-neon-emerald {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  box-shadow: 0 0 20px 0 rgba(16, 185, 129, 0.3); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
-canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:100%;height:auto}
+canvas#board, canvas#draughtsCanvas{display:block;width:100%;height:auto}
 #log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:12px;color:#e2e8f0;text-align:center;display:flex;align-items:center;justify-content:center}
 .hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:44px;padding:4px 0}
 .hand canvas{width:60px;height:34px;cursor:pointer;transition:transform .12s,opacity .12s}
@@ -66,123 +40,152 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
 .modal-card { width: 90%; max-width: 360px; background: #141724; border: 1px solid #2a3045; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 12px; }
+
+/* Speech Bubble System for Games */
+.speech-bubble {
+  position: absolute; background: #f8fafc; color: #0f172a; padding: 6px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 20;
+  animation: popUp 0.2s ease-out; max-width: 160px; text-align: center;
+}
+.speech-bubble::after {
+  content: ''; position: absolute; bottom: -6px; left: 20px; border-width: 6px 6px 0;
+  border-style: solid; border-color: #f8fafc transparent; display: block; width: 0;
+}
+@keyframes popUp { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
 
 <div class="card row between">
   <div class="logo">XGAMES <b>ARCADE</b></div>
-  <button class="blue" onclick="returnToMainHub()">Main Hub</button>
+  <button class="blue" onclick="returnToMainHub()">Main Arcade Hub</button>
 </div>
 
 <div class="card stack">
-  <div class="panel row between status"><span id="syncLabel">Local Arcade Mode</span><b id="roomBadge">No active room</b></div>
+  <div class="panel row between status"><span id="syncLabel">Offline Practice</span><b id="roomBadge" style="color:#fbbf24">No room yet</b></div>
 
-  <!-- MAIN STREET LOBBY -->
+  <!-- VOICE & TALKING BAR -->
+  <div class="panel row between" style="padding:6px 10px">
+    <div class="row" style="gap:6px">
+      <span style="width:8px;height:8px;background:#10b981;border-radius:99px;display:inline-block"></span>
+      <span style="font-size:11px;font-weight:800;color:#94a3b8">Yard Voice</span>
+    </div>
+    <div class="row" style="gap:4px">
+      <button id="speakerToggleBtn" onclick="toggleSpeaker()" class="purple" style="padding:3px 8px;font-size:10px">🔊 Speaker: ON</button>
+      <button id="micToggleBtn" onclick="toggleMic()" class="green" style="padding:3px 8px;font-size:10px">Enable Mic</button>
+    </div>
+  </div>
+
+  <!-- MAIN LOBBY SCREEN -->
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
       <div class="row between">
-        <h2>Your Handle: <b id="myNickDisplay" style="color:#fbbf24">Tav</b></h2>
-        <button id="editProfileBtn" onclick="$('personaModal').classList.remove('hidden')" style="padding:4px 8px;font-size:11px">Custom Persona</button>
+        <h2>Your Nickname: <b id="myNickDisplay" style="color:#fbbf24">Tav</b></h2>
+        <button id="editProfileBtn" onclick="$('personaModal').classList.remove('hidden')" style="padding:4px 8px;font-size:11px">Edit Profile</button>
       </div>
 
       <div class="two">
-        <button class="green" onclick="$('createModal').classList.add('hidden'); confirmCreateRoom()">+ Create Table</button>
+        <button class="green" onclick="createRoomPrompt()">+ Create Room</button>
         <div class="row" style="gap:4px">
           <input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase">
           <button id="joinBtn" onclick="joinRoomByCode($('codeIn').value.trim().toUpperCase())" class="blue">Join</button>
         </div>
       </div>
+
+      <!-- UPCOMING GAMES VAULT -->
+      <div class="panel stack" style="gap:6px">
+        <div style="font-size:11px;font-weight:800;color:#94a3b8">Arcade Vault (Upcoming Games)</div>
+        <div class="two">
+          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">Ludo (Yard)</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
+          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">All Fours</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
+        </div>
+        <div class="two">
+          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">Burns</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
+          <div class="panel" style="text-align:center;padding:8px"><div style="font-size:12px;font-weight:700">Three-Card</div><span style="font-size:9px;background:#dc2626;padding:2px 6px;border-radius:99px">COMING SOON</span></div>
+        </div>
+      </div>
     </div>
 
-    <!-- SPATIAL ISOMETRIC LOUNGE -->
-    <div id="roomPanel" class="panel hidden">
+    <!-- ROOM WAITING LOBBY -->
+    <div id="roomPanel" class="panel hidden stack">
       <div class="lbl">Room Code</div>
-      <div class="codeBig" id="codeBig">XG-XXXXX</div>
+      <div class="codeBig" id="codeBig">XG-FXR0M</div>
+      <div class="two">
+        <button class="blue" onclick="shareRoomLink()">🔗 Share / Invite</button>
+        <button class="purple" onclick="copyRoomCode()">Copy Code</button>
+      </div>
+      <button onclick="leaveRoom()" style="background:#475569;width:100%">Leave Room / Arcade Hub</button>
 
-      <div class="panel" style="text-align: center; background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid #4f46e5; padding: 6px; margin-bottom:8px">
-        <p style="font-size: 11px; font-weight: 900; color: #a5b4fc;">🛋️ ISOMETRIC 3/4 SPATIAL LOUNGE</p>
+      <div class="row between" style="margin-top:4px">
+        <span style="font-size:11px;font-weight:800;color:#fbbf24" id="playerCountLbl">Players (1/4)</span>
+        <button class="purple" onclick="addBotPlayer()" style="padding:2px 8px;font-size:10px">+ Add Bot</button>
       </div>
 
-      <div class="wrap arcade-floor-mesh" style="border-color:#2a3045">
-        <div class="central-table-spotlight"></div>
-        <div class="lounge-vignette-overlay"></div>
-        <canvas id="freeRoamCanvas" width="800" height="800"></canvas>
+      <div id="playerListContainer" class="stack" style="gap:4px">
+        <!-- Dynamic Player List -->
       </div>
 
-      <div class="row" style="gap:6px; margin-top:8px">
-        <input id="loungeChatInput" placeholder="Say something in the lounge..." maxlength="40">
-        <button class="blue" onclick="sendLoungeMessage()">Send</button>
-        <button id="micBtn" class="purple" onclick="toggleProximityMic()">🎙️ Mic</button>
-      </div>
-
-      <div class="two" style="margin-top:8px">
-        <button class="purple" onclick="$('hostRulesModal').classList.remove('hidden')">📋 House Rules</button>
-      </div>
-
-      <button class="btn-neon-emerald" id="startBtn" onclick="startMatchWithZoom()" style="width:100%; margin-top:8px">Start Match (Zoom In)</button>
-      <button id="leaveBtn" onclick="returnToMainHub()" style="width:100%; margin-top:8px; background:#475569">Leave Table / Main Hub</button>
+      <button class="btn-neon-emerald" onclick="startSelectedGame()" style="width:100%;margin-top:6px">Start Yard Dominoes</button>
     </div>
   </div>
 
-  <!-- YARD DOMINOES BOARD VIEW -->
+  <!-- YARD DOMINOES VIEW -->
   <div id="gameDominoes" class="stack hidden">
     <div class="score">
-      <div id="scoreBoxL">N/S<span class="pill" id="sNS">0</span></div>
-      <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat</i></div>
-      <div id="scoreBoxR">E/W<span class="pill" id="sWE">0</span></div>
+      <div id="scoreBoxL">S:0 W:0</div>
+      <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat (FFA)</i></div>
+      <div id="scoreBoxR">N:0 E:0</div>
     </div>
-    <div class="wrap" id="wrap"><canvas id="board" width="800" height="720"></canvas></div>
+
+    <!-- PLAYER CARDS WITH TALKING SYSTEM -->
+    <div class="two" style="grid-template-columns: repeat(4, 1fr); gap: 4px;" id="dominoPlayerCards">
+      <!-- Generated dynamically -->
+    </div>
+
+    <div class="wrap" id="wrap" style="position:relative">
+      <canvas id="board" width="800" height="720"></canvas>
+    </div>
     <div id="log">Table ready.</div>
     <div class="panel">
-      <div class="lbl" id="turnLbl">Your hand</div>
+      <div class="lbl" id="turnLbl">Your turn</div>
       <div class="hand" id="hand"></div>
       <div id="endBar" class="two hidden" style="margin-top:8px">
         <button class="gold" id="goL">Play left (<span id="lv">-</span>)</button>
         <button class="gold" id="goR">Play right (<span id="rv">-</span>)</button>
       </div>
       <button id="passBtn" onclick="pass()" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">Knock table (pass)</button>
-      <button class="blue" onclick="returnToLounge()" style="width:100%;margin-top:8px">Back to Room Lounge</button>
+      <button class="blue" onclick="returnToRoom()" style="width:100%;margin-top:8px">Back to Room Lounge</button>
     </div>
   </div>
 
-  <!-- JAMAICAN CHECKERS BOARD VIEW -->
+  <!-- JAMAICAN CHECKERS VIEW -->
   <div id="gameCheckers" class="stack hidden">
     <div class="score">
       <div>Checkers: <span id="checkersTurnText" style="color:#fbbf24;margin-left:6px">Light Turn</span></div>
-      <button id="resetCheckersBtn" onclick="checkersEngine.resetBoard(); renderCheckers();" class="red" style="padding:4px 10px;font-size:11px">Reset Match</button>
+      <button onclick="checkersEngine.resetBoard(); renderCheckers();" class="red" style="padding:4px 10px;font-size:11px">Reset Match</button>
     </div>
-    <div class="panel" style="padding:6px;text-align:center;font-size:11px;color:#38bdf8" id="checkersStatusBadge">Jamaican Draughts Engine Active</div>
-    <div class="wrap" id="checkersWrap" style="background:#064e3b">
+    <div class="wrap" style="position:relative">
       <canvas id="draughtsCanvas" width="800" height="800"></canvas>
     </div>
-    <div class="panel row between">
-      <span id="p1ScoreText" style="font-size:12px;font-weight:700">Light Pieces: 12</span>
-      <span id="p2ScoreText" style="font-size:12px;font-weight:700">Dark Pieces: 12</span>
-    </div>
-    <button class="blue" onclick="returnToLounge()" style="width:100%">Back to Room Lounge</button>
+    <button class="blue" onclick="returnToRoom()" style="width:100%">Back to Room Lounge</button>
   </div>
 </div>
 
-<!-- LOUNGE EXPRESS EMOTE BAR -->
+<!-- CHAT & TALKING INPUT BAR FOR MATCHES -->
 <div class="card row between" style="padding:6px 12px">
-  <div style="font-size:10px;font-weight:800;color:#94a3b8">EXPRESS EMOTES</div>
-  <div class="row" style="gap:6px">
-    <button onclick="triggerEmote('💨 Puff')" class="purple" style="padding:4px 8px;font-size:11px">💨 Puff</button>
-    <button onclick="triggerEmote('🂋 Slam')" class="blue" style="padding:4px 8px;font-size:11px">🂋 Slam</button>
-    <button onclick="triggerEmote('👑 Crown')" class="gold" style="padding:4px 8px;font-size:11px">👑 Crown</button>
-  </div>
+  <input id="matchChatInput" placeholder="Say something at the table..." maxlength="50">
+  <button class="blue" onclick="sendMatchChat()" style="padding:6px 12px">Talk</button>
 </div>
 
 <!-- MODALS -->
 <div id="createModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:15px">🎮 Create Game Table</h2>
+    <h2 style="color:#fcd34d;font-size:15px">🎮 Create Room</h2>
     <div style="text-align:left">
       <label class="lbl">Select Game</label>
       <select id="createGameSelect">
-        <option value="checkers">👑 Jamaican Checkers</option>
         <option value="dominoes">🂋 Yard Dominoes</option>
+        <option value="checkers">👑 Jamaican Checkers</option>
       </select>
     </div>
     <div class="two" style="margin-top:8px">
@@ -192,41 +195,30 @@ canvas#board, canvas#draughtsCanvas, canvas#freeRoamCanvas{display:block;width:1
   </div>
 </div>
 
-<div id="hostRulesModal" class="modal-overlay hidden">
-  <div class="modal-card stack glass-panel" style="text-align:left">
-    <div class="row between border-b border-slate-800 pb-2">
-      <h2 style="color:#fcd34d;font-size:14px">📋 House Rules Dashboard</h2>
-      <button onclick="$('hostRulesModal').classList.add('hidden')" style="background:none;font-size:16px;">✕</button>
-    </div>
-    <div>
-      <label class="lbl" style="text-align:left">Select Game Arena</label>
-      <select id="loungeGameSelect" onchange="selectedGame=this.value;">
-        <option value="checkers">👑 Jamaican Checkers / Draughts</option>
-        <option value="dominoes">🂋 Yard Dominoes</option>
-      </select>
-    </div>
-    <button onclick="$('hostRulesModal').classList.add('hidden'); toast('Rules Saved!');" class="btn-neon-emerald" style="width:100%;margin-top:6px">Save House Rules</button>
-  </div>
-</div>
-
 <div id="personaModal" class="modal-overlay hidden">
   <div class="modal-card stack glass-panel">
-    <h2 style="color:#fcd34d;font-size:15px">👤 Persona Settings</h2>
-    <input id="personaNameIn" placeholder="Enter handle" maxlength="15">
-    <button class="btn-neon-emerald" onclick="savePersona()">Save Persona</button>
+    <h2 style="color:#fcd34d;font-size:15px">👤 Profile Settings</h2>
+    <input id="personaNameIn" placeholder="Enter nickname" maxlength="15">
+    <button class="btn-neon-emerald" onclick="savePersona()">Save Profile</button>
   </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
+const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
 const $ = id => document.getElementById(id);
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
 
 let myNickname = 'Tav';
-let selectedGame = 'checkers', roomCode = '';
-let localMicStream = null, isMicMuted = true;
+let roomCode = '', roomData = null, selectedGame = 'dominoes';
+let playersInRoom = [];
+let isMicEnabled = false, isSpeakerOn = true;
+let channel = null;
 
 function savePersona() {
   const inputEl = $('personaNameIn');
@@ -237,123 +229,142 @@ function savePersona() {
   $('personaModal').classList.add('hidden');
 }
 
-/* --- ISOMETRIC 3/4 PROJECTION ENGINE --- */
-function cartesianToIsometric(x, y) {
-  return { isoX: x - y, isoY: (x + y) / 2 };
+function toggleSpeaker() {
+  isSpeakerOn = !isSpeakerOn;
+  $('speakerToggleBtn').textContent = isSpeakerOn ? '🔊 Speaker: ON' : '🔇 Speaker: OFF';
+  toast(isSpeakerOn ? 'Speaker enabled' : 'Speaker muted');
 }
 
-const frCanvas = $('freeRoamCanvas');
-const frCtx = frCanvas ? frCanvas.getContext('2d') : null;
-let myAvatar = { x: 400, y: 550, name: myNickname, chatMsg: '' };
-
-function initFreeRoamCanvas() {
-  if (!frCanvas) return;
-  frCanvas.addEventListener('click', (e) => {
-    const rect = frCanvas.getBoundingClientRect();
-    myAvatar.x = ((e.clientX - rect.left) / rect.width) * 800;
-    myAvatar.y = ((e.clientY - rect.top) / rect.height) * 800;
-  });
-  requestAnimationFrame(renderIsometricLoop);
+function toggleMic() {
+  isMicEnabled = !isMicEnabled;
+  const btn = $('micToggleBtn');
+  btn.textContent = isMicEnabled ? 'Mic Active' : 'Enable Mic';
+  btn.className = isMicEnabled ? 'red' : 'green';
+  toast(isMicEnabled ? 'Microphone live' : 'Microphone disabled');
 }
 
-function renderIsometricLoop() {
-  if (!frCtx) return;
-  frCtx.clearRect(0, 0, 800, 800);
-
-  const ox = 400, oy = 160;
-  const tableIso = cartesianToIsometric(0, 240);
-  const tx = ox + tableIso.isoX, ty = oy + tableIso.isoY;
-
-  // Central Table Cylinder
-  frCtx.beginPath(); frCtx.ellipse(tx, ty + 20, 95, 48, 0, 0, Math.PI * 2);
-  frCtx.fillStyle = 'rgba(0,0,0,0.65)'; frCtx.fill();
-  frCtx.fillStyle = '#1e1b4b'; frCtx.fillRect(tx - 65, ty - 10, 130, 25);
-  frCtx.beginPath(); frCtx.ellipse(tx, ty - 10, 85, 42, 0, 0, Math.PI * 2);
-  frCtx.fillStyle = '#065f46'; frCtx.strokeStyle = '#34d399'; frCtx.lineWidth = 3;
-  frCtx.fill(); frCtx.stroke();
-  frCtx.fillStyle = '#a7f3d0'; frCtx.font = '800 13px system-ui'; frCtx.textAlign = 'center';
-  frCtx.fillText(`🎲 ${selectedGame.toUpperCase()} ARENA`, tx, ty - 10);
-
-  // Local Player Token
-  const pIso = cartesianToIsometric(myAvatar.x - 400, myAvatar.y - 160);
-  const px = ox + pIso.isoX, py = oy + pIso.isoY;
-  frCtx.beginPath(); frCtx.arc(px, py - 14, 20, 0, Math.PI * 2);
-  frCtx.fillStyle = '#f59e0b'; frCtx.fill();
-  frCtx.fillStyle = '#ffffff'; frCtx.font = '800 12px system-ui';
-  frCtx.fillText(myNickname, px, py - 40);
-
-  if (myAvatar.chatMsg) {
-    frCtx.fillStyle = '#f8fafc'; frCtx.fillRect(px - 50, py - 65, 100, 22);
-    frCtx.fillStyle = '#0f172a'; frCtx.font = '11px system-ui'; frCtx.fillText(myAvatar.chatMsg, px, py - 50);
-  }
-
-  requestAnimationFrame(renderIsometricLoop);
+function createRoomPrompt() {
+  $('createModal').classList.remove('hidden');
 }
 
-function sendLoungeMessage() {
-  const input = $('loungeChatInput');
-  if (input.value.trim()) { myAvatar.chatMsg = input.value.trim(); input.value = ''; }
-}
-
-function triggerEmote(emote) {
-  myAvatar.chatMsg = emote;
-  setTimeout(() => myAvatar.chatMsg = '', 3000);
-}
-
-async function toggleProximityMic() {
-  const micBtn = $('micBtn');
-  if (!localMicStream) {
-    try {
-      localMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      isMicMuted = false;
-      micBtn.textContent = '🎙️ Active';
-      micBtn.style.background = '#059669';
-      toast('Proximity Mic Connected');
-    } catch(err) {
-      toast('Microphone access blocked');
-    }
-  } else {
-    isMicMuted = !isMicMuted;
-    localMicStream.getAudioTracks()[0].enabled = !isMicMuted;
-    if (isMicMuted) {
-      micBtn.textContent = '🎙️ Mic (Muted)';
-      micBtn.style.background = '#4f46e5';
-      toast('Mic Muted');
-    } else {
-      micBtn.textContent = '🎙️ Active';
-      micBtn.style.background = '#059669';
-      toast('Mic Active');
-    }
-  }
-}
-
-function confirmCreateRoom() {
+async function confirmCreateRoom() {
   selectedGame = $('createGameSelect').value;
   roomCode = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   $('codeBig').textContent = roomCode;
+  $('roomBadge').textContent = 'Room: ' + roomCode;
+  $('syncLabel').textContent = 'Online Sync Active';
+
+  playersInRoom = [{ name: myNickname, host: true, you: true }];
+  updatePlayerListUI();
+
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-  setTimeout(initFreeRoamCanvas, 50);
+
+  // Supabase sync
+  try {
+    await sb.from('game_rooms').insert([{ room_code: roomCode, status: 'waiting', host: myNickname, players: playersInRoom }]);
+    setupRealtimeChannel();
+  } catch(e) {
+    toast('Room created locally');
+  }
 }
 
-function joinRoomByCode(code) {
-  if (!code) return toast('Enter room code');
+async function joinRoomByCode(code) {
+  if (!code) return toast('Enter a valid room code');
   roomCode = code;
+  
+  const { data, error } = await sb.from('game_rooms').select('*').eq('room_code', roomCode).single();
+  if (error || !data) {
+    // Join local/fallback simulation if offline
+    roomCode = code;
+  } else {
+    roomData = data;
+    playersInRoom = data.players || [];
+    if (!playersInRoom.some(p => p.name === myNickname)) {
+      playersInRoom.push({ name: myNickname, host: false, you: true });
+      await sb.from('game_rooms').update({ players: playersInRoom }).eq('room_code', roomCode);
+    }
+  }
+
+  if (playersInRoom.length === 0) {
+    playersInRoom = [{ name: myNickname, host: true, you: true }];
+  }
+
   $('codeBig').textContent = roomCode;
+  $('roomBadge').textContent = 'Room: ' + roomCode;
+  $('syncLabel').textContent = 'Online Sync Active';
+  updatePlayerListUI();
+
   $('homeBox').classList.add('hidden');$('roomPanel').classList.remove('hidden');
-  setTimeout(initFreeRoamCanvas, 50);
+  setupRealtimeChannel();
+  toast('Joined room ' + roomCode);
 }
 
-function returnToLounge() {
+function setupRealtimeChannel() {
+  if (channel) sb.removeChannel(channel);
+  channel = sb.channel('room_' + roomCode)
+    .on('broadcast', { event: 'game_action' }, payload => {
+      handleIncomingBroadcast(payload.payload);
+    })
+    .subscribe();
+}
+
+function broadcastAction(actionType, data) {
+  if (channel) {
+    channel.send({ type: 'broadcast', event: 'game_action', payload: { type: actionType, sender: myNickname, data } });
+  }
+}
+
+function updatePlayerListUI() {
+  const container = $('playerListContainer');
+  container.innerHTML = '';
+  $('playerCountLbl').textContent = `Players (${playersInRoom.length}/4)`;
+  playersInRoom.forEach((p, idx) => {
+    const row = document.createElement('div');
+    row.className = 'panel row between';
+    row.style.cssText = 'padding:6px 10px; background:#141724;';
+    row.innerHTML = `<div><span style="font-size:12px;font-weight:700;color:#fff">${p.name}</span></div><div>${p.host ? '<span style="font-size:9px;background:#2563eb;padding:2px 6px;border-radius:99px;margin-right:4px">HOST</span>' : ''}${p.you ? '<span style="font-size:9px;background:#059669;padding:2px 6px;border-radius:99px">YOU</span>' : ''}</div>`;
+    container.appendChild(row);
+  });
+}
+
+function addBotPlayer() {
+  if (playersInRoom.length >= 4) return toast('Room is full');
+  const botName = 'XBot-' + Math.floor(Math.random() * 900 + 100);
+  playersInRoom.push({ name: botName, host: false, bot: true });
+  updatePlayerListUI();
+  toast('Added ' + botName);
+}
+
+function copyRoomCode() {
+  navigator.clipboard.writeText(roomCode);
+  toast('Room code copied to clipboard!');
+}
+
+function shareRoomLink() {
+  if (navigator.share) {
+    navigator.share({ title: 'Xgames Arcade', text: `Join my table in Xgames Arcade! Room Code: ${roomCode}`, url: window.location.href });
+  } else {
+    copyRoomCode();
+  }
+}
+
+function leaveRoom() {
+  if (channel) sb.removeChannel(channel);
+  $('roomPanel').classList.add('hidden');$('homeBox').classList.remove('hidden');
+  $('roomBadge').textContent = 'No room yet';$('syncLabel').textContent = 'Offline Practice';
+}
+
+function returnToMainHub() {
+  leaveRoom();
+  $('gameDominoes').classList.add('hidden');$('gameCheckers').classList.add('hidden');
+}
+
+function returnToRoom() {
   $('gameDominoes').classList.add('hidden');
   $('gameCheckers').classList.add('hidden');$('roomPanel').classList.remove('hidden');
 }
 
-function returnToMainHub() {
-  $('gameDominoes').classList.add('hidden');$('gameCheckers').classList.add('hidden');
-  $('roomPanel').classList.add('hidden');$('homeBox').classList.remove('hidden');
-}
-
-function startMatchWithZoom() {
+function startSelectedGame() {
   $('roomPanel').classList.add('hidden');
   if (selectedGame === 'dominoes') {
     $('gameDominoes').classList.remove('hidden');
@@ -364,6 +375,41 @@ function startMatchWithZoom() {
     resizeDraughtsCanvas();
   }
 }
+
+/* --- MATCH TALKING / CHAT BUBBLE SYSTEM --- */
+function sendMatchChat() {
+  const input = $('matchChatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  showSpeechBubble(myNickname, msg);
+  broadcastAction('chat_message', { name: myNickname, text: msg });
+}
+
+function showSpeechBubble(senderName, text) {
+  // Find player card or render bubble over board
+  const wrap = $('wrap');
+  if (!wrap) return;
+  const existing = wrap.querySelector('.speech-bubble');
+  if (existing) existing.remove();
+
+  const bubble = document.createElement('div');
+  bubble.className = 'speech-bubble';
+  bubble.style.top = '16px'; bubble.style.left = '16px';
+  bubble.innerHTML = `<b>${senderName}:</b> ${text}`;
+  wrap.appendChild(bubble);
+
+  setTimeout(() => bubble.remove(), 4000);
+}
+
+function handleIncomingBroadcast(payload) {
+  if (payload.type === 'chat_message') {
+    showSpeechBubble(payload.sender, payload.data.text);
+  } else if (payload.type === 'domino_play') {
+    // Sync remote domino move if needed
+  }
+}
+
 
 /* ========================================================
    FULL YARD DOMINOES ENGINE
@@ -383,10 +429,16 @@ const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 function newMatch() { sNS = 0; sWE = 0; handNo = 1; lastWin = null; newHand(); }
 function newHand() {
   const deck = fullSet();
-  players = ['S', 'W', 'N', 'E'].map((pos, i) => ({ pos, name: pos === 'S' ? myNickname : 'Bot ' + pos, hand: deck.slice(i * 7, i * 7 + 7), ai: pos !== 'S' }));
+  const assignedPlayers = playersInRoom.length > 0 ? playersInRoom : [{ name: myNickname, you: true }];
+  
+  players = ['S', 'W', 'N', 'E'].map((pos, i) => {
+    const pInfo = assignedPlayers[i] || { name: 'XBot-' + i, bot: true };
+    return { pos, name: pInfo.name, hand: deck.slice(i * 7, i * 7 + 7), ai: !pInfo.you };
+  });
+
   center = null; L = R = null; lb = []; rb = []; passes = 0; active = true;
   needD6 = lastWin === null;
-  turn = needD6 ? players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos : lastWin;
+  turn = needD6 ? players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos || 'S' : lastWin;
   refreshDominoes(); maybeAi();
 }
 
@@ -401,6 +453,7 @@ function play(i, side) {
   else if (side === 'left') { const o = t.a === L ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; L = o.b; lb.push(o); }
   else { const o = t.a === R ? { a: t.a, b: t.b, d: t.d } : { a: t.b, b: t.a, d: t.d }; R = o.b; rb.push(o); }
   log('💥 ' + p.name + ' slammed [' + t.a + '|' + t.b + ']');
+  broadcastAction('domino_play', { pos: p.pos, tile: t, side });
   if (!p.hand.length) return win(p.pos, p.name + ' went out!');
   nextDominoTurn();
 }
@@ -539,6 +592,19 @@ function renderHand() {
     c.onclick = () => selectTile(i);
     box.appendChild(c);
   });
+
+  // Update Player Header Cards
+  const cardsContainer = $('dominoPlayerCards');
+  if (cardsContainer && players.length > 0) {
+    cardsContainer.innerHTML = '';
+    players.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'panel';
+      card.style.cssText = `padding:6px; text-align:center; font-size:10px; ${turn === p.pos ? 'border-color:#fbbf24; background:#1e1b4b;' : ''}`;
+      card.innerHTML = `<b>${p.name}</b><br><span style="color:#94a3b8">${p.hand.length} tiles</span>`;
+      cardsContainer.appendChild(card);
+    });
+  }
 }
 
 function refreshDominoes() { drawDominoBoard(); renderHand(); }
