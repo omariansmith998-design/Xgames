@@ -999,12 +999,15 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   c.restore();
 }
 
-/* Dynamic Snake Layout Engine with Directional Pip Order */
+/* Dynamic Snake Layout Engine with Fixed Vertical Row Clearance */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0; 
   const out = [];
   const limitR = W - MARGIN - 12;
   const limitL = MARGIN + 12;
+  
+  // Vertical step clearance accounting for vertical tile length (40px) + row padding (24px)
+  const verticalStep = 64; 
 
   tiles.forEach(t => {
     let isVert = t.d;
@@ -1020,7 +1023,7 @@ function layoutChain(tiles, startX, y0, dir, rowDir) {
         const cy = y;
         out.push({ t, cx, cy, vert: true, flip: false });
         
-        y += rowDir * 40;
+        y += rowDir * verticalStep;
         dir = -dir;
         x = cx + dir * 10;
       } else {
@@ -1028,12 +1031,12 @@ function layoutChain(tiles, startX, y0, dir, rowDir) {
         isVert = true;
         tw = 20;
         const cx = x + dir * 10;
-        const cy = y + rowDir * 10;
+        const cy = y + rowDir * (verticalStep / 2);
         const flip = rowDir < 0; // Flip when going upward
         
         out.push({ t, cx, cy, vert: true, flip });
         
-        y += rowDir * 40;
+        y += rowDir * verticalStep;
         dir = -dir;
         x = cx + dir * 10;
       }
