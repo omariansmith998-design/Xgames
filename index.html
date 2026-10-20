@@ -244,7 +244,7 @@ function tone(f1, f2, d, type, vol, delay = 0) {
     if (AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
-    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f1, t + d);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + d);
     o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
   } catch (e) {}
@@ -925,7 +925,7 @@ function renderHand() {
   me.hand.forEach((t, i) => {
     const c = document.createElement('canvas'); c.width = 120; c.height = 68;
     const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
-    drawTile(x, 30, 17, t.a, t.b, false, 1.3);
+    drawTile(x, 30, 17, t.a, t.b, false, 1.3, false);
     if (mine && center && !isValid(t)) c.className = 'dim';
     if (selIdx === i) c.className = 'sel';
     c.onclick = () => selectTile(i);
@@ -936,7 +936,7 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- CANVAS BOARD ENGINE (WATERTIGHT 48px ROW STRIDE) ---------- */
+/* ---------- CANVAS BOARD ENGINE (DIRECTIONAL PIP ORIENTATION) ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -951,7 +951,8 @@ function pips(c, x, y, w, h, n, s) {
     c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.8 * s, 0, 7); c.fill();
   });
 }
-function drawTile(c, x, y, a, b, vert, s) {
+
+function drawTile(c, x, y, a, b, vert, s, flip) {
   s = s || 1; 
   const w = vert ? 20 * s : 40 * s;
   const h = vert ? 40 * s : 20 * s;
@@ -983,18 +984,22 @@ function drawTile(c, x, y, a, b, vert, s) {
   }
   c.stroke();
   
+  // Flip pip order so 'a' always touches the preceding tile
+  const firstPip = flip ? b : a;
+  const secondPip = flip ? a : b;
+
   if (vert) {
-    pips(c, -w / 2, -h / 2, w, h / 2, a, s);
-    pips(c, -w / 2, 0, w, h / 2, b, s);
+    pips(c, -w / 2, -h / 2, w, h / 2, firstPip, s);
+    pips(c, -w / 2, 0, w, h / 2, secondPip, s);
   } else {
-    pips(c, -w / 2, -h / 2, w / 2, h, a, s);
-    pips(c, 0, -h / 2, w / 2, h, b, s);
+    pips(c, -w / 2, -h / 2, w / 2, h, firstPip, s);
+    pips(c, 0, -h / 2, w / 2, h, secondPip, s);
   }
   
   c.restore();
 }
 
-/* Clean Dynamic Layout Engine with 48px Row Centerline Stride */
+/* Dynamic Snake Layout Engine with Directional Pip Order */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0; 
   const out = [];
@@ -1005,23 +1010,42 @@ function layoutChain(tiles, startX, y0, dir, rowDir) {
     let isVert = t.d;
     let tw = isVert ? 20 : 40;
     
-    // Check if standard horizontal tile exceeds edge
+    // Check if standard tile exceeds board boundary
     const willOverflow = dir > 0 ? (x + dir * tw > limitR) : (x + dir * tw < limitL);
 
     if (willOverflow) {
-      // FORCE THIS TILE TO BE A VERTICAL ELBOW CONNECTOR
-      isVert = true;
-      tw = 20;
-      const elbowX = x + dir * (tw / 2);
-      const elbowY = y + rowDir * 20; // Bridge down cleanly from top row
-      out.push({ t, cx: elbowX, cy: elbowY, vert: true });
-      
-      // Step down by 48px row stride (gives 28px clean vertical space between rows)
-      y += rowDir * 48;
-      dir = -dir;
-      x = elbowX + dir * 10;
+      if (t.d) {
+        // Double tile at corner (already vertical)
+        const cx = x + dir * 10;
+        const cy = y;
+        out.push({ t, cx, cy, vert: true, flip: false });
+        
+        y += rowDir * 40;
+        dir = -dir;
+        x = cx + dir * 10;
+      } else {
+        // Non-double tile turning corner vertically
+        isVert = true;
+        tw = 20;
+        const cx = x + dir * 10;
+        const cy = y + rowDir * 10;
+        const flip = rowDir < 0; // Flip when going upward
+        
+        out.push({ t, cx, cy, vert: true, flip });
+        
+        y += rowDir * 40;
+        dir = -dir;
+        x = cx + dir * 10;
+      }
     } else {
-      out.push({ t, cx: x + dir * (tw / 2), cy: y, vert: isVert });
+      // Normal row placement
+      const cx = x + dir * (tw / 2);
+      const cy = y;
+      
+      // When moving LEFT (dir < 0), flip horizontal non-double tiles so 'a' touches inner end
+      const flip = !isVert && (dir < 0);
+      
+      out.push({ t, cx, cy, vert: isVert, flip });
       x += dir * tw;
     }
   });
@@ -1086,10 +1110,10 @@ function drawBoard() {
   const lay = layoutChain(lb, cx - cw / 2, cy, -1, -1);
   const ray = layoutChain(rb, cx + cw / 2, cy, 1, 1);
   
-  drawTile(ctx, cx, cy, center.a, center.b, center.d, 1);
+  drawTile(ctx, cx, cy, center.a, center.b, center.d, 1, false);
   
-  lay.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1));
-  ray.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1));
+  lay.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1, o.flip));
+  ray.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1, o.flip));
   
   endTag(lay.x, lay.y, lay.dir, 'L ' + L);
   endTag(ray.x, ray.y, ray.dir, 'R ' + R);
