@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Yard Dominoes (Six Love)</title>
+<title>Xgames Arcade - Yard Dominoes & Lobby</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
 <style>
@@ -19,7 +19,6 @@ button:disabled{opacity:.5}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
 input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0;text-transform:none}
 input:focus{border-color:#6366f1}
-select:disabled{opacity:.6}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
 .panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
@@ -29,6 +28,17 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
+
+/* SLEEK ARCADE PILL TOGGLES */
+.pill-group { display: flex; gap: 4px; background: #141724; padding: 3px; border-radius: 99px; border: 1px solid #282e42; }
+.pill-opt { flex: 1; text-align: center; font-size: 11px; font-weight: 800; padding: 6px 8px; border-radius: 99px; cursor: pointer; color: #94a3b8; transition: all 0.15s ease; }
+.pill-opt.active { background: #4f46e5; color: #fff; box-shadow: 0 0 8px rgba(79, 70, 229, 0.4); }
+
+/* ARCADE VAULT GRID */
+.vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.vault-card { background: #0b0c12; border: 1px solid #23273a; border-radius: 12px; padding: 10px; text-align: center; position: relative; opacity: 0.75; }
+.vault-card .v-title { font-size: 12px; font-weight: 800; color: #f1f5f9; }
+.vault-card .v-tag { font-size: 8px; font-weight: 900; background: #f43f5e; color: #fff; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
 
 /* TABLE CANVAS CONTAINER */
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
@@ -52,75 +62,15 @@ canvas#board{display:block;width:100%;height:auto}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 
-/* OUTSIDE PLAYER SEAT BADGES */
-.seat-grid-outside {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  background: #0b0c12;
-  border: 1px solid #23273a;
-  border-radius: 10px;
-  padding: 6px;
-  margin-bottom: 6px;
-}
-.seat-card-out {
-  background: #141724;
-  border: 1px solid #282e42;
-  border-radius: 8px;
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-  transition: all 0.15s ease;
-}
-.seat-card-out.active {
-  border-color: #facc15;
-  background: #3a2a14;
-}
-.seat-card-out.speaking {
-  border-color: #22c55e !important;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
-  transform: scale(1.02);
-}
-.seat-card-out .p-name {
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-.seat-card-out .p-tiles {
-  font-size: 9px;
-  font-weight: 700;
-  color: #fbbf24;
-}
-.seat-card-out .p-avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #b45309;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 9px;
-  color: #fff;
-}
+.seat-grid-outside { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #0b0c12; border: 1px solid #23273a; border-radius: 10px; padding: 6px; margin-bottom: 6px; }
+.seat-card-out { background: #141724; border: 1px solid #282e42; border-radius: 8px; padding: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; transition: all 0.15s ease; }
+.seat-card-out.active { border-color: #facc15; background: #3a2a14; }
+.seat-card-out.speaking { border-color: #22c55e !important; box-shadow: 0 0 10px rgba(34, 197, 94, 0.6); transform: scale(1.02); }
+.seat-card-out .p-name { font-size: 10px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.seat-card-out .p-tiles { font-size: 9px; font-weight: 700; color: #fbbf24; }
+.seat-card-out .p-avatar { width: 18px; height: 18px; border-radius: 50%; background: #b45309; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 9px; color: #fff; }
 .seat-card-out .p-avatar.bot { background: #581c87; }
-.seat-mute-btn {
-  background: #334155;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 1px 4px;
-  font-size: 8px;
-  cursor: pointer;
-  margin-top: 2px;
-}
+.seat-mute-btn { background: #334155; border: 0; color: #fff; border-radius: 4px; padding: 1px 4px; font-size: 8px; cursor: pointer; margin-top: 2px; }
 .seat-mute-btn.muted { background: #dc2626; }
 </style>
 </head>
@@ -152,6 +102,17 @@ canvas#board{display:block;width:100%;height:auto}
         <button class="green" id="createBtn">+ Create Room</button>
         <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
       </div>
+
+      <!-- ARCADE VAULT PREVIEW GRID -->
+      <div class="panel style="margin-top:4px"">
+        <div class="lbl" style="text-align:left;font-weight:800">Arcade Vault (Upcoming Games)</div>
+        <div class="vault-grid">
+          <div class="vault-card"><div class="v-title">Ludo (Yard)</div><div class="v-tag">COMING SOON</div></div>
+          <div class="vault-card"><div class="v-title">All Fours</div><div class="v-tag">COMING SOON</div></div>
+          <div class="vault-card"><div class="v-title">Burns</div><div class="v-tag">COMING SOON</div></div>
+          <div class="vault-card"><div class="v-title">Three-Card</div><div class="v-tag">COMING SOON</div></div>
+        </div>
+      </div>
     </div>
 
     <!-- ROOM LOBBY PANEL -->
@@ -162,13 +123,36 @@ canvas#board{display:block;width:100%;height:auto}
         <button class="blue" id="shareBtn">🔗 Share / Invite</button>
         <button class="purple" id="copyBtn">Copy Code</button>
       </div>
-      <div class="row between" style="margin-bottom:8px">
-        <label style="font-size:12px;color:#a5b4fc;font-weight:700">Game Rules:</label>
-        <select id="modeSelect" style="background:#1e2433;color:#fff;border:1px solid #334155;border-radius:6px;padding:4px 8px;font-size:12px">
-          <option value="partners">Partners (2v2)</option>
-          <option value="cutthroat" selected>Cut Throat (FFA)</option>
-        </select>
+
+      <!-- GAME MODE PILL TOGGLE -->
+      <div class="stack" style="margin-bottom:8px">
+        <div class="lbl" style="text-align:left">Game Rules</div>
+        <div class="pill-group" id="modePillGroup">
+          <div class="pill-opt active" data-val="cutthroat">Cut Throat (FFA)</div>
+          <div class="pill-opt" data-val="partners">Partners (2v2)</div>
+        </div>
       </div>
+
+      <!-- BOT DIFFICULTY PILL TOGGLE -->
+      <div class="stack" style="margin-bottom:8px">
+        <div class="lbl" style="text-align:left">Bot Difficulty Tiers</div>
+        <div class="pill-group" id="diffPillGroup">
+          <div class="pill-opt" data-val="easy">Easy</div>
+          <div class="pill-opt active" data-val="medium">Medium</div>
+          <div class="pill-opt" data-val="hard">Hard</div>
+        </div>
+      </div>
+
+      <!-- TILE THEME PILL TOGGLE -->
+      <div class="stack" style="margin-bottom:8px">
+        <div class="lbl" style="text-align:left">Tile Style Theme</div>
+        <div class="pill-group" id="themePillGroup">
+          <div class="pill-opt active" data-val="white">Classic</div>
+          <div class="pill-opt" data-val="neon">Neon</div>
+          <div class="pill-opt" data-val="wood">Yard Wood</div>
+        </div>
+      </div>
+
       <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave Room / Arcade Hub</button>
       <div class="row between" style="margin-bottom:4px">
         <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b>
@@ -237,7 +221,7 @@ let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoo
 let roomCode = '', mySeatPos = 'S', micActive = false, speakerBoost = false;
 let hostTerm = 0, stateVersion = 0, lastApplied = { term: -1, version: -1 };
 let joinConfirmed = false, syncing = false, syncDirty = false;
-let mutedPlayers = new Set(), gameMode = 'cutthroat';
+let mutedPlayers = new Set(), gameMode = 'cutthroat', botDiff = 'medium', tileTheme = 'white';
 let scores = { S: 0, W: 0, N: 0, E: 0 };
 
 /* PERMANENT DEVICE IDENTITY */
@@ -331,9 +315,31 @@ $('editProfileBtn').onclick = () => {
   $('profileBox').classList.remove('hidden');
 };
 
+/* ---------- PILL TOGGLE CONTROLLERS ---------- */
+function bindPillGroup(containerId, onChange) {
+  const opts = document.querySelectorAll('#' + containerId + ' .pill-opt');
+  opts.forEach(opt => {
+    opt.onclick = () => {
+      if (!isHost && containerId !== 'themePillGroup') return;
+      opts.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      onChange(opt.getAttribute('data-val'));
+    };
+  });
+}
+
+bindPillGroup('modePillGroup', val => { gameMode = val; refresh(); syncRoomState(); });
+bindPillGroup('diffPillGroup', val => { botDiff = val; refresh(); syncRoomState(); });
+bindPillGroup('themePillGroup', val => { tileTheme = val; refresh(); });
+
+function setPillActive(containerId, val) {
+  const opts = document.querySelectorAll('#' + containerId + ' .pill-opt');
+  opts.forEach(o => o.classList.toggle('active', o.getAttribute('data-val') === val));
+}
+
 /* ---------- ROOM SYNC ---------- */
 function snapshot() {
-  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, scores, gameMode, botDiff, tileTheme, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
 }
 
 async function syncRoomState() {
@@ -362,7 +368,9 @@ function applyState(st, force) {
   roomStatus = pick(st.status, roomStatus);
   hostClientId = pick(st.hostClientId, hostClientId);
   handNo = pick(st.handNo, handNo); sNS = pick(st.sNS, sNS); sWE = pick(st.sWE, sWE);
-  if (st.gameMode === 'partners' || st.gameMode === 'cutthroat') gameMode = st.gameMode;
+  if (st.gameMode) gameMode = st.gameMode;
+  if (st.botDiff) botDiff = st.botDiff;
+  if (st.tileTheme) tileTheme = st.tileTheme;
   if (st.scores) scores = st.scores;
   lastWin = pick(st.lastWin, lastWin); needD6 = pick(st.needD6, needD6);
   if (st.players && st.players.length) players = st.players;
@@ -486,13 +494,12 @@ $('createBtn').onclick = async () => {
 
   const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
   const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true };
-  gameMode = $('modeSelect').value;
   scores = { S: 0, W: 0, N: 0, E: 0 };
 
   const { error } = await sb.from('game_rooms').insert([{
     room_code: code,
     status: 'waiting',
-    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores }
+    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, botDiff, tileTheme, scores }
   }]);
   if (error) { console.error(error); toast('Error creating room'); return; }
 
@@ -595,12 +602,6 @@ $('botBtn').onclick = () => {
   renderLobby(); syncRoomState();
 };
 
-$('modeSelect').onchange = () => {
-  if (!isHost) return;
-  gameMode = $('modeSelect').value;
-  refresh(); syncRoomState();
-};
-
 function toggleMutePlayer(targetClientId) {
   const audioEl = $('audio_' + targetClientId);
   if (mutedPlayers.has(targetClientId)) {
@@ -661,13 +662,13 @@ function renderLobby() {
   $('startBtn').classList.toggle('hidden', !isHost);
   $('botBtn').classList.toggle('hidden', !isHost);
   $('guestWaitMsg').classList.toggle('hidden', isHost);
-  $('modeSelect').disabled = !isHost;
-  $('modeSelect').value = gameMode;
+  setPillActive('modePillGroup', gameMode);
+  setPillActive('diffPillGroup', botDiff);
+  setPillActive('themePillGroup', tileTheme);
 }
 
 $('startBtn').onclick = () => {
   if (!isHost) return toast('Only host can start');
-  gameMode = $('modeSelect').value;
   ['S', 'W', 'N', 'E'].forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) {
       botN++;
@@ -678,7 +679,7 @@ $('startBtn').onclick = () => {
   newMatch();
 };
 
-/* ---------- LIVE TALKING INDICATOR DETECTOR (WEB AUDIO API) ---------- */
+/* ---------- LIVE TALKING INDICATOR DETECTOR ---------- */
 function monitorAudioLevel(stream, onSpeakingChange) {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -949,21 +950,38 @@ function maybeAi() {
   if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
 }
 
+/* ---------- AI BOT DIFFICULTY ENGINE ---------- */
 function aiTurn() {
   const p = byPos(turn);
   if (!p) return;
   const opts = [];
   p.hand.forEach((t, i) => {
     if (!isValid(t)) return;
-    if (!center) opts.push({ i, side: 'first', w: t.a + t.b });
+    if (!center) opts.push({ i, side: 'first', w: t.a + t.b, isDouble: t.d });
     else {
-      if (t.a === L || t.b === L) opts.push({ i, side: 'left', w: t.a + t.b });
-      if (t.a === R || t.b === R) opts.push({ i, side: 'right', w: t.a + t.b });
+      if (t.a === L || t.b === L) opts.push({ i, side: 'left', w: t.a + t.b, isDouble: t.d });
+      if (t.a === R || t.b === R) opts.push({ i, side: 'right', w: t.a + t.b, isDouble: t.d });
     }
   });
   if (!opts.length) return pass();
-  opts.sort((x, y) => y.w - x.w + (Math.random() - .5) * 3);
-  play(opts[0].i, opts[0].side);
+
+  if (botDiff === 'easy') {
+    // EASY: Pick a random legal move
+    const choice = opts[Math.floor(Math.random() * opts.length)];
+    play(choice.i, choice.side);
+  } else if (botDiff === 'medium') {
+    // MEDIUM: Prioritize doubles and heaviest tiles
+    opts.sort((x, y) => (y.isDouble ? 10 : 0) + y.w - ((x.isDouble ? 10 : 0) + x.w));
+    play(opts[0].i, opts[0].side);
+  } else {
+    // HARD: Advanced pip dumping + double unloading + starving ends
+    opts.sort((x, y) => {
+      let scoreX = x.w + (x.isDouble ? 15 : 0);
+      let scoreY = y.w + (y.isDouble ? 15 : 0);
+      return scoreY - scoreX;
+    });
+    play(opts[0].i, opts[0].side);
+  }
 }
 
 function blocked() {
@@ -1050,7 +1068,7 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- ROTATIONAL SNAKE LAYOUT CANVAS ENGINE ---------- */
+/* ---------- ROTATIONAL SNAKE LAYOUT CANVAS ENGINE WITH THEME ENGINE ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, EDGE = 8, CY = 180;
 const TILE_L = 40, TILE_W = 20, ROW_PITCH = 48;
@@ -1061,9 +1079,9 @@ function roundRect(c, x, y, w, h, r) {
   c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
 
-function drawHalf(c, hx, hy, n) {
+function drawHalf(c, hx, hy, n, pipColor) {
   const step = 5.5;
-  c.fillStyle = '#111827';
+  c.fillStyle = pipColor;
   PIP_GRID[n].forEach(i => {
     c.beginPath();
     c.arc(hx + ((i % 3) - 1) * step, hy + (((i / 3) | 0) - 1) * step, 1.8, 0, Math.PI * 2);
@@ -1072,16 +1090,30 @@ function drawHalf(c, hx, hy, n) {
 }
 
 function drawTile(c, cx, cy, lead, trail, rot) {
+  let bodyColor = '#ffffff';
+  let pipColor = '#111827';
+  let dividerColor = '#94a3b8';
+
+  if (tileTheme === 'neon') {
+    bodyColor = '#0f172a';
+    pipColor = '#38bdf8';
+    dividerColor = '#38bdf8';
+  } else if (tileTheme === 'wood') {
+    bodyColor = '#fef3c7';
+    pipColor = '#78350f';
+    dividerColor = '#b45309';
+  }
+
   c.save();
   c.translate(cx, cy); c.rotate(rot || 0);
   c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 4; c.shadowOffsetY = 2;
   roundRect(c, -TILE_L / 2, -TILE_W / 2, TILE_L, TILE_W, 4);
-  c.fillStyle = lead === trail ? '#fde68a' : '#ffffff'; c.fill();
+  c.fillStyle = lead === trail && tileTheme === 'white' ? '#fde68a' : bodyColor; c.fill();
   c.shadowColor = 'transparent';
   c.lineWidth = 1; c.strokeStyle = '#cbd5e1'; c.stroke();
-  c.strokeStyle = '#94a3b8'; c.beginPath(); c.moveTo(0, -TILE_W / 2 + 2); c.lineTo(0, TILE_W / 2 - 2); c.stroke();
-  drawHalf(c, -TILE_L / 4, 0, lead);
-  drawHalf(c, TILE_L / 4, 0, trail);
+  c.strokeStyle = dividerColor; c.beginPath(); c.moveTo(0, -TILE_W / 2 + 2); c.lineTo(0, TILE_W / 2 - 2); c.stroke();
+  drawHalf(c, -TILE_L / 4, 0, lead, pipColor);
+  drawHalf(c, TILE_L / 4, 0, trail, pipColor);
   c.restore();
 }
 
