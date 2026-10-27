@@ -88,7 +88,7 @@ canvas#board{display:block;width:100%;height:auto}
   <div id="voiceBar" class="voice-bar hidden">
     <div class="voice-status"><div id="micDot" class="mic-dot"></div><span>🎙️ Yard Voice</span></div>
     <div class="row" style="gap:4px">
-      <button id="speakerBtn" class="blue" style="padding:4px 10px;font-size:11px">🔊 Speaker: OFF</button>
+      <button id="sfxBtn" class="blue" style="padding:4px 10px;font-size:11px">🔊 SFX: ON</button>
       <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px">Enable Mic</button>
     </div>
   </div>
@@ -199,7 +199,7 @@ const stripName = s => String(s || '').replace(/[\u0000-\u001f\u007f<>]/g, '').t
 const cleanName = s => stripName(s) || 'Player';
 
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
-let roomCode = '', mySeatPos = 'S', micActive = false, speakerEnabled = false;
+let roomCode = '', mySeatPos = 'S', micActive = false, sfxEnabled = true;
 let hostTerm = 0, stateVersion = 0, lastApplied = { term: -1, version: -1 };
 let joinConfirmed = false, syncing = false, syncDirty = false;
 let mutedPlayers = new Set(), speaking = new Set(), gameMode = 'cutthroat';
@@ -310,10 +310,20 @@ $('roomThemeBtn').onclick = () => {
   ], themeKey, val => setTheme(val));
 };
 
+/* ---------- SOUND EFFECTS ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
+
+$('sfxBtn').onclick = () => {
+  sfxEnabled = !sfxEnabled;
+  $('sfxBtn').textContent = sfxEnabled ? '🔊 SFX: ON' : '🔇 SFX: OFF';
+  $('sfxBtn').className = sfxEnabled ? 'blue' : 'red';
+  toast(sfxEnabled ? 'Sound Effects Enabled' : 'Sound Effects Muted');
+};
+
 function tone(f1, f2, d, type, vol, delay = 0) {
+  if (!sfxEnabled) return;
   try {
-    if (AC.state === 'suspended') AC.resume();
+    if (AC.state === 'suspended' || AC.state === 'interrupted') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
     if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
@@ -742,7 +752,6 @@ async function connectVoice() {
       el.id = 'audio_' + participant.identity; el.autoplay = true; el.playsInline = true;
       if (mutedPlayers.has(participant.identity)) el.muted = true;
       $('audioBox').appendChild(el);
-      if (speakerEnabled) routeToSpeaker(el);
     }
   });
   room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => { track.detach().forEach(el => el.remove()); });
@@ -759,27 +768,6 @@ async function connectVoice() {
   return true;
 }
 
-async function routeToSpeaker(audioEl) {
-  if (audioEl && typeof audioEl.setSinkId === 'function') {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const speaker = devices.find(d => d.kind === 'audiooutput' && (d.deviceId === 'speaker' || d.label.toLowerCase().includes('speaker')));
-      if (speaker) await audioEl.setSinkId(speaker.deviceId);
-    } catch (e) {}
-  }
-}
-
-$('speakerBtn').onclick = async () => {
-  const supported = typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
-  if (!supported) return toast("This browser can't switch speakers. Use your volume buttons or headphones.");
-  speakerEnabled = !speakerEnabled;
-  const btn = $('speakerBtn');
-  btn.textContent = speakerEnabled ? '🔊 Speaker: ON' : '🔊 Speaker: OFF';
-  btn.className = speakerEnabled ? 'green' : 'blue';
-  if (speakerEnabled) { document.querySelectorAll('#audioBox audio').forEach(el => routeToSpeaker(el)); toast('Speaker requested'); }
-  else toast('Speaker off');
-};
-
 function disconnectVoice() {
   const r = livekitRoom; livekitRoom = null; speaking = new Set();
   if (r) { try { r.disconnect(); } catch (e) {} }
@@ -788,7 +776,7 @@ function disconnectVoice() {
 }
 
 $('micBtn').onclick = async () => {
-  if (AC.state === 'suspended') AC.resume();
+  if (AC.state === 'suspended' || AC.state === 'interrupted') AC.resume();
   const wantOn = !micActive;
   $('micBtn').disabled = true;
   try {
