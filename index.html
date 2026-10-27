@@ -3,34 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Xgames Arcade - Yard Dominoes (Six Love)</title>
+<title>Xgames Arcade</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#07080c;color:#f1f5f9;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:8px}
 .card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:10px}
-.row{display:flex;gap:8px;align-items:center}
-.between{justify-content:space-between}
-.hidden{display:none!important}
+.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.hidden{display:none!important}
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
 button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 12px;cursor:pointer;background:#334155}
 button:disabled{opacity:.5}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
-input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0;text-transform:none}
+button.big{width:100%;font-size:17px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 4px 14px rgba(239,68,68,.35)}
+input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0}
 input:focus{border-color:#6366f1}
+select{width:100%;font:inherit;font-size:12px;color:#fff;background:#141724;border:1px solid #334155;border-radius:99px;padding:8px 14px;outline:0;appearance:none;text-align:center;cursor:pointer}
+select:focus{border-color:#6366f1}
 select:disabled{opacity:.6}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
 .panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
-.pl{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1e2433;font-size:14px}
-.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}.tag.you{background:#059669;color:#fff}
+.pl{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px solid #1e2433;font-size:14px;border-radius:8px}
+.pl.speaking{box-shadow:0 0 0 2px #22c55e;background:#0f2a1c}
+.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}
+.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}.tag.you{background:#059669;color:#fff}.tag.ok{background:#16a34a;color:#fff}.tag.wait{background:#475569;color:#e2e8f0}
 .status{font-size:11px;color:#94a3b8}.status b{color:#fbbf24}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
-
-/* TABLE CANVAS CONTAINER */
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
 canvas#board{display:block;width:100%;height:auto}
 .shake{animation:shake .25s both}
@@ -38,117 +39,80 @@ canvas#board{display:block;width:100%;height:auto}
 #log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:12px;color:#e2e8f0;text-align:center;display:flex;align-items:center;justify-content:center}
 .hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:44px;padding:4px 0}
 .hand canvas{width:60px;height:34px;cursor:pointer;transition:transform .12s,opacity .12s}
-.hand canvas.sel{transform:translateY(-6px)}
-.hand canvas.dim{opacity:.4}
+.hand canvas.sel{transform:translateY(-6px)}.hand canvas.dim{opacity:.4}
 .lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
-.voice-bar{display:flex;align-items:center;justify-content:space-between;background:#1e1b4b;padding:6px 12px;border-radius:8px;margin-bottom:6px;border:1px solid #312e81}
+.voice-bar{display:flex;align-items:center;justify-content:space-between;background:#1e1b4b;padding:6px 12px;border-radius:8px;border:1px solid #312e81}
 .voice-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#a5b4fc}
-.mic-dot{width:8px;height:8px;border-radius:50%;background:#64748b;transition:all .2s}
+.mic-dot{width:8px;height:8px;border-radius:50%;background:#64748b}
 .mic-dot.active{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
-
-/* OUTSIDE PLAYER SEAT BADGES (CLEAN TOP BAR) */
-.seat-grid-outside {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  background: #0b0c12;
-  border: 1px solid #23273a;
-  border-radius: 10px;
-  padding: 6px;
-  margin-bottom: 6px;
-}
-.seat-card-out {
-  background: #141724;
-  border: 1px solid #282e42;
-  border-radius: 8px;
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-.seat-card-out.active {
-  border-color: #facc15;
-  background: #3a2a14;
-}
-.seat-card-out .p-name {
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-.seat-card-out .p-tiles {
-  font-size: 9px;
-  font-weight: 700;
-  color: #fbbf24;
-}
-.seat-card-out .p-avatar {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #b45309;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 9px;
-  color: #fff;
-}
-.seat-card-out .p-avatar.bot { background: #581c87; }
-.seat-mute-btn {
-  background: #334155;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 1px 4px;
-  font-size: 8px;
-  cursor: pointer;
-  margin-top: 2px;
-}
-.seat-mute-btn.muted { background: #dc2626; }
+.gamechips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.chip{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8}
+.chip.on{border-color:#fbbf24;color:#fff;background:#3a2a14}
+.chip small{display:block;font-size:9px;color:#64748b;margin-top:2px}
+.opt{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;color:#a5b4fc;font-weight:700}
+.seat-grid-outside{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#0b0c12;border:1px solid #23273a;border-radius:10px;padding:6px}
+.seat-card-out{background:#141724;border:1px solid #282e42;border-radius:8px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.seat-card-out.active{border-color:#facc15;background:#3a2a14}
+.seat-card-out.speaking{box-shadow:0 0 0 2px #22c55e,0 0 10px #22c55e}
+.seat-card-out .p-name{font-size:10px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.seat-card-out .p-tiles{font-size:9px;font-weight:700;color:#fbbf24}
+.seat-card-out .p-avatar{width:18px;height:18px;border-radius:50%;background:#b45309;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:#fff}
+.seat-card-out .p-avatar.bot{background:#581c87}
+.seat-mute-btn{background:#334155;border:0;color:#fff;border-radius:4px;padding:1px 4px;font-size:8px;cursor:pointer;margin-top:2px}
+.seat-mute-btn.muted{background:#dc2626}
+#confirm{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.cbox{background:#141724;border:1px solid #334155;border-radius:16px;padding:18px;max-width:320px;width:100%;text-align:center}
+.cbox p{margin:0 0 14px;font-size:14px;line-height:1.4}
 </style>
 </head>
 <body>
 
 <div class="card row between">
   <div class="logo">XGAMES <b>ARCADE</b></div>
-  <button class="blue" id="hubBtn">Main Arcade Hub</button>
+  <button class="blue" id="hubBtn">Main Menu</button>
 </div>
 
 <div class="card stack">
-  <div class="panel row between status"><span id="syncLabel">Offline Practice</span><b id="roomBadge">No room yet</b></div>
+  <div class="panel row between status hidden" id="statusPanel"><span id="syncLabel">Main menu</span><b id="roomBadge">No room yet</b></div>
 
-  <!-- PROFILE SETUP -->
-  <div id="profileBox" class="profile-card stack hidden">
+  <div id="voiceBar" class="voice-bar hidden">
+    <div class="voice-status"><div id="micDot" class="mic-dot"></div><span>🎙️ Yard Voice</span></div>
+    <div class="row" style="gap:4px">
+      <button id="speakerBtn" class="blue" style="padding:4px 10px;font-size:11px">🔊 Speaker: OFF</button>
+      <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px">Enable Mic</button>
+    </div>
+  </div>
+
+  <div id="profileBox" class="profile-card hidden">
     <h2>Set Up Your Player Profile</h2>
     <input id="profileNameIn" placeholder="Enter nickname (e.g. Omarian, Tav, Louis)" maxlength="15">
     <button class="green" id="saveProfileBtn">Save Profile & Continue</button>
   </div>
 
-  <!-- LOBBY MAIN -->
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
       <div class="row between">
         <h2>Your Nickname: <b id="myNickDisplay" style="color:#fbbf24">Player</b></h2>
         <button id="editProfileBtn" style="padding:4px 8px;font-size:11px">Edit Profile</button>
       </div>
+      <button class="big" id="quickBtn">⚡ Quick Play</button>
       <div class="two">
+        <div><div class="lbl" style="text-align:left">Rules</div><select id="quickMode"><option value="cutthroat">Cut Throat (FFA)</option><option value="partners">Partners (2v2)</option></select></div>
+        <div><div class="lbl" style="text-align:left">Bots</div><select id="quickLevel"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div>
+      </div>
+      <div class="lbl" style="margin:0">Quick Play starts right away against bots. Nobody needs to join.</div>
+      <div class="two" style="margin-top:4px">
         <button class="green" id="createBtn">+ Create Room</button>
         <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
       </div>
     </div>
 
-    <!-- ROOM LOBBY PANEL -->
     <div id="roomPanel" class="panel hidden">
       <div class="lbl">Room Code</div>
       <div class="codeBig" id="codeBig">XG-XXXXX</div>
@@ -156,50 +120,43 @@ canvas#board{display:block;width:100%;height:auto}
         <button class="blue" id="shareBtn">🔗 Share / Invite</button>
         <button class="purple" id="copyBtn">Copy Code</button>
       </div>
-      <div class="row between" style="margin-bottom:8px">
-        <label style="font-size:12px;color:#a5b4fc;font-weight:700">Game Rules:</label>
-        <select id="modeSelect" style="background:#1e2433;color:#fff;border:1px solid #334155;border-radius:6px;padding:4px 8px;font-size:12px">
-          <option value="partners">Partners (2v2)</option>
-          <option value="cutthroat" selected>Cut Throat (FFA)</option>
-        </select>
+      <div class="lbl" style="text-align:left">Game</div>
+      <div class="gamechips">
+        <div class="chip on">🁣<br>Dominoes</div>
+        <div class="chip">🎲<br>Ludo<small>coming soon</small></div>
+        <div class="chip">♟️<br>Checkers<small>coming soon</small></div>
       </div>
-      <button id="leaveBtn" style="width:100%;margin-bottom:8px">Leave Room / Arcade Hub</button>
-      <div class="row between" style="margin-bottom:4px">
+      <div class="opt"><span>Rules</span>
+        <select id="modeSelect"><option value="partners">Partners (2v2)</option><option value="cutthroat" selected>Cut Throat (FFA)</option></select></div>
+      <div class="opt"><span>Bot difficulty</span>
+        <select id="levelSel"><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></div>
+      <div class="opt"><span>Your theme</span>
+        <select id="themeSel"><option value="classic">Classic</option><option value="neon">Neon</option><option value="wood">Yard Wood</option></select></div>
+      <div class="row between" style="margin:8px 0 4px">
         <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b>
         <button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px">+ Add Bot</button>
       </div>
       <div id="plist"></div>
+      <button id="readyBtn" class="blue hidden" style="width:100%;margin-top:8px">Tap when you are ready</button>
       <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
       <div id="guestWaitMsg" class="lbl hidden" style="color:#fbbf24;margin-top:10px">Waiting for the Host to start the match...</div>
+      <button id="leaveBtn" style="width:100%;margin-top:10px">Leave Room</button>
     </div>
   </div>
 
-  <!-- GAME BOARD VIEW -->
   <div id="game" class="stack hidden">
-    <div class="voice-bar">
-      <div class="voice-status">
-        <div id="micDot" class="mic-dot"></div>
-        <span>🎙️ Yard Voice</span>
-      </div>
-      <div class="row" style="gap:4px">
-        <button id="speakerBtn" class="blue" style="padding:4px 10px;font-size:11px">🔊 Speaker: OFF</button>
-        <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px">Enable Mic</button>
-      </div>
+    <div class="row between">
+      <button id="exitBtn">⬅ Exit</button>
+      <button id="themeBtn" class="purple">🎨 Classic</button>
     </div>
     <div class="score">
       <div id="scoreBoxL">N/S<span class="pill" id="sNS">0</span></div>
       <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat</i></div>
       <div id="scoreBoxR">E/W<span class="pill" id="sWE">0</span></div>
     </div>
-
-    <!-- SEATS OUTSIDE BOARD -->
     <div id="seatOverlayOutside" class="seat-grid-outside"></div>
-
-    <div class="wrap" id="wrap">
-      <canvas id="board" width="800" height="720"></canvas>
-    </div>
-
-    <div id="log">Connecting to room...</div>
+    <div class="wrap" id="wrap"><canvas id="board" width="800" height="720"></canvas></div>
+    <div id="log">Starting...</div>
     <div class="panel">
       <div class="lbl" id="turnLbl">Your hand</div>
       <div class="hand" id="hand"></div>
@@ -209,58 +166,72 @@ canvas#board{display:block;width:100%;height:auto}
       </div>
       <button id="passBtn" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">Knock table (pass)</button>
       <button id="againBtn" class="green hidden" style="width:100%;margin-top:8px">Play another match</button>
+      <button id="roomBtn" class="purple hidden" style="width:100%;margin-top:8px">⬅ Back to room</button>
     </div>
   </div>
 </div>
+
+<div id="confirm" class="hidden"><div class="cbox"><p id="cMsg"></p>
+  <div class="two"><button id="cNo">Stay</button><button id="cYes" class="red">Leave</button></div></div></div>
 <div id="toast"></div>
 <div id="audioBox"></div>
 
 <script>
-/* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
-// The key below is the PUBLIC anon key (safe in the browser). Never put a service_role key,
-// a "sb_secret_" key, or the LiveKit API secret in this file.
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
-
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-/* ---------- INPUT SAFETY ---------- */
-// Anything another player sends is checked before it is used, and only ever shown with textContent.
+const $ = id => document.getElementById(id);
+
 const ID_RE = /^p_[a-z0-9]{4,16}$/;
 const stripName = s => String(s || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 15);
 const cleanName = s => stripName(s) || 'Player';
 
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
 let roomCode = '', mySeatPos = 'S', micActive = false, speakerEnabled = false;
-// Ordering: (term, version). The host bumps version on every update. A host that comes back after a
-// refresh bumps the TERM, so guests accept it even if it restored from an older saved copy.
 let hostTerm = 0, stateVersion = 0, lastApplied = { term: -1, version: -1 };
 let joinConfirmed = false, syncing = false, syncDirty = false;
-let mutedPlayers = new Set(), gameMode = 'cutthroat';
+let mutedPlayers = new Set(), speaking = new Set(), gameMode = 'cutthroat';
 let scores = { S: 0, W: 0, N: 0, E: 0 };
+let botLevel = localStorage.getItem('xg_level') || 'medium';
+if (!['easy', 'medium', 'hard'].includes(botLevel)) botLevel = 'medium';
 
-/* PERMANENT DEVICE IDENTITY */
 let myClientId = localStorage.getItem('xg_perm_client_id');
 if (!myClientId || !ID_RE.test(myClientId)) {
   myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
   localStorage.setItem('xg_perm_client_id', myClientId);
 }
-
 let myNickname = stripName(localStorage.getItem('xg_perm_nickname'));
 
-/* ---------- REFRESH-PROOF SESSION (who you are + which room you were in; never the game itself) ---------- */
 const SESSION_KEY = 'xg_session_v1';
 const MAX_SESSION_AGE = 6 * 3600 * 1000;
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } },
-  del(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
 function saveSession() { store.set(SESSION_KEY, { roomCode, role: isHost ? 'host' : 'guest', savedAt: Date.now() }); }
 function clearSession() { store.del(SESSION_KEY); }
 
-/* ---------- AUDIO SOUND EFFECTS ---------- */
+const THEMES = {
+  classic: { n: 'Classic', tile: '#ffffff', edge: '#cbd5e1', line: '#94a3b8', pip: '#111827', top: '#155e2b', bot: '#0f441f', frame: '#3d2314' },
+  neon: { n: 'Neon', tile: '#0f172a', edge: '#22d3ee', line: '#22d3ee', pip: '#f472b6', top: '#0b1020', bot: '#05060d', frame: '#312e81', glow: '#22d3ee' },
+  wood: { n: 'Yard Wood', tile: '#f5e6c8', edge: '#a16207', line: '#92400e', pip: '#3b1d0a', top: '#6b4423', bot: '#4a2c14', frame: '#2a1608' },
+};
+let themeKey = localStorage.getItem('xg_theme');
+if (!THEMES[themeKey]) themeKey = 'classic';
+const TH = () => THEMES[themeKey];
+function setTheme(k) {
+  if (!THEMES[k]) return;
+  themeKey = k; localStorage.setItem('xg_theme', k);
+  $('wrap').style.borderColor = TH().frame;
+  $('themeSel').value = k; $('themeBtn').textContent = '🎨 ' + TH().n;
+  if (!$('game').classList.contains('hidden')) refresh();
+}
+$('themeSel').onchange = () => setTheme($('themeSel').value);
+$('themeBtn').onclick = () => { const ks = Object.keys(THEMES); setTheme(ks[(ks.indexOf(themeKey) + 1) % ks.length]); };
+
 const AC = new (window.AudioContext || window.webkitAudioContext)();
 function tone(f1, f2, d, type, vol, delay = 0) {
   try {
@@ -281,8 +252,6 @@ function shake() {
   setTimeout(() => w.classList.remove('shake'), 260);
 }
 
-/* ---------- HELPERS ---------- */
-const $ = id => document.getElementById(id);
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
 const pick = (v, cur) => (v === undefined ? cur : v);
@@ -290,69 +259,64 @@ const isNewer = st => {
   const term = st.term || 0, version = st.version || 0;
   return term !== lastApplied.term ? term > lastApplied.term : version > lastApplied.version;
 };
+const gameHidden = () => $('game').classList.contains('hidden');
+function ask(msg, yesLabel, fn) {
+  $('cMsg').textContent = msg; $('cYes').textContent = yesLabel;
+  $('confirm').classList.remove('hidden');
+  $('cYes').onclick = () => { $('confirm').classList.add('hidden'); fn(); };
+  $('cNo').onclick = () => $('confirm').classList.add('hidden');
+}
 
-/* ---------- STATE ---------- */
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
+const MATE = { S: 'N', N: 'S', W: 'E', E: 'W' };
 let lobby = [], botN = 0, isHost = false, hostClientId = '', roomStatus = 'waiting';
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
+let passMiss = { S: new Set(), W: new Set(), N: new Set(), E: new Set() };
 const byPos = p => players.find(x => x.pos === p);
 
-/* ---------- PROFILE CONTROLLER ---------- */
 function initProfile() {
-  if (!myNickname) {
-    $('homeBox').classList.add('hidden');
-    $('profileBox').classList.remove('hidden');
-  } else {
-    $('myNickDisplay').textContent = myNickname;
-    $('profileBox').classList.add('hidden');
-    $('homeBox').classList.remove('hidden');
-  }
+  if (!myNickname) { $('homeBox').classList.add('hidden'); $('profileBox').classList.remove('hidden'); }
+  else { $('myNickDisplay').textContent = myNickname; $('profileBox').classList.add('hidden'); $('homeBox').classList.remove('hidden'); }
 }
-
 $('saveProfileBtn').onclick = () => {
-  const inputVal = stripName($('profileNameIn').value);
-  if (!inputVal) return toast('Please enter a nickname');
-  myNickname = inputVal;
-  localStorage.setItem('xg_perm_nickname', myNickname);
-  $('myNickDisplay').textContent = myNickname;
-  $('profileBox').classList.add('hidden');
-  $('homeBox').classList.remove('hidden');
+  const v = stripName($('profileNameIn').value);
+  if (!v) return toast('Please enter a nickname');
+  myNickname = v; localStorage.setItem('xg_perm_nickname', v);
+  $('myNickDisplay').textContent = v;
+  $('profileBox').classList.add('hidden'); $('homeBox').classList.remove('hidden');
   toast('Profile saved!');
-
-  const params = new URLSearchParams(window.location.search);
-  const roomParam = params.get('room');
+  const roomParam = new URLSearchParams(window.location.search).get('room');
   if (roomParam) joinRoomByCode(roomParam.toUpperCase());
 };
-
 $('editProfileBtn').onclick = () => {
   $('profileNameIn').value = myNickname;
-  $('homeBox').classList.add('hidden');
-  $('profileBox').classList.remove('hidden');
+  $('homeBox').classList.add('hidden'); $('profileBox').classList.remove('hidden');
 };
 
-/* ---------- ROOM SYNC ----------
-   THE HOST OWNS THE GAME. Only the host changes the table, and the host never takes state back from the
-   network (except once, to restore after a refresh). Guests only apply NEWER (term, version) states. */
 function snapshot() {
-  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
+  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, game: 'dominoes', botLevel, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
 }
 
 async function syncRoomState() {
   if (!roomCode || !isHost) return;
   stateVersion++;
   if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'STATE', payload: snapshot() });
-
   if (syncing) { syncDirty = true; return; }
   syncing = true;
   try {
     do {
       syncDirty = false;
-      const st = snapshot();
-      await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: st, updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
+      await sb.from('game_rooms').upsert({ room_code: roomCode, status: roomStatus, state: snapshot(), updated_at: new Date().toISOString() }, { onConflict: 'room_code' });
     } while (syncDirty);
   } catch (e) { console.error('Save failed', e); }
   syncing = false;
+}
+
+function showLobbyView() {
+  $('game').classList.add('hidden'); $('lobby').classList.remove('hidden');
+  $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
+  renderLobby(); refresh();
 }
 
 function applyState(st, force) {
@@ -363,6 +327,7 @@ function applyState(st, force) {
 
   roomStatus = pick(st.status, roomStatus);
   hostClientId = pick(st.hostClientId, hostClientId);
+  if (['easy', 'medium', 'hard'].includes(st.botLevel)) botLevel = st.botLevel;
   handNo = pick(st.handNo, handNo); sNS = pick(st.sNS, sNS); sWE = pick(st.sWE, sWE);
   if (st.gameMode === 'partners' || st.gameMode === 'cutthroat') gameMode = st.gameMode;
   if (st.scores) scores = st.scores;
@@ -375,18 +340,15 @@ function applyState(st, force) {
   if (st.lobby) {
     lobby = st.lobby;
     const me = lobby.find(p => p.clientId === myClientId);
-    if (me) {
-      mySeatPos = me.pos; joinConfirmed = true; clearInterval(joinRetryTimer);
-    } else if (joinConfirmed && !isHost) {
-      leaveToHome('The host removed you from the table.');
-      return;
-    }
+    if (me) { mySeatPos = me.pos; joinConfirmed = true; clearInterval(joinRetryTimer); }
+    else if (joinConfirmed && !isHost) { leaveToHome('The host removed you from the table.'); return; }
     renderLobby();
   }
 
-  if (roomStatus === 'playing' && $('game').classList.contains('hidden')) {
-    $('lobby').classList.add('hidden');
-    $('game').classList.remove('hidden');
+  if (roomStatus === 'playing' && gameHidden()) {
+    $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
+  } else if (roomStatus === 'waiting' && !gameHidden() && roomCode) {
+    showLobbyView(); return;
   }
   refresh();
   if (force) maybeAi();
@@ -405,16 +367,15 @@ function stopListening() {
 
 function listenToRoom() {
   stopListening();
-
   roomSubscription = sb.channel('room_' + roomCode)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'game_rooms', filter: 'room_code=eq.' + roomCode }, payload => {
       if (!isHost && payload.new) applyState(payload.new.state);
     })
-    // Only accept a broadcast table that names the real host (a basic check; real protection needs accounts)
     .on('broadcast', { event: 'STATE' }, ({ payload }) => {
       if (!isHost && payload && payload.hostClientId === hostClientId) applyState(payload);
     })
     .on('broadcast', { event: 'JOIN_EVENT' }, ({ payload }) => { if (isHost) handleJoin(payload); })
+    .on('broadcast', { event: 'READY' }, ({ payload }) => { if (isHost) handleReady(payload); })
     .on('broadcast', { event: 'JOIN_DENIED' }, ({ payload }) => {
       if (payload && payload.clientId === myClientId) leaveToHome(payload.reason || 'The host could not seat you.');
     })
@@ -424,7 +385,6 @@ function listenToRoom() {
       if (status !== 'SUBSCRIBED') return;
       if (!isHost) { fetchLatestState(); startJoinRetry(); }
     });
-
   if (!isHost) pollTimer = setInterval(fetchLatestState, 3000);
 }
 
@@ -434,11 +394,7 @@ function startJoinRetry() {
   let tries = 0;
   const send = () => {
     if (joinConfirmed || !roomSubscription) { clearInterval(joinRetryTimer); return; }
-    if (++tries > 12) {
-      clearInterval(joinRetryTimer);
-      toast("Couldn't reach the host. Ask them to keep the room open.");
-      return;
-    }
+    if (++tries > 12) { clearInterval(joinRetryTimer); toast("Couldn't reach the host. Ask them to keep the room open."); return; }
     roomSubscription.send({ type: 'broadcast', event: 'JOIN_EVENT', payload: { clientId: myClientId, name: myNickname } });
   };
   send();
@@ -450,25 +406,30 @@ function denyJoin(clientId, reason) {
 }
 
 function handleJoin(g) {
-  // The id must look exactly like one our app makes, and the name is cleaned before it is stored
   if (!g || typeof g.clientId !== 'string' || !ID_RE.test(g.clientId)) return;
   if (!lobby.some(p => p.clientId === g.clientId)) {
     if (roomStatus === 'playing') return denyJoin(g.clientId, 'That match has already started.');
     if (lobby.length >= 4) return denyJoin(g.clientId, 'The room is full.');
     const freePos = ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
     const name = cleanName(g.name);
-    lobby.push({ clientId: g.clientId, name, isBot: false, pos: freePos, isHost: false });
-    renderLobby();
-    toast(name + ' joined the table!');
+    lobby.push({ clientId: g.clientId, name, isBot: false, pos: freePos, isHost: false, ready: false });
+    renderLobby(); toast(name + ' joined the table!');
   }
   syncRoomState();
+}
+
+function handleReady(g) {
+  if (!g || typeof g.clientId !== 'string') return;
+  const m = lobby.find(p => p.clientId === g.clientId && !p.isBot && p.clientId !== hostClientId);
+  if (!m) return;
+  m.ready = g.ready === true;
+  renderLobby(); syncRoomState();
 }
 
 function handleMove(mv) {
   if (!isHost || !mv || !active) return;
   const cur = byPos(turn);
   if (!cur || cur.ai || cur.clientId !== mv.clientId) return;
-
   if (mv.type === 'PLAY') {
     if (!Number.isInteger(mv.index)) return;
     const t = cur.hand[mv.index];
@@ -484,19 +445,33 @@ function handleMove(mv) {
   }
 }
 
-/* ---------- LOBBY CONTROLLER ---------- */
+$('quickLevel').value = botLevel;
+
+$('quickBtn').onclick = () => {
+  if (!myNickname) return initProfile();
+  if (AC.state === 'suspended') AC.resume();
+  roomCode = ''; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; joinConfirmed = true; roomStatus = 'playing';
+  gameMode = $('quickMode').value;
+  botLevel = $('quickLevel').value; localStorage.setItem('xg_level', botLevel);
+  botN = 0;
+  lobby = [{ clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true, ready: true }];
+  ['W', 'N', 'E'].forEach(pos => { botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false, ready: true }); });
+  $('roomBadge').textContent = 'Quick Play';
+  $('homeBox').classList.add('hidden');
+  newMatch();
+};
+
 $('createBtn').onclick = async () => {
   if (!myNickname) return initProfile();
-
   const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true };
+  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true, ready: true };
   gameMode = $('modeSelect').value;
+  botLevel = localStorage.getItem('xg_level') || 'medium';
   scores = { S: 0, W: 0, N: 0, E: 0 };
 
   const { error } = await sb.from('game_rooms').insert([{
-    room_code: code,
-    status: 'waiting',
-    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores }
+    room_code: code, status: 'waiting',
+    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: 'dominoes', botLevel, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores }
   }]);
   if (error) { console.error(error); toast('Error creating room'); return; }
 
@@ -505,8 +480,7 @@ $('createBtn').onclick = async () => {
   lobby = [myEntry];
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
-  renderLobby(); refresh();
-  saveSession();
+  renderLobby(); refresh(); saveSession();
   toast('Room ' + roomCode + ' created!');
   listenToRoom();
 };
@@ -520,7 +494,6 @@ $('joinBtn').onclick = () => {
 
 async function joinRoomByCode(code) {
   if (!myNickname) return initProfile();
-
   const { data, error } = await sb.from('game_rooms').select('state, status').eq('room_code', code).maybeSingle();
   if (error || !data || !data.state) return toast('Room not found');
 
@@ -529,21 +502,18 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
   joinConfirmed = false; lastApplied = { term: -1, version: -1 };
 
-  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId)
-      && (data.state.lobby || []).length >= 4) {
-    roomCode = '';
-    return toast('That room is full');
+  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId) && (data.state.lobby || []).length >= 4) {
+    roomCode = ''; return toast('That room is full');
   }
 
   $('roomBadge').textContent = 'Room: ' + roomCode; $('codeBig').textContent = roomCode;
   $('homeBox').classList.add('hidden'); $('roomPanel').classList.remove('hidden');
 
-  if (isHost) { hostTerm = (data.state.term || 0) + 1; stateVersion = 0; } // host coming back: new term, carry on from the saved table
+  if (isHost) { hostTerm = (data.state.term || 0) + 1; stateVersion = 0; }
   applyState(data.state, isHost);
-  renderLobby(); refresh();
-  saveSession();
+  renderLobby(); refresh(); saveSession();
   listenToRoom();
-  if (isHost) syncRoomState(); // tell everyone the host is back
+  if (isHost) syncRoomState();
 }
 
 $('copyBtn').onclick = () => {
@@ -553,96 +523,99 @@ $('copyBtn').onclick = () => {
 
 $('shareBtn').onclick = () => {
   const joinUrl = window.location.origin + window.location.pathname + '?room=' + roomCode;
-  if (navigator.share) {
-    navigator.share({
-      title: 'Xgames Yard Dominoes',
-      text: 'Join my dominoes table! Room Code: ' + roomCode,
-      url: joinUrl
-    }).catch(() => {});
-  } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(joinUrl).then(() => toast('Invite link copied!'));
-  } else {
-    toast(joinUrl);
-  }
+  if (navigator.share) navigator.share({ title: 'Xgames Arcade', text: 'Join my table! Room Code: ' + roomCode, url: joinUrl }).catch(() => {});
+  else if (navigator.clipboard) navigator.clipboard.writeText(joinUrl).then(() => toast('Invite link copied!'));
+  else toast(joinUrl);
 };
 
-// Everything that takes you back to the home screen goes through here
 async function leaveToHome(message) {
   clearSession();
   epoch++; active = false;
   if (isHost && roomSubscription) {
     try { await roomSubscription.send({ type: 'broadcast', event: 'ROOM_CLOSED', payload: {} }); } catch (e) {}
   }
-  stopListening();
-  disconnectVoice();
-
+  stopListening(); disconnectVoice();
   lobby = []; players = []; roomCode = ''; isHost = false; hostClientId = ''; joinConfirmed = false;
   lastApplied = { term: -1, version: -1 }; hostTerm = 0; stateVersion = 0; roomStatus = 'waiting'; matchOver = false;
-  center = null; lb = []; rb = []; L = R = null; botN = 0;
+  center = null; lb = []; rb = []; L = R = null; botN = 0; speaking = new Set();
   scores = { S: 0, W: 0, N: 0, E: 0 };
-
   $('roomBadge').textContent = 'No room yet';
   $('game').classList.add('hidden'); $('roomPanel').classList.add('hidden');
-  $('lobby').classList.remove('hidden'); $('homeBox').classList.remove('hidden');
+  $('lobby').classList.remove('hidden');
   window.history.replaceState({}, document.title, window.location.pathname);
-  refresh();
+  initProfile(); refresh();
   if (message) toast(message);
 }
-$('leaveBtn').onclick = () => leaveToHome();
-$('hubBtn').onclick = () => leaveToHome();
+function leaveOrConfirm() {
+  if (roomCode || !gameHidden()) ask('Leave and go back to the main menu?', 'Leave', () => leaveToHome());
+  else leaveToHome();
+}
+$('leaveBtn').onclick = leaveOrConfirm;
+$('hubBtn').onclick = leaveOrConfirm;
+
+$('exitBtn').onclick = () => {
+  if (!roomCode) ask('Leave this game and go back to the main menu?', 'Leave', () => leaveToHome());
+  else if (isHost) ask('Send everyone back to the room? This match will end.', 'Back to room', backToRoom);
+  else ask('Leave the room?', 'Leave', () => leaveToHome());
+};
+
+function backToRoom() {
+  if (!isHost) return;
+  if (!roomCode) return leaveToHome();
+  epoch++; active = false; matchOver = false; roomStatus = 'waiting';
+  lobby.forEach(p => { p.ready = p.isBot || p.clientId === hostClientId; });
+  showLobbyView(); syncRoomState();
+}
+$('roomBtn').onclick = backToRoom;
 
 $('botBtn').onclick = () => {
   if (!isHost) return toast('Only host can add bots');
   if (lobby.length >= 4) return toast('Room is full');
   const freePos = ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
   botN++;
-  lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos: freePos, isHost: false });
+  lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos: freePos, isHost: false, ready: true });
   renderLobby(); syncRoomState();
 };
 
-// The host picks the rules in the lobby. The choice is sent to everyone and used when the match starts.
-$('modeSelect').onchange = () => {
+$('modeSelect').onchange = () => { if (!isHost) return; gameMode = $('modeSelect').value; refresh(); syncRoomState(); };
+$('levelSel').onchange = () => {
   if (!isHost) return;
-  gameMode = $('modeSelect').value;
-  refresh(); syncRoomState();
+  botLevel = $('levelSel').value; localStorage.setItem('xg_level', botLevel); syncRoomState();
+};
+
+$('readyBtn').onclick = () => {
+  const me = lobby.find(p => p.clientId === myClientId);
+  if (!me || !roomSubscription || isHost) return;
+  me.ready = !me.ready; renderLobby();
+  roomSubscription.send({ type: 'broadcast', event: 'READY', payload: { clientId: myClientId, ready: me.ready } });
 };
 
 function toggleMutePlayer(targetClientId) {
-  const audioEl = $('audio_' + targetClientId);
-  if (mutedPlayers.has(targetClientId)) {
-    mutedPlayers.delete(targetClientId);
-    if (audioEl) audioEl.muted = false;
-    toast('Unmuted player');
-  } else {
-    mutedPlayers.add(targetClientId);
-    if (audioEl) audioEl.muted = true;
-    toast('Muted player locally');
-  }
+  const el = $('audio_' + targetClientId);
+  if (mutedPlayers.has(targetClientId)) { mutedPlayers.delete(targetClientId); if (el) el.muted = false; toast('Unmuted player'); }
+  else { mutedPlayers.add(targetClientId); if (el) el.muted = true; toast('Muted player locally'); }
   renderLobby(); refresh();
 }
 
-// Lobby rows are built with DOM calls and textContent only, so a player's name can never run as code
 function renderLobby() {
   const list = $('plist'); list.innerHTML = '';
-
   lobby.forEach((p, i) => {
-    const isPlayerHost = p.clientId === hostClientId;
-    const isMe = p.clientId === myClientId;
-    const isMuted = mutedPlayers.has(p.clientId);
-
-    const row = document.createElement('div'); row.className = 'pl';
+    const isPlayerHost = p.clientId === hostClientId, isMe = p.clientId === myClientId, isMuted = mutedPlayers.has(p.clientId);
+    const row = document.createElement('div'); row.className = 'pl' + (speaking.has(p.clientId) ? ' speaking' : '');
     const nameEl = document.createElement('span'); nameEl.textContent = p.name;
     const right = document.createElement('span');
-
     const kind = document.createElement('span');
     kind.className = 'tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : ''));
     kind.textContent = p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER');
     right.appendChild(kind);
-
+    if (!p.isBot) {
+      right.appendChild(document.createTextNode(' '));
+      const rd = document.createElement('span'); rd.className = 'tag ' + (p.ready ? 'ok' : 'wait'); rd.textContent = p.ready ? 'READY' : 'WAITING';
+      right.appendChild(rd);
+    }
     if (isMe) {
       right.appendChild(document.createTextNode(' '));
-      const you = document.createElement('span'); you.className = 'tag you'; you.textContent = 'YOU';
-      right.appendChild(you);
+      const you = document.createElement('span'); you.className = 'tag you'; you.textContent = 'YOU'; right.appendChild(you);
     }
     if (!isMe && !p.isBot) {
       const mute = document.createElement('button');
@@ -659,81 +632,64 @@ function renderLobby() {
       remove.addEventListener('click', () => { lobby.splice(i, 1); renderLobby(); syncRoomState(); });
       right.appendChild(remove);
     }
-
-    row.appendChild(nameEl); row.appendChild(right);
-    list.appendChild(row);
+    row.appendChild(nameEl); row.appendChild(right); list.appendChild(row);
   });
 
+  const me = lobby.find(p => p.clientId === myClientId);
   $('pc').textContent = lobby.length;
   $('startBtn').classList.toggle('hidden', !isHost);
   $('botBtn').classList.toggle('hidden', !isHost);
   $('guestWaitMsg').classList.toggle('hidden', isHost);
-  $('modeSelect').disabled = !isHost;   // only the host picks the rules
-  $('modeSelect').value = gameMode;     // everyone sees the rules that are really set
+  $('readyBtn').classList.toggle('hidden', isHost);
+  $('readyBtn').textContent = me && me.ready ? '✅ Ready (tap to cancel)' : 'Tap when you are ready';
+  $('readyBtn').className = (me && me.ready ? 'green' : 'blue') + (isHost ? ' hidden' : '');
+  $('modeSelect').disabled = !isHost; $('modeSelect').value = gameMode;
+  $('levelSel').disabled = !isHost; $('levelSel').value = botLevel;
+  $('themeSel').value = themeKey;
 }
 
 $('startBtn').onclick = () => {
   if (!isHost) return toast('Only host can start');
-  gameMode = $('modeSelect').value;     // use exactly what is shown on screen
+  const waiting = lobby.filter(p => !p.isBot && !p.ready);
+  if (waiting.length) return toast(waiting.map(p => p.name).join(', ') + ' not ready yet');
+  gameMode = $('modeSelect').value;
   ['S', 'W', 'N', 'E'].forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) {
-      botN++;
-      lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false });
+      botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false, ready: true });
     }
   });
   roomStatus = 'playing';
   newMatch();
 };
 
-/* ---------- VOICE (LiveKit WebRTC) ---------- */
 async function connectVoice() {
   if (livekitRoom) return true;
   if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
   if (!roomCode) { toast('Join a room first'); return false; }
-
-  const { data, error } = await sb.functions.invoke('livekit-token', {
-    body: { roomCode, clientId: myClientId, name: myNickname }
-  });
-  if (error || !data || !data.token) {
-    console.error('Voice token error', error, data);
-    toast('Voice token error. Check Supabase setup.');
-    return false;
-  }
+  const { data, error } = await sb.functions.invoke('livekit-token', { body: { roomCode, clientId: myClientId, name: myNickname } });
+  if (error || !data || !data.token) { console.error('Voice token error', error, data); toast('Voice token error. Check Supabase setup.'); return false; }
 
   const room = new LivekitClient.Room({
-    adaptiveStream: true,
-    dynacast: true,
-    audioCaptureDefaults: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true
-    }
+    adaptiveStream: true, dynacast: true,
+    audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
   });
-
   room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
     if (track.kind === 'audio') {
       const el = track.attach();
-      el.id = 'audio_' + participant.identity;
-      el.autoplay = true;
-      el.playsInline = true;
-
-      if (mutedPlayers.has(participant.identity)) {
-        el.muted = true;
-      }
-
+      el.id = 'audio_' + participant.identity; el.autoplay = true; el.playsInline = true;
+      if (mutedPlayers.has(participant.identity)) el.muted = true;
       $('audioBox').appendChild(el);
       if (speakerEnabled) routeToSpeaker(el);
     }
   });
-
-  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
-    track.detach().forEach(el => el.remove());
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => { track.detach().forEach(el => el.remove()); });
+  room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, sp => {
+    speaking = new Set(sp.map(s => s.identity));
+    if (gameHidden()) renderLobby(); else renderOutsideSeats();
   });
-
   room.on(LivekitClient.RoomEvent.Disconnected, () => {
     if (livekitRoom === room) { livekitRoom = null; micActive = false; updateMicUI(false, true); }
   });
-
   await room.connect(LIVEKIT_URL, data.token);
   try { await room.startAudio(); } catch (e) { console.log('Audio autoplay prompt needed'); }
   livekitRoom = room;
@@ -751,27 +707,18 @@ async function routeToSpeaker(audioEl) {
 }
 
 $('speakerBtn').onclick = async () => {
-  // Most phone browsers can't switch the audio output from a web page, so say so instead of pretending
   const supported = typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
-  if (!supported) {
-    toast("This browser can't switch speakers. Use your volume buttons or headphones.");
-    return;
-  }
+  if (!supported) return toast("This browser can't switch speakers. Use your volume buttons or headphones.");
   speakerEnabled = !speakerEnabled;
   const btn = $('speakerBtn');
   btn.textContent = speakerEnabled ? '🔊 Speaker: ON' : '🔊 Speaker: OFF';
   btn.className = speakerEnabled ? 'green' : 'blue';
-
-  if (speakerEnabled) {
-    document.querySelectorAll('#audioBox audio').forEach(el => routeToSpeaker(el));
-    toast('Speaker requested');
-  } else {
-    toast('Speaker off');
-  }
+  if (speakerEnabled) { document.querySelectorAll('#audioBox audio').forEach(el => routeToSpeaker(el)); toast('Speaker requested'); }
+  else toast('Speaker off');
 };
 
 function disconnectVoice() {
-  const r = livekitRoom; livekitRoom = null;
+  const r = livekitRoom; livekitRoom = null; speaking = new Set();
   if (r) { try { r.disconnect(); } catch (e) {} }
   $('audioBox').innerHTML = '';
   if (micActive) { micActive = false; updateMicUI(false, true); }
@@ -788,73 +735,45 @@ $('micBtn').onclick = async () => {
       micActive = true;
     } else if (livekitRoom) {
       await livekitRoom.localParticipant.setMicrophoneEnabled(false);
-      // Release the mic fully so Safari stops showing it as in use
-      livekitRoom.localParticipant.audioTrackPublications.forEach(pub => {
-        if (pub.track) pub.track.stop();
-      });
+      livekitRoom.localParticipant.audioTrackPublications.forEach(pub => { if (pub.track) pub.track.stop(); });
       micActive = false;
     }
     updateMicUI(micActive);
   } catch (e) {
-    console.error('Voice error', e);
-    toast('Mic blocked or voice failed. Check mic permission.');
-  } finally {
-    $('micBtn').disabled = false;
-  }
+    console.error('Voice error', e); toast('Mic blocked or voice failed. Check mic permission.');
+  } finally { $('micBtn').disabled = false; }
 };
 
 function updateMicUI(on, silent) {
   const btn = $('micBtn'), dot = $('micDot');
-  if (on) {
-    btn.textContent = 'Mute Mic';
-    btn.className = 'red';
-    dot.classList.add('active');
-    if (!silent) toast('Microphone ON');
-  } else {
-    btn.textContent = 'Enable Mic';
-    btn.className = 'blue';
-    dot.classList.remove('active');
-    if (!silent) toast('Microphone OFF');
-  }
+  if (on) { btn.textContent = 'Mute Mic'; btn.className = 'red'; dot.classList.add('active'); if (!silent) toast('Microphone ON'); }
+  else { btn.textContent = 'Enable Mic'; btn.className = 'blue'; dot.classList.remove('active'); if (!silent) toast('Microphone OFF'); }
 }
 
-/* ---------- RESUME AFTER A REFRESH, SLEEP, OR SIGNAL DROP ---------- */
 async function resumeSession() {
   const s = store.get(SESSION_KEY);
   if (!s || !s.roomCode || !myNickname) return false;
   if (Date.now() - s.savedAt > MAX_SESSION_AGE) { clearSession(); return false; }
-
   const { data } = await sb.from('game_rooms').select('updated_at').eq('room_code', s.roomCode).maybeSingle();
   if (!data || Date.now() - Date.parse(data.updated_at) > MAX_SESSION_AGE) { clearSession(); return false; }
-
-  // joinRoomByCode already handles both roles: a host restores the saved table, a guest picks up where they were
   await joinRoomByCode(s.roomCode);
   return true;
 }
-
 async function reconnect() {
   if (!roomCode) return;
-  // The live channel can silently die while the phone sleeps
   if (!roomSubscription || roomSubscription.state !== 'joined') listenToRoom();
-  if (isHost) syncRoomState();       // re-broadcast the table so guests catch up
-  else await fetchLatestState();     // pull anything missed
+  if (isHost) syncRoomState(); else await fetchLatestState();
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reconnect(); });
 window.addEventListener('online', reconnect);
 
 window.addEventListener('load', async () => {
-  initProfile();
-  const params = new URLSearchParams(window.location.search);
-  const roomParam = (params.get('room') || '').toUpperCase();
-  if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) {
-    $('codeIn').value = roomParam;
-    joinRoomByCode(roomParam);
-  } else if (myNickname) {
-    await resumeSession();
-  }
+  initProfile(); setTheme(themeKey);
+  const roomParam = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
+  if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) { $('codeIn').value = roomParam; joinRoomByCode(roomParam); }
+  else if (myNickname) await resumeSession();
 });
 
-/* ---------- GAME CORE ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -870,19 +789,18 @@ function newMatch() {
 
 function newHand() {
   epoch++;
+  passMiss = { S: new Set(), W: new Set(), N: new Set(), E: new Set() };
   const deck = fullSet();
   players = ['S', 'W', 'N', 'E'].map((pos, i) => {
-    const playerObj = lobby.find(l => l.pos === pos) || { clientId: 'bot_' + (i + 1), name: 'XBot-' + (i + 1), isBot: true };
-    return { clientId: playerObj.clientId, name: playerObj.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: playerObj.isBot };
+    const o = lobby.find(l => l.pos === pos) || { clientId: 'bot_' + (i + 1), name: 'XBot-' + (i + 1), isBot: true };
+    return { clientId: o.clientId, name: o.name, pos, hand: deck.slice(i * 7, i * 7 + 7), ai: o.isBot };
   });
-  center = null; L = R = null; lb = []; rb = []; passes = 0; active = true; $('againBtn').classList.add('hidden');
+  center = null; L = R = null; lb = []; rb = []; passes = 0; active = true;
   needD6 = lastWin === null;
   if (needD6) {
     turn = players.find(p => p.hand.some(t => t.a === 6 && t.b === 6)).pos;
     log(byPos(turn).name + ' holds [6|6] and poses first.');
-  } else {
-    turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.');
-  }
+  } else { turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.'); }
   refresh(); syncRoomState(); maybeAi();
 }
 
@@ -893,9 +811,7 @@ function isValid(t) {
 
 function play(i, side) {
   if (!isHost) {
-    if (roomSubscription) {
-      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PLAY', index: i, side, clientId: myClientId } });
-    }
+    if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PLAY', index: i, side, clientId: myClientId } });
     return;
   }
   const p = byPos(turn), t = p.hand.splice(i, 1)[0]; passes = 0;
@@ -910,12 +826,12 @@ function play(i, side) {
 
 function pass() {
   if (!isHost) {
-    if (roomSubscription) {
-      roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PASS', clientId: myClientId } });
-    }
+    if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'ACTION_MOVE', payload: { type: 'PASS', clientId: myClientId } });
     return;
   }
-  const p = byPos(turn); passes++; knock(); log('✋ ' + p.name + ' knocked (passed).');
+  const p = byPos(turn); passes++; knock();
+  if (center) { passMiss[p.pos].add(L); passMiss[p.pos].add(R); }
+  log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
   next();
 }
@@ -925,7 +841,7 @@ function next() { turn = NEXT[turn]; refresh(); syncRoomState(); maybeAi(); }
 function maybeAi() {
   if (!isHost) return;
   const e = epoch, cur = byPos(turn);
-  if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, 900);
+  if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, botLevel === 'hard' ? 700 : 900);
 }
 
 function aiTurn() {
@@ -934,38 +850,59 @@ function aiTurn() {
   const opts = [];
   p.hand.forEach((t, i) => {
     if (!isValid(t)) return;
-    if (!center) opts.push({ i, side: 'first', w: t.a + t.b });
+    if (!center) opts.push({ i, side: 'first', t });
     else {
-      if (t.a === L || t.b === L) opts.push({ i, side: 'left', w: t.a + t.b });
-      if (t.a === R || t.b === R) opts.push({ i, side: 'right', w: t.a + t.b });
+      if (t.a === L || t.b === L) opts.push({ i, side: 'left', t });
+      if (t.a === R || t.b === R) opts.push({ i, side: 'right', t });
     }
   });
   if (!opts.length) return pass();
-  opts.sort((x, y) => y.w - x.w + (Math.random() - .5) * 3);
-  play(opts[0].i, opts[0].side);
+  let best;
+  if (botLevel === 'easy') best = opts[Math.floor(Math.random() * opts.length)];
+  else if (botLevel === 'hard') best = hardPick(p, opts);
+  else { opts.forEach(o => { o.s = o.t.a + o.t.b + (Math.random() - .5) * 3; }); best = opts.sort((x, y) => y.s - x.s)[0]; }
+  play(best.i, best.side);
+}
+
+function hardPick(p, opts) {
+  const mate = gameMode === 'partners' ? MATE[p.pos] : null;
+  let bestScore = -1e9, best = opts[0];
+  opts.forEach(o => {
+    const t = o.t; let nl = L, nr = R;
+    if (o.side === 'first') { nl = t.a; nr = t.b; }
+    else if (o.side === 'left') nl = t.a === L ? t.b : t.a;
+    else nr = t.a === R ? t.b : t.a;
+    const rest = p.hand.filter((_, k) => k !== o.i);
+    let s = (t.a + t.b) * 1.2 + (t.d ? 2 : 0);
+    s += rest.filter(x => x.a === nl || x.b === nl || x.a === nr || x.b === nr).length * 2.5;
+    ['S', 'W', 'N', 'E'].forEach(q => {
+      if (q === p.pos) return;
+      const m = passMiss[q], hit = (m.has(nl) ? 1 : 0) + (m.has(nr) ? 1 : 0);
+      s += (q === mate ? -5 : 4) * hit;
+    });
+    if (!rest.length) s += 100;
+    s += Math.random();
+    if (s > bestScore) { bestScore = s; best = o; }
+  });
+  return best;
 }
 
 function blocked() {
-  let pScores = {};
+  const pScores = {};
   players.forEach(p => { pScores[p.pos] = p.hand.reduce((a, t) => a + t.a + t.b, 0); });
+  const tie = () => {
+    active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch; syncRoomState();
+    setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
+  };
   if (gameMode === 'partners') {
     const ns = pScores.N + pScores.S, we = pScores.W + pScores.E;
     if (ns < we) win('S', 'Blocked! N/S win (' + ns + ' vs ' + we + ' pips)');
     else if (we < ns) win('E', 'Blocked! E/W win (' + we + ' vs ' + ns + ' pips)');
-    else {
-      active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
-      syncRoomState();
-      setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
-    }
+    else tie();
   } else {
-    let sorted = Object.keys(pScores).sort((a, b) => pScores[a] - pScores[b]);
-    if (pScores[sorted[0]] < pScores[sorted[1]]) {
-      win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins (' + pScores[sorted[0]] + ' pips)');
-    } else {
-      active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch;
-      syncRoomState();
-      setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
-    }
+    const sorted = Object.keys(pScores).sort((a, b) => pScores[a] - pScores[b]);
+    if (pScores[sorted[0]] < pScores[sorted[1]]) win(sorted[0], 'Blocked! ' + byPos(sorted[0]).name + ' wins (' + pScores[sorted[0]] + ' pips)');
+    else tie();
   }
 }
 
@@ -992,7 +929,6 @@ function win(pos, why) {
   setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
 }
 
-/* ---------- HAND UI ---------- */
 let selIdx = null;
 function selectTile(i) {
   if (!active || turn !== mySeatPos) return toast('Not your turn');
@@ -1029,7 +965,6 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- CANVAS BOARD ENGINE (DIRECTIONAL PIP ORIENTATION) ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -1039,108 +974,45 @@ function rr(c, x, y, w, h, r) {
   c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
 }
 function pips(c, x, y, w, h, n, s) {
-  c.fillStyle = '#111827';
-  PIPS[n].forEach(i => {
-    c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.8 * s, 0, 7); c.fill();
-  });
+  c.fillStyle = TH().pip;
+  PIPS[n].forEach(i => { c.beginPath(); c.arc(x + w * (0.2 + 0.3 * (i % 3)), y + h * (0.2 + 0.3 * ((i / 3) | 0)), 1.8 * s, 0, 7); c.fill(); });
 }
 
 function drawTile(c, x, y, a, b, vert, s, flip) {
   s = s || 1;
-  const w = vert ? 20 * s : 40 * s;
-  const h = vert ? 40 * s : 20 * s;
-
-  c.save();
-  c.translate(x, y);
-
-  c.shadowColor = 'rgba(0,0,0,0.35)';
-  c.shadowBlur = 4 * s;
-  c.shadowOffsetY = 2 * s;
-
-  rr(c, -w / 2, -h / 2, w, h, 4 * s);
-  c.fillStyle = '#ffffff';
-  c.fill();
-
-  c.shadowColor = 'transparent';
-  c.lineWidth = 1;
-  c.strokeStyle = '#cbd5e1';
+  const w = vert ? 20 * s : 40 * s, h = vert ? 40 * s : 20 * s, th = TH();
+  c.save(); c.translate(x, y);
+  c.shadowColor = th.glow || 'rgba(0,0,0,0.35)'; c.shadowBlur = (th.glow ? 9 : 4) * s; c.shadowOffsetY = th.glow ? 0 : 2 * s;
+  rr(c, -w / 2, -h / 2, w, h, 4 * s); c.fillStyle = th.tile; c.fill();
+  c.shadowColor = 'transparent'; c.lineWidth = 1; c.strokeStyle = th.edge; c.stroke();
+  c.strokeStyle = th.line; c.beginPath();
+  if (vert) { c.moveTo(-w / 2 + 2 * s, 0); c.lineTo(w / 2 - 2 * s, 0); }
+  else { c.moveTo(0, -h / 2 + 2 * s); c.lineTo(0, h / 2 - 2 * s); }
   c.stroke();
-
-  c.strokeStyle = '#94a3b8';
-  c.beginPath();
-  if (vert) {
-    c.moveTo(-w / 2 + 2 * s, 0);
-    c.lineTo(w / 2 - 2 * s, 0);
-  } else {
-    c.moveTo(0, -h / 2 + 2 * s);
-    c.lineTo(0, h / 2 - 2 * s);
-  }
-  c.stroke();
-
-  // Flip pip order so 'a' always touches the preceding tile
-  const firstPip = flip ? b : a;
-  const secondPip = flip ? a : b;
-
-  if (vert) {
-    pips(c, -w / 2, -h / 2, w, h / 2, firstPip, s);
-    pips(c, -w / 2, 0, w, h / 2, secondPip, s);
-  } else {
-    pips(c, -w / 2, -h / 2, w / 2, h, firstPip, s);
-    pips(c, 0, -h / 2, w / 2, h, secondPip, s);
-  }
-
+  const first = flip ? b : a, second = flip ? a : b;
+  if (vert) { pips(c, -w / 2, -h / 2, w, h / 2, first, s); pips(c, -w / 2, 0, w, h / 2, second, s); }
+  else { pips(c, -w / 2, -h / 2, w / 2, h, first, s); pips(c, 0, -h / 2, w / 2, h, second, s); }
   c.restore();
 }
 
-/* Dynamic Snake Layout Engine with Fixed Vertical Row Clearance */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0;
-  const out = [];
-  const limitR = W - MARGIN - 12;
-  const limitL = MARGIN + 12;
-
-  // Vertical step clearance accounting for vertical tile length (40px) + row padding (24px)
-  const verticalStep = 64;
-
+  const out = [], limitR = W - MARGIN - 12, limitL = MARGIN + 12, verticalStep = 64;
   tiles.forEach(t => {
-    let isVert = t.d;
-    let tw = isVert ? 20 : 40;
-
-    // Check if standard tile exceeds board boundary
+    let isVert = t.d, tw = isVert ? 20 : 40;
     const willOverflow = dir > 0 ? (x + dir * tw > limitR) : (x + dir * tw < limitL);
-
     if (willOverflow) {
       if (t.d) {
-        // Double tile at corner (already vertical)
-        const cx = x + dir * 10;
-        const cy = y;
+        const cx = x + dir * 10, cy = y;
         out.push({ t, cx, cy, vert: true, flip: false });
-
-        y += rowDir * verticalStep;
-        dir = -dir;
-        x = cx + dir * 10;
+        y += rowDir * verticalStep; dir = -dir; x = cx + dir * 10;
       } else {
-        // Non-double tile turning corner vertically
-        isVert = true;
-        tw = 20;
-        const cx = x + dir * 10;
-        const cy = y + rowDir * (verticalStep / 2);
-        const flip = rowDir < 0; // Flip when going upward
-
+        const cx = x + dir * 10, cy = y + rowDir * (verticalStep / 2), flip = rowDir < 0;
         out.push({ t, cx, cy, vert: true, flip });
-
-        y += rowDir * verticalStep;
-        dir = -dir;
-        x = cx + dir * 10;
+        y += rowDir * verticalStep; dir = -dir; x = cx + dir * 10;
       }
     } else {
-      // Normal row placement
-      const cx = x + dir * (tw / 2);
-      const cy = y;
-
-      // When moving LEFT (dir < 0), flip horizontal non-double tiles so 'a' touches inner end
-      const flip = !isVert && (dir < 0);
-
+      const cx = x + dir * (tw / 2), cy = y, flip = !isVert && (dir < 0);
       out.push({ t, cx, cy, vert: isVert, flip });
       x += dir * tw;
     }
@@ -1159,95 +1031,68 @@ function endTag(x, y, dir, txt) {
   ctx.fillText(txt, cx, y + 0.5);
 }
 
-// Seat cards are built with DOM calls and textContent only, so a player's name can never run as code
 function renderOutsideSeats() {
-  const seatGrid = $('seatOverlayOutside');
-  seatGrid.innerHTML = '';
-
+  const grid = $('seatOverlayOutside'); grid.innerHTML = '';
   ['S', 'W', 'N', 'E'].forEach(pos => {
     const p = byPos(pos); if (!p) return;
-    const isMuted = mutedPlayers.has(p.clientId);
-    const isMe = p.clientId === myClientId;
-    const name = String(p.name || '?');
-
+    const isMuted = mutedPlayers.has(p.clientId), isMe = p.clientId === myClientId, name = String(p.name || '?');
     const card = document.createElement('div');
-    card.className = 'seat-card-out' + (pos === turn && active ? ' active' : '');
-
-    const avatar = document.createElement('div');
-    avatar.className = 'p-avatar' + (p.ai ? ' bot' : '');
-    avatar.textContent = name.charAt(0).toUpperCase();
-
-    const nameEl = document.createElement('div');
-    nameEl.className = 'p-name';
-    nameEl.textContent = name + (pos === mySeatPos ? ' ★' : '');
-
-    const tiles = document.createElement('div');
-    tiles.className = 'p-tiles';
-    tiles.textContent = (p.hand ? p.hand.length : 0) + ' tiles';
-
+    card.className = 'seat-card-out' + (pos === turn && active ? ' active' : '') + (speaking.has(p.clientId) ? ' speaking' : '');
+    const avatar = document.createElement('div'); avatar.className = 'p-avatar' + (p.ai ? ' bot' : ''); avatar.textContent = name.charAt(0).toUpperCase();
+    const nameEl = document.createElement('div'); nameEl.className = 'p-name'; nameEl.textContent = name + (pos === mySeatPos ? ' ★' : '');
+    const tiles = document.createElement('div'); tiles.className = 'p-tiles'; tiles.textContent = (p.hand ? p.hand.length : 0) + ' tiles';
     card.appendChild(avatar); card.appendChild(nameEl); card.appendChild(tiles);
-
     if (!isMe && !p.ai) {
       const mute = document.createElement('button');
-      mute.className = 'seat-mute-btn' + (isMuted ? ' muted' : '');
-      mute.textContent = isMuted ? 'Unmute' : 'Mute';
+      mute.className = 'seat-mute-btn' + (isMuted ? ' muted' : ''); mute.textContent = isMuted ? 'Unmute' : 'Mute';
       mute.addEventListener('click', () => toggleMutePlayer(p.clientId));
       card.appendChild(mute);
     }
-    seatGrid.appendChild(card);
+    grid.appendChild(card);
   });
 }
 
 function drawBoard() {
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
-
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#155e2b');
-  g.addColorStop(1, '#0f441f');
+  g.addColorStop(0, TH().top); g.addColorStop(1, TH().bot);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
   renderOutsideSeats();
-
   if (!center) {
     ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(needD6 ? 'Pose [6|6] to start the hand' : 'Table empty. Pose any tile', W / 2, CY);
     return;
   }
-
   const cx = W / 2, cy = CY, cw = center.d ? 20 : 40;
-  const lay = layoutChain(lb, cx - cw / 2, cy, -1, -1);
-  const ray = layoutChain(rb, cx + cw / 2, cy, 1, 1);
-
+  const lay = layoutChain(lb, cx - cw / 2, cy, -1, -1), ray = layoutChain(rb, cx + cw / 2, cy, 1, 1);
   drawTile(ctx, cx, cy, center.a, center.b, center.d, 1, false);
-
   lay.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1, o.flip));
   ray.out.forEach(o => drawTile(ctx, o.cx, o.cy, o.t.a, o.t.b, o.vert, 1, o.flip));
-
-  endTag(lay.x, lay.y, lay.dir, 'L ' + L);
-  endTag(ray.x, ray.y, ray.dir, 'R ' + R);
+  endTag(lay.x, lay.y, lay.dir, 'L ' + L); endTag(ray.x, ray.y, ray.dir, 'R ' + R);
 }
 
-/* ---------- REFRESH ---------- */
 function refresh() {
-  $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Practice';
-
+  $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Mode';
+  $('statusPanel').classList.toggle('hidden', !roomCode && gameHidden());
+  $('voiceBar').classList.toggle('hidden', !roomCode);
+  if (gameHidden()) return;
+  const lvl = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
   if (gameMode === 'partners') {
     $('scoreBoxL').innerHTML = 'N/S<span class="pill" id="sNS">' + sNS + '</span>';
     $('scoreBoxR').innerHTML = 'E/W<span class="pill" id="sWE">' + sWE + '</span>';
-    $('modeLbl').textContent = 'Partners (2v2)';
+    $('modeLbl').textContent = 'Partners (2v2) · Bots: ' + lvl;
   } else {
     $('scoreBoxL').textContent = 'S:' + scores.S + ' W:' + scores.W;
     $('scoreBoxR').textContent = 'N:' + scores.N + ' E:' + scores.E;
-    $('modeLbl').textContent = 'Cut Throat (FFA)';
+    $('modeLbl').textContent = 'Cut Throat (FFA) · Bots: ' + lvl;
   }
-
   $('handLbl').textContent = 'Hand ' + handNo;
-  const currPlayer = byPos(turn);
-  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (currPlayer ? currPlayer.name : 'Waiting...'));
+  const cur = byPos(turn);
+  $('turnLbl').textContent = matchOver ? 'Match over' : (turn === mySeatPos && active ? 'Your turn' : 'Turn: ' + (cur ? cur.name : 'Waiting...'));
   selIdx = null; drawBoard(); renderHand();
   $('againBtn').classList.toggle('hidden', !(matchOver && isHost));
+  $('roomBtn').classList.toggle('hidden', !(matchOver && isHost && roomCode));
 }
-
 $('againBtn').onclick = () => { if (isHost) newMatch(); };
 </script>
 </body>
