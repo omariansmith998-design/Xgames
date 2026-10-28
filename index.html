@@ -12,19 +12,21 @@ body{margin:0;padding:8px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,
 .card{width:100%;max-width:460px;background:#141724;border:1px solid #23273a;border-radius:14px;padding:10px}
 .row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.hidden{display:none!important}
 .logo{font-weight:900;letter-spacing:.04em;color:#818cf8}.logo b{color:#f43f5e}
-button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:10px 14px;cursor:pointer;background:#334155;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+button{font:inherit;font-weight:700;font-size:13px;color:#fff;border:0;border-radius:99px;padding:8px 14px;min-height:44px;cursor:pointer;background:#334155}
 button:disabled{opacity:.5}
 button.blue{background:#2563eb}button.green{background:#059669}button.purple{background:#4f46e5}button.gold{background:#a16207}button.red{background:#dc2626}
 button.big{width:100%;font-size:17px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 4px 14px rgba(239,68,68,.35)}
-input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0;min-height:44px}
+input{width:100%;font:inherit;font-size:14px;color:#fff;background:#0b0c12;border:1px solid #2a3045;border-radius:99px;padding:10px 14px;outline:0}
 input:focus{border-color:#6366f1}
+select{width:100%;font:inherit;font-size:12px;color:#fff;background:#1e2433;border:1px solid #334155;border-radius:8px;padding:6px 8px}
+select:disabled{opacity:.6}
 h2{margin:0;font-size:13px;color:#a5b4fc}
 .stack{display:flex;flex-direction:column;gap:10px}
 .panel{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px}
-.pl{display:flex;justify-content:space-between;align-items:center;padding:8px 6px;border-bottom:1px solid #1e2433;font-size:14px;border-radius:8px}
+.pl{display:flex;justify-content:space-between;align-items:center;padding:6px 4px;border-bottom:1px solid #1e2433;font-size:14px;border-radius:8px}
 .pl.speaking{box-shadow:0 0 0 2px #22c55e;background:#0f2a1c}
 .tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;background:#f59e0b;color:#000}
-.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}.tag.you{background:#059669;color:#fff}.tag.ok{background:#16a34a;color:#fff}.tag.wait{background:#475569;color:#e2e8f0}.tag.spec{background:#a855f7;color:#fff}
+.tag.bot{background:#581c87;color:#e9d5ff}.tag.host{background:#0284c7;color:#fff}.tag.you{background:#059669;color:#fff}.tag.ok{background:#16a34a;color:#fff}.tag.wait{background:#475569;color:#e2e8f0}
 .status{font-size:11px;color:#94a3b8}.status b{color:#fbbf24}
 .score{display:flex;justify-content:space-between;align-items:center;background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
@@ -40,7 +42,7 @@ canvas#board{display:block;width:100%;height:auto}
 .lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .codeBig{font-size:28px;font-weight:900;letter-spacing:.12em;text-align:center;color:#fbbf24;padding:4px 0}
-#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:150;max-width:90vw;text-align:center}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1e293b;border:1px solid #475569;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw;text-align:center}
 #toast.on{opacity:1}
 .voice-bar{display:flex;align-items:center;justify-content:space-between;background:#1e1b4b;padding:6px 12px;border-radius:8px;border:1px solid #312e81}
 .voice-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#a5b4fc}
@@ -49,46 +51,47 @@ canvas#board{display:block;width:100%;height:auto}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .gamechips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
-.chip{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8;cursor:pointer}
+.chip{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8}
 .chip.on{border-color:#fbbf24;color:#fff;background:#3a2a14}
 .chip small{display:block;font-size:9px;color:#64748b;margin-top:2px}
 .opt{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;color:#a5b4fc;font-weight:700}
-.arcade-btn{width:100%;font:inherit;font-size:12px;font-weight:700;color:#fff;background:#0b0c12;border:1px solid #334155;border-radius:99px;padding:8px 14px;cursor:pointer;text-align:center;min-height:40px}
-.arcade-btn:hover{border-color:#6366f1}
 .seat-grid-outside{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#0b0c12;border:1px solid #23273a;border-radius:10px;padding:6px}
-.seat-card-out{background:#141724;border:1px solid #282e42;border-radius:8px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;cursor:pointer}
+.seat-card-out{background:#141724;border:1px solid #282e42;border-radius:8px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
 .seat-card-out.active{border-color:#facc15;background:#3a2a14}
 .seat-card-out.speaking{box-shadow:0 0 0 2px #22c55e,0 0 10px #22c55e}
 .seat-card-out .p-name{font-size:10px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .seat-card-out .p-tiles{font-size:9px;font-weight:700;color:#fbbf24}
-.seat-card-out .p-avatar{width:22px;height:22px;border-radius:50%;background:#b45309;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;color:#fff}
+.seat-card-out .p-avatar{width:18px;height:18px;border-radius:50%;background:#b45309;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:#fff}
 .seat-card-out .p-avatar.bot{background:#581c87}
-
-/* ---------- FLOATING CHAT DRAWER ---------- */
-#chatFloatingBtn{position:fixed;bottom:16px;right:16px;z-index:90;padding:12px 18px;border-radius:99px;background:#2563eb;box-shadow:0 6px 20px rgba(37,99,235,0.45);font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px}
-#chatBadge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:10px;font-weight:900;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #07080c}
-#chatDrawer{position:fixed;bottom:0;left:0;right:0;max-width:460px;margin:0 auto;height:340px;background:#0d0f17;border-top:2px solid #312e81;border-radius:18px 18px 0 0;z-index:100;display:flex;flex-direction:column;padding:12px;box-shadow:0 -10px 30px rgba(0,0,0,0.8);transition:transform .25s ease-in-out}
-#chatDrawer.closed{transform:translateY(100%)}
-.chat-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid #1e2433}
-.chat-body{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:6px;font-size:12px}
-.chat-msg{background:#181c2b;border-radius:8px;padding:6px 10px;line-height:1.35;word-break:break-word}
-.chat-msg b{color:#818cf8;font-size:11px}
-
-#confirm{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.seat-mute-btn{background:#334155;border:0;color:#fff;border-radius:4px;padding:1px 4px;font-size:8px;cursor:pointer;margin-top:2px}
+.seat-mute-btn.muted{background:#dc2626}
+#confirm{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
 .cbox{background:#141724;border:1px solid #334155;border-radius:16px;padding:18px;max-width:320px;width:100%;text-align:center}
 .cbox p{margin:0 0 14px;font-size:14px;line-height:1.4}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:300;padding:20px}
+input{-webkit-user-select:text;user-select:text}
+.tag.watch{background:#0369a1;color:#fff}
+.arcade-btn{width:100%;font:inherit;font-size:12px;font-weight:700;color:#fff;background:#0b0c12;border:1px solid #334155;border-radius:99px;padding:8px 14px;cursor:pointer;text-align:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
 .modal-box{background:#141724;border:1px solid #334155;border-radius:16px;padding:14px;max-width:300px;width:100%;display:flex;flex-direction:column;gap:8px}
 .modal-title{font-size:13px;font-weight:800;color:#fbbf24;text-align:center;margin-bottom:4px}
-.modal-option{padding:10px;border-radius:10px;background:#0b0c12;border:1px solid #23273a;text-align:center;font-weight:700;font-size:13px;cursor:pointer;color:#fff}
+.modal-option{padding:12px;min-height:44px;border-radius:10px;background:#0b0c12;border:1px solid #23273a;text-align:center;font-weight:700;font-size:13px;cursor:pointer;color:#fff}
 .modal-option.selected{border-color:#fbbf24;background:#3a2a14;color:#fbbf24}
+#chatFab{position:fixed;right:14px;bottom:18px;width:56px;height:56px;border-radius:50%;font-size:24px;padding:0;background:#4f46e5;box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:60}
+#chatBadge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;font-size:11px;line-height:20px;padding:0 5px;color:#fff}
+#chatSheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:460px;height:58vh;background:#141724;border:1px solid #334155;border-radius:16px 16px 0 0;z-index:150;display:flex;flex-direction:column}
+.chat-head{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid #23273a;font-size:14px}
+#chatList{flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+.msg{max-width:85%;padding:6px 10px;border-radius:12px;background:#1e2433;font-size:13px;align-self:flex-start;word-break:break-word;-webkit-user-select:text;user-select:text}
+.msg.me{align-self:flex-end;background:#312e81}
+.msg b{display:block;font-size:10px;color:#a5b4fc;margin-bottom:2px}
+.chat-in{display:flex;gap:6px;padding:8px;border-top:1px solid #23273a}
 </style>
 </head>
 <body>
 
 <div class="card row between">
   <div class="logo">XGAMES <b>ARCADE</b></div>
-  <button class="blue" id="hubBtn">🏠 Menu</button>
+  <div class="row" style="gap:6px"><button id="sfxBtn" class="blue">🔊 On</button><button class="blue" id="hubBtn">🏠 Menu</button></div>
 </div>
 
 <div class="card stack">
@@ -96,23 +99,20 @@ canvas#board{display:block;width:100%;height:auto}
 
   <div id="voiceBar" class="voice-bar hidden">
     <div class="voice-status"><div id="micDot" class="mic-dot"></div><span>🎙️ Yard Voice</span></div>
-    <div class="row" style="gap:4px">
-      <button id="sfxBtn" class="blue" style="padding:4px 10px;font-size:11px;min-height:32px">🔊 SFX: ON</button>
-      <button id="micBtn" class="blue" style="padding:4px 10px;font-size:11px;min-height:32px">🎙️ Enable Mic</button>
-    </div>
+    <button id="micBtn" class="blue">🎙️ Off</button>
   </div>
 
   <div id="profileBox" class="profile-card hidden">
     <h2>Set Up Your Player Profile</h2>
     <input id="profileNameIn" placeholder="Enter nickname (e.g. Omarian, Tav, Louis)" maxlength="15">
-    <button class="green" id="saveProfileBtn">Save Profile & Continue</button>
+    <button class="green" id="saveProfileBtn">✅ Save & Continue</button>
   </div>
 
   <div id="lobby" class="stack">
     <div id="homeBox" class="stack">
       <div class="row between">
         <h2>Your Nickname: <b id="myNickDisplay" style="color:#fbbf24">Player</b></h2>
-        <button id="editProfileBtn" style="padding:4px 8px;font-size:11px;min-height:32px">Edit Profile</button>
+        <button id="editProfileBtn" style="font-size:11px">✏️ Edit</button>
       </div>
       <button class="big" id="quickBtn">⚡ Quick Play</button>
       <div class="two">
@@ -121,8 +121,8 @@ canvas#board{display:block;width:100%;height:auto}
       </div>
       <div class="lbl" style="margin:0">Quick Play starts right away against bots. Nobody needs to join.</div>
       <div class="two" style="margin-top:4px">
-        <button class="green" id="createBtn">+ Create Room</button>
-        <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">Join</button></div>
+        <button class="green" id="createBtn">➕ Create Room</button>
+        <div class="row" style="gap:4px"><input id="codeIn" placeholder="XG-XXXXX" maxlength="10" style="text-transform:uppercase"><button id="joinBtn">➡ Join</button></div>
       </div>
     </div>
 
@@ -135,20 +135,21 @@ canvas#board{display:block;width:100%;height:auto}
       </div>
       <div class="lbl" style="text-align:left">Game</div>
       <div class="gamechips">
-        <div class="chip on">🁣<br>Dominoes</div>
-        <div class="chip">🎲<br>Ludo<small>coming soon</small></div>
-        <div class="chip">♟️<br>Draughts<small>coming soon</small></div>
+        <div class="chip on"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#fff"/><line x1="12" y1="7" x2="12" y2="17" stroke="#64748b"/><circle cx="7" cy="12" r="1.5" fill="#111"/><circle cx="16" cy="9.8" r="1.3" fill="#111"/><circle cx="18" cy="14" r="1.3" fill="#111"/></svg><br>Dominoes</div>
+        <div class="chip"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#dc2626"/><circle cx="12" cy="12" r="6" fill="none" stroke="#fecaca" stroke-width="1.5"/></svg><br>Draughts<small>coming soon</small></div>
+        <div class="chip"><span style="font-size:26px">🎲</span><br>Ludo<small>coming soon</small></div>
       </div>
       <div class="opt"><span>Rules</span><button class="arcade-btn" id="roomModeBtn">Cut Throat (FFA)</button></div>
       <div class="opt"><span>Bot difficulty</span><button class="arcade-btn" id="roomLevelBtn">Medium</button></div>
       <div class="opt"><span>Your theme</span><button class="arcade-btn" id="roomThemeBtn">Classic</button></div>
       <div class="row between" style="margin:8px 0 4px">
-        <b style="color:#fbbf24;font-size:13px">Room Members (<span id="pc">1</span>/8)</b>
-        <button class="purple" id="botBtn" style="padding:6px 10px;font-size:11px;min-height:32px">🤖 +Bot</button>
+        <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/4)</b>
+        <button class="purple" id="botBtn">🤖 +Bot</button>
       </div>
+      <div class="lbl" style="text-align:left;margin:0 0 4px">Tap a player for options</div>
       <div id="plist"></div>
       <button id="readyBtn" class="blue hidden" style="width:100%;margin-top:8px">Tap when you are ready</button>
-      <button class="green" id="startBtn" style="width:100%;margin-top:10px">Start Yard Dominoes</button>
+      <button class="green" id="startBtn" style="width:100%;margin-top:10px">▶ Start Yard Dominoes</button>
       <div id="guestWaitMsg" class="lbl hidden" style="color:#fbbf24;margin-top:10px">Waiting for the Host to start the match...</div>
       <button id="leaveBtn" style="width:100%;margin-top:10px">🚪 Leave Room</button>
     </div>
@@ -171,31 +172,13 @@ canvas#board{display:block;width:100%;height:auto}
       <div class="lbl" id="turnLbl">Your hand</div>
       <div class="hand" id="hand"></div>
       <div id="endBar" class="two hidden" style="margin-top:8px">
-        <button class="gold" id="goL">Play left (<span id="lv">-</span>)</button>
-        <button class="gold" id="goR">Play right (<span id="rv">-</span>)</button>
+        <button class="gold" id="goL">⬅ Left (<span id="lv">-</span>)</button>
+        <button class="gold" id="goR">Right (<span id="rv">-</span>) ➡</button>
       </div>
-      <button id="passBtn" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">Knock table (pass)</button>
-      <button id="againBtn" class="green hidden" style="width:100%;margin-top:8px">Play another match</button>
+      <button id="passBtn" class="hidden" style="width:100%;margin-top:8px;color:#fcd34d">✋ Knock (pass)</button>
+      <button id="againBtn" class="green hidden" style="width:100%;margin-top:8px">🔁 Play another match</button>
       <button id="roomBtn" class="purple hidden" style="width:100%;margin-top:8px">⬅ Back to room</button>
     </div>
-  </div>
-</div>
-
-<!-- FLOATING CHAT BUTTON & DRAWER -->
-<button id="chatFloatingBtn" onclick="toggleChatDrawer()">
-  <span>💬 Chat</span>
-  <span id="chatBadge" class="hidden">0</span>
-</button>
-
-<div id="chatDrawer" class="closed">
-  <div class="chat-header">
-    <b style="color:#fbbf24;font-size:13px">Table Chat</b>
-    <button onclick="toggleChatDrawer()" style="padding:4px 10px;font-size:11px;min-height:30px">Close</button>
-  </div>
-  <div id="chatBody" class="chat-body"></div>
-  <div class="row" style="gap:6px;margin-top:auto">
-    <input id="chatInput" placeholder="Say something (200 max)" maxlength="200" style="min-height:40px;font-size:13px">
-    <button onclick="sendChatMessage()" class="green" style="min-height:40px;padding:0 16px">Send</button>
   </div>
 </div>
 
@@ -203,17 +186,27 @@ canvas#board{display:block;width:100%;height:auto}
   <div class="two"><button id="cNo">Stay</button><button id="cYes" class="red">Leave</button></div></div></div>
 
 <div id="customModal" class="modal-overlay hidden">
-  <div class="modal-box" id="modalBox">
+  <div class="modal-box">
     <div class="modal-title" id="modalTitle">Select Option</div>
     <div id="modalList" class="stack" style="gap:6px"></div>
-    <button id="modalClose" style="background:#334155;margin-top:4px;min-height:40px">Cancel</button>
+    <button id="modalClose">Cancel</button>
   </div>
+</div>
+
+<button id="chatFab" class="hidden">💬<span id="chatBadge" class="hidden">0</span></button>
+<div id="chatSheet" class="hidden">
+  <div class="chat-head"><b>💬 Room Chat</b><button id="chatClose" style="padding:4px 12px">✕</button></div>
+  <div id="chatList"></div>
+  <div class="chat-in"><input id="chatInput" maxlength="200" placeholder="Say something..."><button id="chatSend" class="green">Send</button></div>
 </div>
 
 <div id="toast"></div>
 <div id="audioBox"></div>
 
 <script>
+/* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
+// The key below is the PUBLIC anon key (safe in the browser). Never put a service_role key,
+// a "sb_secret_" key, or the LiveKit API secret in this file.
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
@@ -221,21 +214,21 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 
 const $ = id => document.getElementById(id);
 
+/* ---------- INPUT SAFETY ---------- */
 const ID_RE = /^p_[a-z0-9]{4,16}$/;
 const stripName = s => String(s || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 15);
 const cleanName = s => stripName(s) || 'Player';
 
 let roomSubscription = null, pollTimer = null, joinRetryTimer = null, livekitRoom = null;
 let roomCode = '', mySeatPos = 'S', micActive = false, sfxEnabled = true;
+let roomMessages = [], unread = 0, chatOpen = false, chatReady = false, chatHits = {};
+const MAX_ROOM = 4;
 let hostTerm = 0, stateVersion = 0, lastApplied = { term: -1, version: -1 };
 let joinConfirmed = false, syncing = false, syncDirty = false;
 let mutedPlayers = new Set(), speaking = new Set(), gameMode = 'cutthroat';
 let scores = { S: 0, W: 0, N: 0, E: 0 };
 let botLevel = localStorage.getItem('xg_level') || 'medium';
 if (!['easy', 'medium', 'hard'].includes(botLevel)) botLevel = 'medium';
-
-/* CHAT STATE */
-let isChatOpen = false, unreadChatCount = 0, chatHistory = [];
 
 let myClientId = localStorage.getItem('xg_perm_client_id');
 if (!myClientId || !ID_RE.test(myClientId)) {
@@ -244,6 +237,7 @@ if (!myClientId || !ID_RE.test(myClientId)) {
 }
 let myNickname = stripName(localStorage.getItem('xg_perm_nickname'));
 
+/* ---------- REFRESH-PROOF SESSION ---------- */
 const SESSION_KEY = 'xg_session_v1';
 const MAX_SESSION_AGE = 6 * 3600 * 1000;
 const store = {
@@ -254,6 +248,7 @@ const store = {
 function saveSession() { store.set(SESSION_KEY, { roomCode, role: isHost ? 'host' : 'guest', savedAt: Date.now() }); }
 function clearSession() { store.del(SESSION_KEY); }
 
+/* ---------- THEMES (each player picks their own) ---------- */
 const THEMES = {
   classic: { n: 'Classic', tile: '#ffffff', edge: '#cbd5e1', line: '#94a3b8', pip: '#111827', top: '#155e2b', bot: '#0f441f', frame: '#3d2314' },
   neon: { n: 'Neon', tile: '#0f172a', edge: '#22d3ee', line: '#22d3ee', pip: '#f472b6', top: '#0b1020', bot: '#05060d', frame: '#312e81', glow: '#22d3ee' },
@@ -266,58 +261,12 @@ function setTheme(k) {
   if (!THEMES[k]) return;
   themeKey = k; localStorage.setItem('xg_theme', k);
   $('wrap').style.borderColor = TH().frame;
-  $('themeBtn').textContent = '🎨 ' + TH().n;
-  renderSettingsButtons();
+  $('themeBtn').textContent = '🎨 ' + TH().n; renderSettingsButtons();
   if (!$('game').classList.contains('hidden')) refresh();
 }
 $('themeBtn').onclick = () => { const ks = Object.keys(THEMES); setTheme(ks[(ks.indexOf(themeKey) + 1) % ks.length]); };
 
-/* ---------- CHAT DRAWER & UNREAD BADGE ---------- */
-function toggleChatDrawer() {
-  const drawer = $('chatDrawer');
-  isChatOpen = !isChatOpen;
-  drawer.classList.toggle('closed', !isChatOpen);
-  if (isChatOpen) {
-    unreadChatCount = 0;
-    const badge = $('chatBadge');
-    badge.textContent = '0';
-    badge.classList.add('hidden');
-    const b = $('chatBody'); b.scrollTop = b.scrollHeight;
-  }
-}
-
-function appendChatMessage(sender, text) {
-  const sanitized = String(text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').slice(0, 200);
-  chatHistory.push({ sender, text: sanitized });
-  if (chatHistory.length > 50) chatHistory.shift();
-
-  const b = $('chatBody');
-  const msgEl = document.createElement('div');
-  msgEl.className = 'chat-msg';
-  msgEl.innerHTML = '<b>' + sender + ':</b> ' + sanitized;
-  b.appendChild(msgEl);
-  b.scrollTop = b.scrollHeight;
-
-  if (!isChatOpen) {
-    unreadChatCount++;
-    const badge = $('chatBadge');
-    badge.textContent = unreadChatCount > 9 ? '9+' : unreadChatCount;
-    badge.classList.remove('hidden');
-  }
-}
-
-function sendChatMessage() {
-  const input = $('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  appendChatMessage(myNickname, text);
-  if (roomSubscription) {
-    roomSubscription.send({ type: 'broadcast', event: 'CHAT_MSG', payload: { sender: myNickname, text } });
-  }
-}
-
-/* ---------- CUSTOM ARCADE MODAL PICKER ---------- */
+/* ---------- ARCADE PICKER (pop-up list) ---------- */
 function openModal(title, items, currentVal, onSelect) {
   $('modalTitle').textContent = title;
   const list = $('modalList'); list.innerHTML = '';
@@ -325,10 +274,7 @@ function openModal(title, items, currentVal, onSelect) {
     const el = document.createElement('div');
     el.className = 'modal-option' + (item.value === currentVal ? ' selected' : '');
     el.textContent = item.label;
-    el.onclick = () => {
-      onSelect(item.value);
-      $('customModal').classList.add('hidden');
-    };
+    el.onclick = () => { $('customModal').classList.add('hidden'); onSelect(item.value); };
     list.appendChild(el);
   });
   $('customModal').classList.remove('hidden');
@@ -338,85 +284,61 @@ $('modalClose').onclick = () => $('customModal').classList.add('hidden');
 function renderSettingsButtons() {
   const modeText = gameMode === 'partners' ? 'Partners (2v2)' : 'Cut Throat (FFA)';
   const levelText = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
-  const themeText = TH().n;
-
-  $('qModeBtn').textContent = modeText;
-  $('qLevelBtn').textContent = levelText;
-  $('roomModeBtn').textContent = modeText;
-  $('roomLevelBtn').textContent = levelText;
-  $('roomThemeBtn').textContent = themeText;
+  $('qModeBtn').textContent = modeText; $('qLevelBtn').textContent = levelText;
+  $('roomModeBtn').textContent = modeText; $('roomLevelBtn').textContent = levelText;
+  $('roomThemeBtn').textContent = TH().n;
 }
-
-$('qModeBtn').onclick = () => {
-  openModal('Select Game Rules', [
-    { value: 'cutthroat', label: 'Cut Throat (FFA)' },
-    { value: 'partners', label: 'Partners (2v2)' }
-  ], gameMode, val => { gameMode = val; renderSettingsButtons(); });
-};
+const MODE_ITEMS = [{ value: 'cutthroat', label: 'Cut Throat (FFA)' }, { value: 'partners', label: 'Partners (2v2)' }];
+const LEVEL_ITEMS = [{ value: 'easy', label: 'Easy' }, { value: 'medium', label: 'Medium' }, { value: 'hard', label: 'Hard' }];
+$('qModeBtn').onclick = () => openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); });
 $('roomModeBtn').onclick = () => {
-  if (!isHost) return toast('Only host can change rules');
-  openModal('Select Game Rules', [
-    { value: 'cutthroat', label: 'Cut Throat (FFA)' },
-    { value: 'partners', label: 'Partners (2v2)' }
-  ], gameMode, val => { gameMode = val; renderSettingsButtons(); syncRoomState(); });
+  if (!isHost) return toast('Only the host can change the rules');
+  openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); syncRoomState(); });
 };
-
-$('qLevelBtn').onclick = () => {
-  openModal('Select Bot Difficulty', [
-    { value: 'easy', label: 'Easy' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'hard', label: 'Hard' }
-  ], botLevel, val => { botLevel = val; localStorage.setItem('xg_level', val); renderSettingsButtons(); });
-};
+$('qLevelBtn').onclick = () => openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); });
 $('roomLevelBtn').onclick = () => {
-  if (!isHost) return toast('Only host can change bot difficulty');
-  openModal('Select Bot Difficulty', [
-    { value: 'easy', label: 'Easy' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'hard', label: 'Hard' }
-  ], botLevel, val => { botLevel = val; localStorage.setItem('xg_level', val); renderSettingsButtons(); syncRoomState(); });
+  if (!isHost) return toast('Only the host can change bot difficulty');
+  openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); syncRoomState(); });
 };
+$('roomThemeBtn').onclick = () => openModal('Select Board Theme', Object.keys(THEMES).map(k => ({ value: k, label: THEMES[k].n })), themeKey, v => setTheme(v));
 
-$('roomThemeBtn').onclick = () => {
-  openModal('Select Board Theme', [
-    { value: 'classic', label: 'Classic' },
-    { value: 'neon', label: 'Neon' },
-    { value: 'wood', label: 'Yard Wood' }
-  ], themeKey, val => setTheme(val));
-};
-
-/* ---------- SOUND EFFECTS & AMBIENT MUSIC ---------- */
+/* ---------- SOUND EFFECTS ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
-let bgOsc = null, bgGain = null;
-
+let bgTimer = null, bgStep = 0;
+const PENTA = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33];
+const BASS = [130.81, 174.61, 196.0, 164.81];
+function bgNote(f, t, d, vol, type) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + 0.05);
+}
 function startAmbientLoop() {
-  if (bgOsc || !sfxEnabled) return;
-  try {
-    if (AC.state === 'suspended') AC.resume();
-    bgOsc = AC.createOscillator(); bgGain = AC.createGain();
-    bgOsc.type = 'sine'; bgOsc.frequency.setValueAtTime(110, AC.currentTime); // Soft ambient chord
-    bgGain.gain.setValueAtTime(0.015, AC.currentTime);
-    bgOsc.connect(bgGain); bgGain.connect(AC.destination); bgOsc.start();
-  } catch (e) {}
+  if (bgTimer || !sfxEnabled) return;
+  bgStep = 0;
+  bgTimer = setInterval(() => {
+    if (!sfxEnabled) return;
+    try {
+      if (AC.state === 'suspended') { AC.resume(); return; }
+      const t = AC.currentTime + 0.05, beat = bgStep % 16, bar = (bgStep >> 4) % 4;
+      if (beat % 4 === 0) bgNote(BASS[bar], t, 1.6, 0.05, 'triangle');
+      if (beat % 2 === 0 || Math.random() < 0.3) bgNote(PENTA[Math.floor(Math.random() * PENTA.length)] * (Math.random() < 0.25 ? 2 : 1), t, 0.9, 0.025, 'sine');
+      bgStep++;
+    } catch (e) {}
+  }, 450);
 }
-
-function stopAmbientLoop() {
-  if (bgGain) { try { bgGain.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + 0.5); } catch (e) {} }
-  setTimeout(() => { if (bgOsc) { try { bgOsc.stop(); } catch (e) {} bgOsc = null; bgGain = null; } }, 500);
-}
-
+function stopAmbientLoop() { clearInterval(bgTimer); bgTimer = null; }
 $('sfxBtn').onclick = () => {
   sfxEnabled = !sfxEnabled;
-  $('sfxBtn').textContent = sfxEnabled ? '🔊 SFX: ON' : '🔇 SFX: OFF';
+  $('sfxBtn').textContent = sfxEnabled ? '🔊 On' : '🔇 Off';
   $('sfxBtn').className = sfxEnabled ? 'blue' : 'red';
-  sfxEnabled ? startAmbientLoop() : stopAmbientLoop();
-  toast(sfxEnabled ? 'Sound & Music Enabled' : 'Sound Effects Muted');
+  if (sfxEnabled) startAmbientLoop(); else stopAmbientLoop();
+  toast(sfxEnabled ? 'Sound and music on' : 'Sound and music off');
 };
-
 function tone(f1, f2, d, type, vol, delay = 0) {
   if (!sfxEnabled) return;
   try {
-    if (AC.state === 'suspended' || AC.state === 'interrupted') AC.resume();
+    if (AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f1, t);
     if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
@@ -433,6 +355,7 @@ function shake() {
   setTimeout(() => w.classList.remove('shake'), 260);
 }
 
+/* ---------- HELPERS ---------- */
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
 const pick = (v, cur) => (v === undefined ? cur : v);
@@ -448,14 +371,16 @@ function ask(msg, yesLabel, fn) {
   $('cNo').onclick = () => $('confirm').classList.add('hidden');
 }
 
+/* ---------- STATE ---------- */
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 const MATE = { S: 'N', N: 'S', W: 'E', E: 'W' };
 let lobby = [], botN = 0, isHost = false, hostClientId = '', roomStatus = 'waiting';
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true;
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
-let passMiss = { S: new Set(), W: new Set(), N: new Set(), E: new Set() };
+let passMiss = { S: new Set(), W: new Set(), N: new Set(), E: new Set() }; // host only: numbers a seat could not follow
 const byPos = p => players.find(x => x.pos === p);
 
+/* ---------- PROFILE ---------- */
 function initProfile() {
   if (!myNickname) { $('homeBox').classList.add('hidden'); $('profileBox').classList.remove('hidden'); }
   else { $('myNickDisplay').textContent = myNickname; $('profileBox').classList.add('hidden'); $('homeBox').classList.remove('hidden'); }
@@ -475,8 +400,9 @@ $('editProfileBtn').onclick = () => {
   $('homeBox').classList.add('hidden'); $('profileBox').classList.remove('hidden');
 };
 
+/* ---------- ROOM SYNC (the host owns the game) ---------- */
 function snapshot() {
-  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, game: 'dominoes', botLevel, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby, chatHistory };
+  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, game: 'dominoes', botLevel, roomMessages, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby };
 }
 
 async function syncRoomState() {
@@ -518,16 +444,17 @@ function applyState(st, force) {
   lb = st.lb || []; rb = st.rb || [];
   passes = pick(st.passes, passes); active = pick(st.active, active); matchOver = pick(st.matchOver, matchOver);
 
-  if (st.chatHistory && Array.isArray(st.chatHistory)) {
-    chatHistory = st.chatHistory;
-    const b = $('chatBody'); b.innerHTML = '';
-    chatHistory.forEach(m => appendChatMessage(m.sender, m.text));
+  if (Array.isArray(st.roomMessages)) {
+    let changed = false;
+    st.roomMessages.forEach(m => { if (validMsg(m) && addMsg(m)) { changed = true; onNewMsg(m); } });
+    if (changed && chatOpen) renderChat();
   }
+  chatReady = true;
 
   if (st.lobby) {
     lobby = st.lobby;
     const me = lobby.find(p => p.clientId === myClientId);
-    if (me) { mySeatPos = me.pos; joinConfirmed = true; clearInterval(joinRetryTimer); }
+    if (me) { mySeatPos = me.pos || null; joinConfirmed = true; clearInterval(joinRetryTimer); }
     else if (joinConfirmed && !isHost) { leaveToHome('The host removed you from the table.'); return; }
     renderLobby();
   }
@@ -563,9 +490,7 @@ function listenToRoom() {
     })
     .on('broadcast', { event: 'JOIN_EVENT' }, ({ payload }) => { if (isHost) handleJoin(payload); })
     .on('broadcast', { event: 'READY' }, ({ payload }) => { if (isHost) handleReady(payload); })
-    .on('broadcast', { event: 'CHAT_MSG' }, ({ payload }) => {
-      if (payload && payload.sender && payload.text) appendChatMessage(payload.sender, payload.text);
-    })
+    .on('broadcast', { event: 'CHAT_MSG' }, ({ payload }) => handleChat(payload))
     .on('broadcast', { event: 'JOIN_DENIED' }, ({ payload }) => {
       if (payload && payload.clientId === myClientId) leaveToHome(payload.reason || 'The host could not seat you.');
     })
@@ -599,13 +524,11 @@ function handleJoin(g) {
   if (!g || typeof g.clientId !== 'string' || !ID_RE.test(g.clientId)) return;
   if (!lobby.some(p => p.clientId === g.clientId)) {
     if (roomStatus === 'playing') return denyJoin(g.clientId, 'That match has already started.');
-    if (lobby.length >= 8) return denyJoin(g.clientId, 'The room is full.');
-    const activeSeats = lobby.filter(p => !p.isSpectator).length;
-    const isSpectator = activeSeats >= 4;
-    const freePos = isSpectator ? 'SPEC' : ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
+    const seat = freeSeat();
+    if (!seat || lobby.length >= MAX_ROOM) return denyJoin(g.clientId, 'The room is full.');
     const name = cleanName(g.name);
-    lobby.push({ clientId: g.clientId, name, isBot: false, pos: freePos, isHost: false, ready: false, isSpectator });
-    renderLobby(); toast(name + (isSpectator ? ' joined as Spectator!' : ' joined the table!'));
+    lobby.push({ clientId: g.clientId, name, isBot: false, pos: seat, isHost: false, ready: false });
+    renderLobby(); toast(name + ' joined the table!');
   }
   syncRoomState();
 }
@@ -637,13 +560,14 @@ function handleMove(mv) {
   }
 }
 
+/* ---------- HOME: QUICK PLAY / CREATE / JOIN ---------- */
 $('quickBtn').onclick = () => {
   if (!myNickname) return initProfile();
   if (AC.state === 'suspended') AC.resume();
   roomCode = ''; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; joinConfirmed = true; roomStatus = 'playing';
   botN = 0;
-  lobby = [{ clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true, ready: true, isSpectator: false }];
-  ['W', 'N', 'E'].forEach(pos => { botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false, ready: true, isSpectator: false }); });
+  lobby = [{ clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true, ready: true }];
+  ['W', 'N', 'E'].forEach(pos => { botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false, ready: true }); });
   $('roomBadge').textContent = 'Quick Play';
   $('homeBox').classList.add('hidden');
   startAmbientLoop();
@@ -653,12 +577,12 @@ $('quickBtn').onclick = () => {
 $('createBtn').onclick = async () => {
   if (!myNickname) return initProfile();
   const code = 'XG-' + Math.random().toString(36).slice(2, 7).toUpperCase();
-  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true, ready: true, isSpectator: false };
+  const myEntry = { clientId: myClientId, name: myNickname, isBot: false, pos: 'S', isHost: true, ready: true };
   scores = { S: 0, W: 0, N: 0, E: 0 };
 
   const { error } = await sb.from('game_rooms').insert([{
     room_code: code, status: 'waiting',
-    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: 'dominoes', botLevel, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores, chatHistory: [] }
+    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: 'dominoes', botLevel, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores }
   }]);
   if (error) { console.error(error); toast('Error creating room'); return; }
 
@@ -689,7 +613,7 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
   joinConfirmed = false; lastApplied = { term: -1, version: -1 };
 
-  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId) && (data.state.lobby || []).length >= 8) {
+  if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId) && (data.state.lobby || []).length >= MAX_ROOM) {
     roomCode = ''; return toast('That room is full');
   }
 
@@ -725,6 +649,7 @@ async function leaveToHome(message) {
   lobby = []; players = []; roomCode = ''; isHost = false; hostClientId = ''; joinConfirmed = false;
   lastApplied = { term: -1, version: -1 }; hostTerm = 0; stateVersion = 0; roomStatus = 'waiting'; matchOver = false;
   center = null; lb = []; rb = []; L = R = null; botN = 0; speaking = new Set();
+  roomMessages = []; unread = 0; chatReady = false; closeChat(); updateChatBadge();
   scores = { S: 0, W: 0, N: 0, E: 0 };
   $('roomBadge').textContent = 'No room yet';
   $('game').classList.add('hidden'); $('roomPanel').classList.add('hidden');
@@ -757,11 +682,11 @@ $('roomBtn').onclick = backToRoom;
 
 $('botBtn').onclick = () => {
   if (!isHost) return toast('Only host can add bots');
-  if (lobby.length >= 8) return toast('Room is full');
-  const activeSeats = lobby.filter(p => !p.isSpectator).length;
-  const freePos = activeSeats >= 4 ? 'SPEC' : ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
+  if (lobby.length >= MAX_ROOM) return toast('Room is full');
+  const freePos = freeSeat();
+  if (!freePos) return toast('No free seat. Remove a player or bot first.');
   botN++;
-  lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos: freePos, isHost: false, ready: true, isSpectator: activeSeats >= 4 });
+  lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos: freePos, isHost: false, ready: true });
   renderLobby(); syncRoomState();
 };
 
@@ -779,53 +704,25 @@ function toggleMutePlayer(targetClientId) {
   renderLobby(); refresh();
 }
 
-function openPlayerSeatMenu(p) {
-  const options = [];
-  if (p.clientId !== myClientId && !p.isBot) {
-    const isMuted = mutedPlayers.has(p.clientId);
-    options.push({ value: 'mute', label: isMuted ? '🔊 Unmute Player' : '🔇 Mute Player' });
-  }
-  if (isHost && p.clientId !== hostClientId) {
-    options.push({ value: 'kick', label: '❌ Remove Player' });
-  }
-  if (!options.length) return;
-  openModal(p.name + ' Actions', options, '', val => {
-    if (val === 'mute') toggleMutePlayer(p.clientId);
-    else if (val === 'kick') {
-      const idx = lobby.findIndex(x => x.clientId === p.clientId);
-      if (idx !== -1) { lobby.splice(idx, 1); renderLobby(); syncRoomState(); }
-    }
-  });
-}
+const freeSeat = () => ['S', 'W', 'N', 'E'].find(pos => !lobby.some(p => p.pos === pos));
 
+// Built with DOM calls and textContent only, so a player's name can never run as code
 function renderLobby() {
   const list = $('plist'); list.innerHTML = '';
-  lobby.forEach((p, i) => {
-    const isPlayerHost = p.clientId === hostClientId, isMe = p.clientId === myClientId, isMuted = mutedPlayers.has(p.clientId);
+  lobby.forEach(p => {
+    const isPlayerHost = p.clientId === hostClientId, isMe = p.clientId === myClientId;
     const row = document.createElement('div'); row.className = 'pl' + (speaking.has(p.clientId) ? ' speaking' : '');
-    row.onclick = () => openPlayerSeatMenu(p);
-
-    const nameEl = document.createElement('span'); nameEl.textContent = p.name;
+    row.style.cssText = 'cursor:pointer;min-height:44px';
+    row.addEventListener('click', () => playerMenu(p, false));
+    const nameEl = document.createElement('span'); nameEl.textContent = (mutedPlayers.has(p.clientId) ? '🔇 ' : '') + p.name;
     const right = document.createElement('span');
-    const kind = document.createElement('span');
-
-    if (p.isSpectator) {
-      kind.className = 'tag spec'; kind.textContent = 'SPECTATOR';
-    } else {
-      kind.className = 'tag' + (p.isBot ? ' bot' : (isPlayerHost ? ' host' : ''));
-      kind.textContent = p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER');
-    }
-    right.appendChild(kind);
-
-    if (!p.isBot) {
-      right.appendChild(document.createTextNode(' '));
-      const rd = document.createElement('span'); rd.className = 'tag ' + (p.ready ? 'ok' : 'wait'); rd.textContent = p.ready ? 'READY' : 'WAITING';
-      right.appendChild(rd);
-    }
-    if (isMe) {
-      right.appendChild(document.createTextNode(' '));
-      const you = document.createElement('span'); you.className = 'tag you'; you.textContent = 'YOU'; right.appendChild(you);
-    }
+    const tags = [[p.isBot ? 'BOT' : (isPlayerHost ? 'HOST' : 'PLAYER'), p.isBot ? 'bot' : (isPlayerHost ? 'host' : '')]];
+    if (!p.isBot) tags.push(p.ready ? ['READY', 'ok'] : ['WAITING', 'wait']);
+    if (isMe) tags.push(['YOU', 'you']);
+    tags.forEach(([t, c], i) => {
+      if (i) right.appendChild(document.createTextNode(' '));
+      const el = document.createElement('span'); el.className = 'tag ' + c; el.textContent = t; right.appendChild(el);
+    });
     row.appendChild(nameEl); row.appendChild(right); list.appendChild(row);
   });
 
@@ -834,7 +731,6 @@ function renderLobby() {
   $('startBtn').classList.toggle('hidden', !isHost);
   $('botBtn').classList.toggle('hidden', !isHost);
   $('guestWaitMsg').classList.toggle('hidden', isHost);
-  $('readyBtn').classList.toggle('hidden', isHost);
   $('readyBtn').textContent = me && me.ready ? '✅ Ready (tap to cancel)' : 'Tap when you are ready';
   $('readyBtn').className = (me && me.ready ? 'green' : 'blue') + (isHost ? ' hidden' : '');
   renderSettingsButtons();
@@ -842,53 +738,49 @@ function renderLobby() {
 
 $('startBtn').onclick = () => {
   if (!isHost) return toast('Only host can start');
-  const waiting = lobby.filter(p => !p.isBot && !p.ready);
+  const waiting = lobby.filter(p => !p.isBot && p.pos && !p.ready);
   if (waiting.length) return toast(waiting.map(p => p.name).join(', ') + ' not ready yet');
   ['S', 'W', 'N', 'E'].forEach(pos => {
     if (!lobby.some(p => p.pos === pos)) {
-      botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false, ready: true, isSpectator: false });
+      botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, isBot: true, pos, isHost: false, ready: true });
     }
   });
   roomStatus = 'playing';
   newMatch();
 };
 
+/* ---------- VOICE (LiveKit) ---------- */
 async function connectVoice() {
   if (livekitRoom) return true;
-  if (!window.LivekitClient) return false;
-  if (!roomCode) return false;
-  try {
-    const { data, error } = await sb.functions.invoke('livekit-token', { body: { roomCode, clientId: myClientId, name: myNickname } });
-    if (error || !data || !data.token) return false;
+  if (!window.LivekitClient) { toast('Voice failed to load. Refresh and try again.'); return false; }
+  if (!roomCode) { toast('Join a room first'); return false; }
+  const { data, error } = await sb.functions.invoke('livekit-token', { body: { roomCode, clientId: myClientId, name: myNickname } });
+  if (error || !data || !data.token) { console.error('Voice token error', error, data); toast('Voice token error. Check Supabase setup.'); return false; }
 
-    const room = new LivekitClient.Room({
-      adaptiveStream: true, dynacast: true,
-      audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-    });
-    room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
-      if (track.kind === 'audio') {
-        const el = track.attach();
-        el.id = 'audio_' + participant.identity; el.autoplay = true; el.playsInline = true;
-        if (mutedPlayers.has(participant.identity)) el.muted = true;
-        $('audioBox').appendChild(el);
-      }
-    });
-    room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => { track.detach().forEach(el => el.remove()); });
-    room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, sp => {
-      speaking = new Set(sp.map(s => s.identity));
-      if (gameHidden()) renderLobby(); else renderOutsideSeats();
-    });
-    room.on(LivekitClient.RoomEvent.Disconnected, () => {
-      if (livekitRoom === room) { livekitRoom = null; micActive = false; updateMicUI(false, true); }
-    });
-    await room.connect(LIVEKIT_URL, data.token);
-    try { await room.startAudio(); } catch (e) {}
-    livekitRoom = room;
-    return true;
-  } catch (err) {
-    console.warn("Voice channel silent fallback:", err);
-    return false;
-  }
+  const room = new LivekitClient.Room({
+    adaptiveStream: true, dynacast: true,
+    audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+  });
+  room.on(LivekitClient.RoomEvent.TrackSubscribed, (track, publication, participant) => {
+    if (track.kind === 'audio') {
+      const el = track.attach();
+      el.id = 'audio_' + participant.identity; el.autoplay = true; el.playsInline = true;
+      if (mutedPlayers.has(participant.identity)) el.muted = true;
+      $('audioBox').appendChild(el);
+    }
+  });
+  room.on(LivekitClient.RoomEvent.TrackUnsubscribed, track => { track.detach().forEach(el => el.remove()); });
+  room.on(LivekitClient.RoomEvent.ActiveSpeakersChanged, sp => {
+    speaking = new Set(sp.map(s => s.identity));
+    if (gameHidden()) renderLobby(); else renderOutsideSeats();
+  });
+  room.on(LivekitClient.RoomEvent.Disconnected, () => {
+    if (livekitRoom === room) { livekitRoom = null; micActive = false; updateMicUI(false, true); }
+  });
+  await room.connect(LIVEKIT_URL, data.token);
+  try { await room.startAudio(); } catch (e) { console.log('Audio autoplay prompt needed'); }
+  livekitRoom = room;
+  return true;
 }
 
 function disconnectVoice() {
@@ -899,18 +791,14 @@ function disconnectVoice() {
 }
 
 $('micBtn').onclick = async () => {
-  if (AC.state === 'suspended' || AC.state === 'interrupted') AC.resume();
+  if (AC.state === 'suspended') AC.resume();
   const wantOn = !micActive;
   $('micBtn').disabled = true;
   try {
     if (wantOn) {
-      const connected = await connectVoice();
-      if (connected && livekitRoom) {
-        await livekitRoom.localParticipant.setMicrophoneEnabled(true);
-        micActive = true;
-      } else {
-        toast('Voice chat unavailable. Text chat active!');
-      }
+      if (!(await connectVoice())) return;
+      await livekitRoom.localParticipant.setMicrophoneEnabled(true);
+      micActive = true;
     } else if (livekitRoom) {
       await livekitRoom.localParticipant.setMicrophoneEnabled(false);
       livekitRoom.localParticipant.audioTrackPublications.forEach(pub => { if (pub.track) pub.track.stop(); });
@@ -918,17 +806,87 @@ $('micBtn').onclick = async () => {
     }
     updateMicUI(micActive);
   } catch (e) {
-    console.warn("Non-blocking mic permission warning:", e);
-    toast('Voice chat disabled. Text chat active.');
+    console.error('Voice error', e); toast('Mic blocked or voice failed. Check mic permission.');
   } finally { $('micBtn').disabled = false; }
 };
 
 function updateMicUI(on, silent) {
   const btn = $('micBtn'), dot = $('micDot');
-  if (on) { btn.textContent = '🎙️ Mute Mic'; btn.className = 'red'; dot.classList.add('active'); if (!silent) toast('Microphone ON'); }
-  else { btn.textContent = '🎙️ Enable Mic'; btn.className = 'blue'; dot.classList.remove('active'); if (!silent) toast('Microphone OFF'); }
+  if (on) { btn.textContent = '🎙️ Live'; btn.className = 'red'; dot.classList.add('active'); if (!silent) toast('Microphone ON'); }
+  else { btn.textContent = '🎙️ Off'; btn.className = 'blue'; dot.classList.remove('active'); if (!silent) toast('Microphone OFF'); }
 }
 
+/* ---------- PLAYER MENU (mute, seat, remove) ---------- */
+function playerMenu(p, inGame) {
+  if (!p) return;
+  const isMe = p.clientId === myClientId, items = [];
+  if (!isMe && !p.isBot) items.push({ value: 'mute', label: mutedPlayers.has(p.clientId) ? '🔊 Unmute ' + p.name : '🔇 Mute ' + p.name });
+  if (isHost && !isMe && !inGame && roomStatus === 'waiting') {
+    items.push({ value: 'kick', label: '🚪 Remove from room' });
+  }
+  if (!items.length) return toast(p.name + (isMe ? ' (you)' : ''));
+  openModal(p.name, items, null, v => {
+    if (v === 'mute') toggleMutePlayer(p.clientId);
+    else if (v === 'kick') { lobby = lobby.filter(x => x.clientId !== p.clientId); renderLobby(); syncRoomState(); }
+  });
+}
+
+/* ---------- ROOM CHAT (the host saves the last 60 messages, so refreshes and board redraws never wipe it) ---------- */
+const stripText = t => String(t || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 200);
+function validMsg(m) {
+  return !!m && typeof m.id === 'string' && m.id.length < 60 && typeof m.from === 'string' && typeof m.name === 'string' && typeof m.text === 'string' && Number.isFinite(m.ts);
+}
+function addMsg(m) {
+  if (roomMessages.some(x => x.id === m.id)) return false;
+  roomMessages.push({ id: m.id, from: m.from, name: stripName(m.name) || 'Player', text: stripText(m.text), ts: m.ts });
+  roomMessages.sort((a, b) => a.ts - b.ts);
+  if (roomMessages.length > 60) roomMessages = roomMessages.slice(-60);
+  return true;
+}
+function updateChatBadge() { const b = $('chatBadge'); b.textContent = unread > 9 ? '9+' : String(unread); b.classList.toggle('hidden', unread === 0); }
+function onNewMsg(m) { if (!chatReady || chatOpen || m.from === myClientId) return; unread++; updateChatBadge(); }
+function renderChat() {
+  const list = $('chatList'); list.innerHTML = '';
+  roomMessages.forEach(m => {
+    const d = document.createElement('div'); d.className = 'msg' + (m.from === myClientId ? ' me' : '');
+    const n = document.createElement('b'); n.textContent = m.from === myClientId ? 'You' : m.name;
+    const t = document.createElement('span'); t.textContent = m.text;
+    d.appendChild(n); d.appendChild(t); list.appendChild(d);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+function openChat() { chatOpen = true; unread = 0; updateChatBadge(); $('chatSheet').classList.remove('hidden'); $('chatFab').classList.add('hidden'); renderChat(); }
+function closeChat() { chatOpen = false; $('chatSheet').classList.add('hidden'); $('chatFab').classList.toggle('hidden', !roomCode); }
+let lastSend = 0;
+function sendChat() {
+  const text = stripText($('chatInput').value);
+  if (!text || !roomCode) return;
+  if (Date.now() - lastSend < 700) return toast('Slow down a little');
+  lastSend = Date.now();
+  const m = { id: myClientId + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: myClientId, name: myNickname, text, ts: Date.now() };
+  $('chatInput').value = '';
+  addMsg(m); renderChat();
+  if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'CHAT_MSG', payload: m });
+  if (isHost) syncRoomState();
+}
+function handleChat(m) {
+  if (!validMsg(m)) return;
+  const who = lobby.find(p => p.clientId === m.from && !p.isBot);
+  if (!who || who.clientId === myClientId) return;
+  if (isHost) {
+    const now = Date.now(), hits = (chatHits[who.clientId] || []).filter(t => now - t < 5000);
+    if (hits.length >= 6) return;
+    hits.push(now); chatHits[who.clientId] = hits;
+  }
+  const clean = { id: m.id, from: who.clientId, name: who.name, text: stripText(m.text), ts: m.ts };
+  if (!clean.text || !addMsg(clean)) return;
+  onNewMsg(clean); if (chatOpen) renderChat();
+  if (isHost) syncRoomState();
+}
+$('chatFab').onclick = openChat; $('chatClose').onclick = closeChat; $('chatSend').onclick = sendChat;
+$('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+
+/* ---------- RESUME AFTER REFRESH / SLEEP / SIGNAL DROP ---------- */
 async function resumeSession() {
   const s = store.get(SESSION_KEY);
   if (!s || !s.roomCode || !myNickname) return false;
@@ -953,6 +911,7 @@ window.addEventListener('load', async () => {
   else if (myNickname) await resumeSession();
 });
 
+/* ---------- GAME CORE (Dominoes) ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -1009,7 +968,7 @@ function pass() {
     return;
   }
   const p = byPos(turn); passes++; knock();
-  if (center) { passMiss[p.pos].add(L); passMiss[p.pos].add(R); }
+  if (center) { passMiss[p.pos].add(L); passMiss[p.pos].add(R); } // remembered by Hard bots
   log('✋ ' + p.name + ' knocked (passed).');
   if (passes >= 4) return blocked();
   next();
@@ -1023,6 +982,7 @@ function maybeAi() {
   if (active && cur && cur.ai) setTimeout(() => { if (e === epoch && active) aiTurn(); }, botLevel === 'hard' ? 700 : 900);
 }
 
+/* Bot brains: Easy plays any legal tile, Medium dumps big tiles, Hard also plans ahead and remembers who knocked */
 function aiTurn() {
   const p = byPos(turn);
   if (!p) return;
@@ -1108,6 +1068,7 @@ function win(pos, why) {
   setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
 }
 
+/* ---------- HAND UI ---------- */
 let selIdx = null;
 function selectTile(i) {
   if (!active || turn !== mySeatPos) return toast('Not your turn');
@@ -1128,7 +1089,8 @@ $('passBtn').onclick = () => { if (active && turn === mySeatPos) pass(); };
 
 function renderHand() {
   const box = $('hand'); box.innerHTML = '';
-  const me = byPos(mySeatPos); if (!me || !me.hand) return;
+  const me = byPos(mySeatPos);
+  if (!me || !me.hand) { $('passBtn').classList.add('hidden'); $('endBar').classList.add('hidden'); return; }
   const mine = active && turn === mySeatPos;
   me.hand.forEach((t, i) => {
     const c = document.createElement('canvas'); c.width = 120; c.height = 68;
@@ -1144,6 +1106,7 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
+/* ---------- CANVAS BOARD ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -1217,12 +1180,13 @@ function renderOutsideSeats() {
     const name = String(p.name || '?');
     const card = document.createElement('div');
     card.className = 'seat-card-out' + (pos === turn && active ? ' active' : '') + (speaking.has(p.clientId) ? ' speaking' : '');
-    card.onclick = () => openPlayerSeatMenu(p);
-
+    card.style.cssText = 'cursor:pointer;min-height:44px';
     const avatar = document.createElement('div'); avatar.className = 'p-avatar' + (p.ai ? ' bot' : ''); avatar.textContent = name.charAt(0).toUpperCase();
-    const nameEl = document.createElement('div'); nameEl.className = 'p-name'; nameEl.textContent = name + (pos === mySeatPos ? ' ★' : '');
+    const nameEl = document.createElement('div'); nameEl.className = 'p-name';
+    nameEl.textContent = (mutedPlayers.has(p.clientId) ? '🔇 ' : '') + name + (pos === mySeatPos ? ' ★' : '');
     const tiles = document.createElement('div'); tiles.className = 'p-tiles'; tiles.textContent = (p.hand ? p.hand.length : 0) + ' tiles';
     card.appendChild(avatar); card.appendChild(nameEl); card.appendChild(tiles);
+    card.addEventListener('click', () => playerMenu(lobby.find(x => x.clientId === p.clientId) || { clientId: p.clientId, name, isBot: !!p.ai }, true));
     grid.appendChild(card);
   });
 }
@@ -1246,10 +1210,12 @@ function drawBoard() {
   endTag(lay.x, lay.y, lay.dir, 'L ' + L); endTag(ray.x, ray.y, ray.dir, 'R ' + R);
 }
 
+/* ---------- REFRESH ---------- */
 function refresh() {
-  $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Offline Mode';
+  $('syncLabel').textContent = roomCode ? 'Online Sync Active' : 'Quick Play (vs bots)';
   $('statusPanel').classList.toggle('hidden', !roomCode && gameHidden());
   $('voiceBar').classList.toggle('hidden', !roomCode);
+  $('chatFab').classList.toggle('hidden', !roomCode || chatOpen);
   if (gameHidden()) return;
   const lvl = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
   if (gameMode === 'partners') {
