@@ -53,8 +53,8 @@ canvas#board{display:block;width:100%;height:auto}
 .mic-dot.active{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
-.gamechips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0}
-.chip{border-radius:12px;padding:8px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8;cursor:pointer}
+.gamechips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.chip{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8;cursor:pointer}
 .chip.on{border-color:#fbbf24;color:#fff;background:#3a2a14}
 .chip small{display:block;font-size:9px;color:#64748b;margin-top:2px}
 .opt{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;color:#a5b4fc;font-weight:700}
@@ -99,9 +99,8 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
 #fxCanvas{position:absolute;inset:0;pointer-events:none;z-index:10}
 .flash-overlay{position:fixed;inset:0;pointer-events:none;z-index:99;background:rgba(251,191,36,0.3);opacity:0;transition:opacity .15s}
 .flash-overlay.on{opacity:1}
-@keyframes bubblePop{0%{transform:scale(0.4) translateY(10px);opacity:0}15%{transform:scale(1.05) translateY(-4px);opacity:1}85%{transform:scale(1) translateY(-4px);opacity:1}100%{transform:scale(0.8) translateY(-20px);opacity:0}}
-.seat-speech-bubble{position:absolute;top:-36px;left:50%;transform:translateX(-50%);background:#1e293b;border:1.5px solid #6366f1;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px rgba(0,0,0,0.6);pointer-events:none;z-index:100;animation:bubblePop 3.5s forwards}
-.seat-speech-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-width:6px 6px 0;border-style:solid;border-color:#6366f1 transparent;display:block;width:0}
+@keyframes emotePop{0%{transform:scale(0.3) translateY(10px);opacity:0}20%{transform:scale(1.2) translateY(-5px);opacity:1}80%{transform:scale(1) translateY(-5px);opacity:1}100%{transform:scale(0.8) translateY(-25px);opacity:0}}
+.emote-floating{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:22px;animation:emotePop 2.4s forwards;pointer-events:none;z-index:90;background:rgba(15,23,42,0.9);border:1px solid #fbbf24;border-radius:99px;padding:2px 8px;box-shadow:0 4px 10px rgba(0,0,0,0.5)}
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .shop-item{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
 .shop-item.owned{border-color:#059669}
@@ -146,28 +145,10 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
         <button id="editProfileBtn" style="font-size:11px">✏️ Profile</button>
       </div>
       <div id="homeProgBar" class="panel" style="padding:8px 12px"></div>
-      
-      <div class="lbl" style="text-align:left;margin:0">Select Game</div>
-      <div class="gamechips">
-        <div class="chip on" id="chipDominoes"><svg width="26" height="26" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#fff"/><line x1="12" y1="7" x2="12" y2="17" stroke="#64748b"/><circle cx="7" cy="12" r="1.5" fill="#111"/><circle cx="16" cy="9.8" r="1.3" fill="#111"/><circle cx="18" cy="14" r="1.3" fill="#111"/></svg><br>Dominoes</div>
-        <div class="chip" id="chipDraughts"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#dc2626"/><circle cx="12" cy="12" r="6" fill="none" stroke="#fecaca" stroke-width="1.5"/></svg><br>Draughts</div>
-        <div class="chip" id="chipLudo" style="opacity:.5;cursor:not-allowed"><span style="font-size:22px">🎲</span><br>Ludo<small>coming soon</small></div>
-      </div>
-
       <button class="big" id="quickBtn">⚡ Quick Play</button>
       <div class="two">
-        <div id="optRules">
-          <div class="lbl" style="text-align:left">Rules</div>
-          <button class="arcade-btn" id="qModeBtn">Cut Throat (FFA)</button>
-        </div>
-        <div id="optDraughtsRule" class="hidden">
-          <div class="lbl" style="text-align:left">Draughts Rule</div>
-          <button class="arcade-btn" id="qDraughtsRuleBtn">Huffing Mode</button>
-        </div>
-        <div>
-          <div class="lbl" style="text-align:left">Bots</div>
-          <button class="arcade-btn" id="qLevelBtn">Medium</button>
-        </div>
+        <div><div class="lbl" style="text-align:left">Rules</div><button class="arcade-btn" id="qModeBtn">Cut Throat (FFA)</button></div>
+        <div><div class="lbl" style="text-align:left">Bots</div><button class="arcade-btn" id="qLevelBtn">Medium</button></div>
       </div>
       <div class="lbl" style="margin:0">Quick Play starts right away against bots. Nobody needs to join.</div>
       <div class="two" style="margin-top:4px">
@@ -183,6 +164,15 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
         <button class="blue" id="shareBtn">📲 Invite</button>
         <button class="purple" id="copyBtn">📋 Copy</button>
       </div>
+      <div class="lbl" style="text-align:left">Game</div>
+      <div class="gamechips">
+        <div class="chip on" id="chipDominoes"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#fff"/><line x1="12" y1="7" x2="12" y2="17" stroke="#64748b"/><circle cx="7" cy="12" r="1.5" fill="#111"/><circle cx="16" cy="9.8" r="1.3" fill="#111"/><circle cx="18" cy="14" r="1.3" fill="#111"/></svg><br>Dominoes</div>
+        <div class="chip" id="chipDraughts"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#dc2626"/><circle cx="12" cy="12" r="6" fill="none" stroke="#fecaca" stroke-width="1.5"/></svg><br>Draughts</div>
+        <div class="chip" id="chipLudo" style="opacity:.5;cursor:not-allowed"><span style="font-size:26px">🎲</span><br>Ludo<small>coming soon</small></div>
+      </div>
+      <div class="opt" id="optRules"><span>Rules</span><button class="arcade-btn" id="roomModeBtn">Cut Throat (FFA)</button></div>
+      <div class="opt" id="optDraughtsRule" class="hidden"><span>Draughts rule</span><button class="arcade-btn" id="roomDraughtsRuleBtn">Huffing Mode</button></div>
+      <div class="opt"><span>Bot difficulty</span><button class="arcade-btn" id="roomLevelBtn">Medium</button></div>
       <div class="opt"><span>Your theme</span><button class="arcade-btn" id="roomThemeBtn">Classic</button></div>
       <div class="row between" style="margin:8px 0 4px">
         <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/<span id="maxPc">4</span>)</b>
@@ -347,7 +337,7 @@ let roomMessages = [], unread = 0, chatOpen = false, chatReady = false, chatHits
 let hostTerm = 0, stateVersion = 0, lastApplied = { term: -1, version: -1 };
 let joinConfirmed = false, syncing = false, syncDirty = false;
 let mutedPlayers = new Set(), speaking = new Set(), gameMode = 'cutthroat', currentGame = 'dominoes';
-let draughtsRule = 'huff';
+let draughtsRule = 'huff'; // 'huff' | 'strict'
 let scores = { S: 0, W: 0, N: 0, E: 0 };
 let botLevel = localStorage.getItem('xg_level') || 'medium';
 if (!['easy', 'medium', 'hard'].includes(botLevel)) botLevel = 'medium';
@@ -378,8 +368,9 @@ const store = {
 function saveSession() { store.set(SESSION_KEY, { roomCode, role: isHost ? 'host' : 'guest', savedAt: Date.now() }); }
 function clearSession() { store.del(SESSION_KEY); }
 
+/* --- PROGRESSION, LEVEL & SHOP STORE --- */
 function getProgression() {
-  const defaults = { xp: 0, level: 1, coins: 100, playtime: 0, inventory: ['emote_smoke', 'emote_fire', 'emote_pat_fahplay', 'emote_pat_watch'] };
+  const defaults = { xp: 0, level: 1, coins: 100, playtime: 0, inventory: ['emote_smoke', 'emote_fire', 'emote_pat_watch'] };
   return Object.assign(defaults, store.get('xg_prog') || {});
 }
 function saveProgression(p) { store.set('xg_prog', p); renderProgressionUI(); }
@@ -411,14 +402,11 @@ function addXpAndCoins(xpAdd, coinAdd, reason) {
 const SHOP_ITEMS = [
   { id: 'emote_smoke', name: 'Smoking Chill Vibe', type: 'emote', symbol: '🚬', price: 0 },
   { id: 'emote_fire', name: 'Fire Heat', type: 'emote', symbol: '🔥', price: 0 },
-  { id: 'emote_pat_fahplay', name: 'Patois: "Who fah play?"', type: 'emote', symbol: '💬 "Who fah play?"', price: 0 },
+  { id: 'emote_crown', name: 'Crown Flex', type: 'emote', symbol: '👑', price: 150 },
   { id: 'emote_pat_watch', name: 'Patois: "Watch dat!"', type: 'emote', symbol: '💬 "Watch dat!"', price: 0 },
-  { id: 'emote_pat_sehpass', name: 'Patois: "Seh pass"', type: 'emote', symbol: '💬 "Seh pass"', price: 100 },
-  { id: 'emote_pat_yuhpass', name: 'Patois: "Yuh pass"', type: 'emote', symbol: '💬 "Yuh pass"', price: 100 },
-  { id: 'emote_pat_knock', name: 'Patois: "Knock ute"', type: 'emote', symbol: '💬 "Knock ute"', price: 150 },
-  { id: 'emote_pat_wicked', name: 'Patois: "Wicked play"', type: 'emote', symbol: '💬 "Wicked play"', price: 200 },
-  { id: 'emote_crown', name: 'Crown Flex', type: 'emote', symbol: '👑', price: 250 },
-  { id: 'emote_pat_bomba', name: 'Patois: "Bomboclaat!"', type: 'emote', symbol: '💬 "Bomboclaat!"', price: 300 }
+  { id: 'emote_pat_bredrin', name: 'Patois: "Bredrin!"', type: 'emote', symbol: '💬 "Bredrin!"', price: 100 },
+  { id: 'emote_pat_shut', name: 'Patois: "Shut dem down!"', type: 'emote', symbol: '💬 "Shut dem down!"', price: 200 },
+  { id: 'emote_pat_pose', name: 'Patois: "Who pose?"', type: 'emote', symbol: '💬 "Who pose?"', price: 100 }
 ];
 
 function openShop() {
@@ -444,7 +432,7 @@ function openShop() {
           toast('Unlocked ' + item.name + '!');
           openShop();
         } else {
-          toast('Not enough XCoins!');
+          toast('Not enough coins!');
         }
       };
     }
@@ -466,23 +454,21 @@ $('emoteMenuBtn').onclick = openEmoteMenu;
 
 function sendEmoteReaction(symbol) {
   if (!mySeatPos) return;
-  triggerSpeechBubble(mySeatPos, symbol);
+  triggerSeatEmote(mySeatPos, symbol);
   if (roomSubscription) {
     roomSubscription.send({ type: 'broadcast', event: 'TABLE_EMOTE', payload: { pos: mySeatPos, symbol } });
   }
 }
 
-function triggerSpeechBubble(pos, text) {
+function triggerSeatEmote(pos, symbol) {
   const card = document.querySelector(`.seat-card-out[data-pos="${pos}"]`);
   if (!card) return;
-  const oldBubble = card.querySelector('.seat-speech-bubble');
-  if (oldBubble) oldBubble.remove();
-  const bubble = document.createElement('div');
-  bubble.className = 'seat-speech-bubble';
-  bubble.textContent = text;
-  card.appendChild(bubble);
+  const pop = document.createElement('div');
+  pop.className = 'emote-floating';
+  pop.textContent = symbol;
+  card.appendChild(pop);
   clack();
-  setTimeout(() => bubble.remove(), 3500);
+  setTimeout(() => pop.remove(), 2400);
 }
 
 /* ---------- THEMES ---------- */
@@ -529,13 +515,14 @@ function renderSettingsButtons() {
   const modeText = MODE_NAME[gameMode] || 'Cut Throat (FFA)';
   const levelText = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
   $('qModeBtn').textContent = modeText; $('qLevelBtn').textContent = levelText;
-  $('qDraughtsRuleBtn').textContent = draughtsRule === 'huff' ? 'Huffing Mode' : 'Strict Jumps';
+  $('roomModeBtn').textContent = modeText; $('roomLevelBtn').textContent = levelText;
   $('roomThemeBtn').textContent = TH().n;
+  $('roomDraughtsRuleBtn').textContent = draughtsRule === 'huff' ? 'Huffing Mode' : 'Strict Jumps';
   
   $('chipDominoes').className = 'chip' + (currentGame === 'dominoes' ? ' on' : '');
   $('chipDraughts').className = 'chip' + (currentGame === 'draughts' ? ' on' : '');
-  $('optRules').style.display = currentGame === 'dominoes' ? 'block' : 'none';
-  $('optDraughtsRule').style.display = currentGame === 'draughts' ? 'block' : 'none';
+  $('optRules').style.display = currentGame === 'dominoes' ? 'grid' : 'none';
+  $('optDraughtsRule').style.display = currentGame === 'draughts' ? 'grid' : 'none';
   $('maxPc').textContent = currentGame === 'draughts' ? '8' : '4';
 }
 
@@ -548,19 +535,30 @@ const MODE_ITEMS = [
 const DRAUGHTS_RULE_ITEMS = [{ value: 'huff', label: 'Huffing Mode (allows human errors)' }, { value: 'strict', label: 'Strict Mode (compulsory jumps)' }];
 const LEVEL_ITEMS = [{ value: 'easy', label: 'Easy' }, { value: 'medium', label: 'Medium' }, { value: 'hard', label: 'Hard' }];
 
-$('chipDominoes').onclick = () => { switchGame('dominoes'); };
-$('chipDraughts').onclick = () => { switchGame('draughts'); };
+$('chipDominoes').onclick = () => { if (isHost) switchGame('dominoes'); };
+$('chipDraughts').onclick = () => { if (isHost) switchGame('draughts'); };
 
 function switchGame(g) {
   if (currentGame === g) return;
   currentGame = g;
   renderSettingsButtons();
-  if (isHost && roomCode) syncRoomState();
+  if (isHost) syncRoomState();
 }
 
-$('qModeBtn').onclick = () => openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); if (isHost && roomCode) syncRoomState(); });
-$('qDraughtsRuleBtn').onclick = () => openModal('Select Draughts Rule', DRAUGHTS_RULE_ITEMS, draughtsRule, v => { draughtsRule = v; renderSettingsButtons(); if (isHost && roomCode) syncRoomState(); });
-$('qLevelBtn').onclick = () => openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); if (isHost && roomCode) syncRoomState(); });
+$('qModeBtn').onclick = () => openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); });
+$('roomModeBtn').onclick = () => {
+  if (!isHost) return toast('Only the host can change the rules');
+  openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); syncRoomState(); });
+};
+$('roomDraughtsRuleBtn').onclick = () => {
+  if (!isHost) return toast('Only the host can change Draughts rule');
+  openModal('Select Draughts Rule', DRAUGHTS_RULE_ITEMS, draughtsRule, v => { draughtsRule = v; renderSettingsButtons(); syncRoomState(); });
+};
+$('qLevelBtn').onclick = () => openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); });
+$('roomLevelBtn').onclick = () => {
+  if (!isHost) return toast('Only the host can change bot difficulty');
+  openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); syncRoomState(); });
+};
 $('roomThemeBtn').onclick = () => openModal('Select Board Theme', Object.keys(THEMES).map(k => ({ value: k, label: THEMES[k].n })), themeKey, v => setTheme(v));
 
 /* ---------- SOUND EFFECTS ---------- */
@@ -848,7 +846,7 @@ function listenToRoom() {
     .on('broadcast', { event: 'JOIN_EVENT' }, ({ payload }) => { if (isHost) handleJoin(payload); })
     .on('broadcast', { event: 'READY' }, ({ payload }) => { if (isHost) handleReady(payload); })
     .on('broadcast', { event: 'CHAT_MSG' }, ({ payload }) => handleChat(payload))
-    .on('broadcast', { event: 'TABLE_EMOTE' }, ({ payload }) => { if (payload && payload.pos) triggerSpeechBubble(payload.pos, payload.symbol); })
+    .on('broadcast', { event: 'TABLE_EMOTE' }, ({ payload }) => { if (payload && payload.pos) triggerSeatEmote(payload.pos, payload.symbol); })
     .on('broadcast', { event: 'JOIN_DENIED' }, ({ payload }) => {
       if (payload && payload.clientId === myClientId) leaveToHome(payload.reason || 'The host could not seat you.');
     })
@@ -947,18 +945,8 @@ $('quickBtn').onclick = () => {
   roomCode = ''; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; joinConfirmed = true; roomStatus = 'playing';
   botN = 0;
   lobby = [{ clientId: myClientId, name: myNickname, av: myAvatar, bio: myBio, link: myLink, isBot: false, pos: 'S', isHost: true, ready: true }];
-  
-  if (currentGame === 'draughts') {
-    botN++;
-    lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, av: '🤖', isBot: true, pos: 'N', isHost: false, ready: true });
-  } else {
-    const total = (gameMode === 'boneyard' ? 2 : 4);
-    ['W', 'N', 'E'].slice(0, total - 1).forEach(pos => {
-      botN++;
-      lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, av: '🤖', isBot: true, pos, isHost: false, ready: true });
-    });
-  }
-  
+  const total = currentGame === 'draughts' ? 2 : (gameMode === 'boneyard' ? 2 : 4);
+  ['W', 'N', 'E'].slice(0, total - 1).forEach(pos => { botN++; lobby.push({ clientId: 'bot_' + botN, name: 'XBot-' + botN, av: '🤖', isBot: true, pos, isHost: false, ready: true }); });
   $('roomBadge').textContent = 'Quick Play';
   $('homeBox').classList.add('hidden');
   startAmbientLoop();
@@ -971,22 +959,11 @@ $('createBtn').onclick = async () => {
   const myEntry = { clientId: myClientId, name: myNickname, av: myAvatar, bio: myBio, link: myLink, isBot: false, pos: 'S', isHost: true, ready: true };
   scores = { S: 0, W: 0, N: 0, E: 0 };
 
-  const roomState = { 
-    term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: currentGame, botLevel, 
-    lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, draughtsRule, scores 
-  };
-
   const { error } = await sb.from('game_rooms').insert([{
-    room_code: code,
-    status: 'waiting',
-    state: roomState
+    room_code: code, status: 'waiting',
+    state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: currentGame, botLevel, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, draughtsRule, scores }
   }]);
-
-  if (error) { 
-    console.error('Room create error:', error); 
-    toast('Error creating room'); 
-    return; 
-  }
+  if (error) { console.error(error); toast('Error creating room'); return; }
 
   roomCode = code; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
   joinConfirmed = true; hostTerm = 0; stateVersion = 0; lastApplied = { term: -1, version: -1 };
@@ -1263,10 +1240,10 @@ function playerMenu(p, inGame) {
 }
 
 /* ---------- ROOM CHAT & QUICK PILLS ---------- */
-const QUICK_PATOIS = ["Watch dat!", "Who fah play?", "Seh pass", "Yuh pass", "Knock ute", "Wicked play!"];
+const QUICK_PATois = ["Watch dat!", "Bredrin!", "Shut dem down!", "Who pose?", "Clean board!", "Nice play!"];
 function renderQuickPills() {
   const container = $('quickPills'); container.innerHTML = '';
-  QUICK_PATOIS.forEach(txt => {
+  QUICK_PATois.forEach(txt => {
     const p = document.createElement('div');
     p.className = 'qpill'; p.textContent = txt;
     p.onclick = () => { $('chatInput').value = txt; sendChat(); };
@@ -1309,7 +1286,6 @@ function sendChat() {
   const m = { id: myClientId + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: myClientId, name: myNickname, text, ts: Date.now() };
   $('chatInput').value = '';
   addMsg(m); renderChat();
-  if (mySeatPos) triggerSpeechBubble(mySeatPos, text);
   if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'CHAT_MSG', payload: m });
   if (isHost) syncRoomState();
 }
@@ -1324,7 +1300,6 @@ function handleChat(m) {
   }
   const clean = { id: m.id, from: who.clientId, name: who.name, text: stripText(m.text), ts: m.ts };
   if (!clean.text || !addMsg(clean)) return;
-  if (who.pos) triggerSpeechBubble(who.pos, clean.text);
   onNewMsg(clean); if (chatOpen) renderChat();
   if (isHost) syncRoomState();
 }
@@ -1463,7 +1438,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('online', reconnect);
 
 window.addEventListener('load', async () => {
-  applyAudio(); applySize(); initProfile(); setTheme(themeKey); renderSettingsButtons();
+  applyAudio(); applySize(); initProfile(); setTheme(themeKey);
   const roomParam = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
   if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) { $('codeIn').value = roomParam; joinRoomByCode(roomParam); }
   else if (myNickname) await resumeSession();
@@ -1719,31 +1694,7 @@ function executeDraughtsMove(fromIdx, path) {
   let skippedJumpPiece = null;
   if (!tookJump && hadJumps) skippedJumpPiece = fromIdx;
   
-  let stepIndex = 0;
-  function animateStep() {
-    if (stepIndex >= path.length) {
-      allCaptured.forEach(cIdx => { dBoard[cIdx] = null; });
-      if (allCaptured.length) captureSnd();
-      else clack();
-
-      if (skippedJumpPiece !== null && draughtsRule === 'huff') {
-        huffable = { pos: currIdx, by: color, turnNo: handNo };
-      } else {
-        huffable = null;
-      }
-      
-      dTurn = dTurn === 'b' ? 'w' : 'b';
-      dSelected = null;
-      huffSelecting = false;
-      
-      checkDraughtsWin();
-      refresh();
-      syncRoomState();
-      maybeAi();
-      return;
-    }
-
-    const destIdx = path[stepIndex];
+  for (let destIdx of path) {
     const r1 = Math.floor(currIdx / 8), c1 = currIdx % 8;
     const r2 = Math.floor(destIdx / 8), c2 = destIdx % 8;
     const dr = Math.sign(r2 - r1), dc = Math.sign(c2 - c1);
@@ -1751,9 +1702,7 @@ function executeDraughtsMove(fromIdx, path) {
     let step = 1;
     while(r1 + dr * step !== r2) {
       let capIdx = (r1 + dr * step) * 8 + (c1 + dc * step);
-      if (dBoard[capIdx] && !allCaptured.includes(capIdx)) {
-        allCaptured.push(capIdx);
-      }
+      if (dBoard[capIdx]) allCaptured.push(capIdx);
       step++;
     }
     
@@ -1765,20 +1714,28 @@ function executeDraughtsMove(fromIdx, path) {
     if (Math.floor(currIdx / 8) === kingRow && !dBoard[currIdx].king) {
       dBoard[currIdx].king = true;
       crownSnd();
-      stepIndex = path.length;
-    } else {
-      stepIndex++;
-    }
-
-    refresh();
-    if (path.length > 1 && stepIndex < path.length) {
-      setTimeout(animateStep, 220);
-    } else {
-      animateStep();
+      break;
     }
   }
-
-  animateStep();
+  
+  allCaptured.forEach(cIdx => { dBoard[cIdx] = null; });
+  if (allCaptured.length) captureSnd();
+  else clack();
+  
+  if (skippedJumpPiece !== null && draughtsRule === 'huff') {
+    huffable = { pos: currIdx, by: color, turnNo: handNo };
+  } else {
+    huffable = null;
+  }
+  
+  dTurn = dTurn === 'b' ? 'w' : 'b';
+  dSelected = null;
+  huffSelecting = false;
+  
+  checkDraughtsWin();
+  refresh();
+  syncRoomState();
+  maybeAi();
 }
 
 function executeHuff(targetIdx) {
@@ -1797,7 +1754,6 @@ function executeHuff(targetIdx) {
   log('🔥 Piece HUFFED!');
   refresh();
   syncRoomState();
-  maybeAi();
 }
 
 function checkDraughtsWin() {
@@ -2116,7 +2072,7 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
 
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0;
-  const out = [], limitR = W - 52, limitL = 52, verticalStep = 52;
+  const out = [], limitR = W - 30 - 12, limitL = 30 + 12, verticalStep = 64;
   tiles.forEach(t => {
     let isVert = t.d, tw = isVert ? 20 : 40;
     const willOverflow = dir > 0 ? (x + dir * tw > limitR) : (x + dir * tw < limitL);
