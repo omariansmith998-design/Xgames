@@ -33,7 +33,6 @@ h2{margin:0;font-size:13px;color:#a5b4fc}
 .score-pill{display:inline-flex;align-items:center;gap:5px;background:#3a2a14;border:1px solid #a16207;border-radius:99px;padding:3px 4px 3px 9px}
 .score-pill .p-name{font-size:11px;color:#fff;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .score-pill .p-score{background:#f59e0b;color:#000;font-weight:900;font-size:11px;border-radius:99px;padding:2px 8px}
-.pill{display:inline-block;min-width:28px;text-align:center;background:#312e81;border-radius:99px;padding:3px 9px;margin-left:6px}
 .mid{text-align:center;font-size:11px;color:#94a3b8}.mid i{display:block;font-style:normal;color:#fbbf24;font-size:10px}
 .wrap{border:5px solid #3d2314;border-radius:16px;overflow:hidden;background:#155e2b;position:relative}
 canvas#board{display:block;width:100%;height:auto}
@@ -59,36 +58,35 @@ canvas#board{display:block;width:100%;height:auto}
 .chip.on{border-color:#fbbf24;color:#fff;background:#3a2a14}
 .chip small{display:block;font-size:9px;color:#64748b;margin-top:2px}
 .opt{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;color:#a5b4fc;font-weight:700}
-.seat-grid-outside{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#0b0c12;border:1px solid #23273a;border-radius:10px;padding:6px}
-.seat-card-out{background:#141724;border:1px solid #282e42;border-radius:8px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.seat-grid-outside{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#0b0c12;border:1px solid #23273a;border-radius:10px;padding:6px;position:relative}
+.seat-card-out{background:#141724;border:1px solid #282e42;border-radius:8px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;position:relative}
 .seat-card-out.active{border-color:#facc15;background:#3a2a14}
 .seat-card-out.speaking{box-shadow:0 0 0 2px #22c55e,0 0 10px #22c55e}
 .seat-card-out .p-name{font-size:10px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .seat-card-out .p-tiles{font-size:9px;font-weight:700;color:#fbbf24}
 .seat-card-out .p-avatar{width:18px;height:18px;border-radius:50%;background:#b45309;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:9px;color:#fff}
 .seat-card-out .p-avatar.bot{background:#581c87}
-.seat-mute-btn{background:#334155;border:0;color:#fff;border-radius:4px;padding:1px 4px;font-size:8px;cursor:pointer;margin-top:2px}
-.seat-mute-btn.muted{background:#dc2626}
-#confirm{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
-.cbox{background:#141724;border:1px solid #334155;border-radius:16px;padding:18px;max-width:320px;width:100%;text-align:center}
+#confirm,#customModal,#summaryModal,#shopModal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.cbox{background:#141724;border:1px solid #334155;border-radius:16px;padding:18px;max-width:340px;width:100%;text-align:center}
 .cbox p{margin:0 0 14px;font-size:14px;line-height:1.4}
 input{-webkit-user-select:text;user-select:text}
 .tag.watch{background:#0369a1;color:#fff}
 .arcade-btn{width:100%;font:inherit;font-size:12px;font-weight:700;color:#fff;background:#0b0c12;border:1px solid #334155;border-radius:99px;padding:8px 14px;cursor:pointer;text-align:center}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
-.modal-box{background:#141724;border:1px solid #334155;border-radius:16px;padding:14px;max-width:300px;width:100%;display:flex;flex-direction:column;gap:8px}
-.modal-title{font-size:13px;font-weight:800;color:#fbbf24;text-align:center;margin-bottom:4px}
-.modal-option{padding:12px;min-height:44px;border-radius:10px;background:#0b0c12;border:1px solid #23273a;text-align:center;font-weight:700;font-size:13px;cursor:pointer;color:#fff}
+.modal-box{background:#141724;border:1px solid #334155;border-radius:16px;padding:14px;max-width:320px;width:100%;display:flex;flex-direction:column;gap:8px}
+.modal-title{font-size:14px;font-weight:800;color:#fbbf24;text-align:center;margin-bottom:4px}
+.modal-option{padding:10px;min-height:40px;border-radius:10px;background:#0b0c12;border:1px solid #23273a;text-align:center;font-weight:700;font-size:13px;cursor:pointer;color:#fff}
 .modal-option.selected{border-color:#fbbf24;background:#3a2a14;color:#fbbf24}
 #chatFab{position:fixed;right:14px;bottom:18px;width:56px;height:56px;border-radius:50%;font-size:24px;padding:0;background:#4f46e5;box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:60}
 #chatBadge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;font-size:11px;line-height:20px;padding:0 5px;color:#fff}
-#chatSheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:460px;height:58vh;background:#141724;border:1px solid #334155;border-radius:16px 16px 0 0;z-index:150;display:flex;flex-direction:column}
+#chatSheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:460px;height:62vh;background:#141724;border:1px solid #334155;border-radius:16px 16px 0 0;z-index:150;display:flex;flex-direction:column}
 .chat-head{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid #23273a;font-size:14px}
 #chatList{flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
 .msg{max-width:85%;padding:6px 10px;border-radius:12px;background:#1e2433;font-size:13px;align-self:flex-start;word-break:break-word;-webkit-user-select:text;user-select:text}
 .msg.me{align-self:flex-end;background:#312e81}
 .msg b{display:block;font-size:10px;color:#a5b4fc;margin-bottom:2px}
 .chat-in{display:flex;gap:6px;padding:8px;border-top:1px solid #23273a}
+.quick-pills{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;background:#0b0c12;border-top:1px solid #1e2433}
+.qpill{white-space:nowrap;background:#1e2433;border:1px solid #334155;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;color:#fbbf24;cursor:pointer;flex-shrink:0}
 input[type=range]{padding:0;min-height:32px;border:0;background:transparent;accent-color:#6366f1}
 .ib{width:44px;min-width:44px;padding:0;font-size:18px}
 #settingsPage{position:fixed;inset:0;background:#07080c;z-index:250;overflow-y:auto;padding:10px;display:flex;flex-direction:column;align-items:center}
@@ -101,6 +99,14 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
 #fxCanvas{position:absolute;inset:0;pointer-events:none;z-index:10}
 .flash-overlay{position:fixed;inset:0;pointer-events:none;z-index:99;background:rgba(251,191,36,0.3);opacity:0;transition:opacity .15s}
 .flash-overlay.on{opacity:1}
+@keyframes emotePop{0%{transform:scale(0.3) translateY(10px);opacity:0}20%{transform:scale(1.2) translateY(-5px);opacity:1}80%{transform:scale(1) translateY(-5px);opacity:1}100%{transform:scale(0.8) translateY(-25px);opacity:0}}
+.emote-floating{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:22px;animation:emotePop 2.4s forwards;pointer-events:none;z-index:90;background:rgba(15,23,42,0.9);border:1px solid #fbbf24;border-radius:99px;padding:2px 8px;box-shadow:0 4px 10px rgba(0,0,0,0.5)}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.shop-item{background:#0b0c12;border:1px solid #23273a;border-radius:12px;padding:10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.shop-item.owned{border-color:#059669}
+.shop-item .icon{font-size:28px}
+.shop-item .title{font-size:12px;font-weight:800;color:#fff}
+.shop-item .price{font-size:11px;color:#fbbf24;font-weight:700}
 </style>
 </head>
 <body>
@@ -109,7 +115,13 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
 
 <div class="card row between">
   <div class="logo">XGAMES <b>ARCADE</b></div>
-  <div class="row" style="gap:6px"><button id="musicBtn" class="ib blue">🎵</button><button id="sfxBtn" class="ib blue">🔊</button><button id="setBtn" class="ib purple">⚙️</button><button class="ib blue" id="hubBtn">🏠</button></div>
+  <div class="row" style="gap:6px">
+    <button id="shopBtn" class="ib gold">🛒</button>
+    <button id="musicBtn" class="ib blue">🎵</button>
+    <button id="sfxBtn" class="ib blue">🔊</button>
+    <button id="setBtn" class="ib purple">⚙️</button>
+    <button class="ib blue" id="hubBtn">🏠</button>
+  </div>
 </div>
 
 <div class="card stack">
@@ -130,8 +142,9 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
     <div id="homeBox" class="stack">
       <div class="row between">
         <h2>Your Nickname: <b id="myNickDisplay" style="color:#fbbf24">Player</b></h2>
-        <button id="editProfileBtn" style="font-size:11px">✏️ Edit</button>
+        <button id="editProfileBtn" style="font-size:11px">✏️ Profile</button>
       </div>
+      <div id="homeProgBar" class="panel" style="padding:8px 12px"></div>
       <button class="big" id="quickBtn">⚡ Quick Play</button>
       <div class="two">
         <div><div class="lbl" style="text-align:left">Rules</div><button class="arcade-btn" id="qModeBtn">Cut Throat (FFA)</button></div>
@@ -178,13 +191,14 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
   <div id="game" class="stack hidden">
     <div class="row between">
       <button id="exitBtn">🚪 Exit</button>
+      <button id="emoteMenuBtn" class="gold">💬 Express</button>
       <button id="huffBtn" class="red hidden">🔥 HUFF!</button>
       <button id="sizeCycle" class="blue">🔍 Size</button>
       <button id="themeBtn" class="purple">🎨 Classic</button>
     </div>
     <div class="score">
       <div id="scoreBoxL"></div>
-      <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat</i></div>
+      <div class="mid"><span id="handLbl">Hand 1</span><i id="modeLbl">Cut Throat</i><span id="timerLbl" style="color:#6366f1;font-weight:700">00:00</span></div>
       <div id="scoreBoxR"></div>
     </div>
     <div id="seatOverlayOutside" class="seat-grid-outside"></div>
@@ -219,9 +233,30 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
   </div>
 </div>
 
+<div id="summaryModal" class="modal-overlay hidden">
+  <div class="cbox stack">
+    <h2 style="font-size:18px;color:#fbbf24" id="sumTitle">🏆 MATCH RESULTS</h2>
+    <div style="font-size:13px;color:#94a3b8" id="sumDuration">Match Duration: 00:00</div>
+    <div id="sumBreakdown" class="panel stack" style="text-align:left;font-size:13px"></div>
+    <button id="sumClose" class="green" style="width:100%">Awesome!</button>
+  </div>
+</div>
+
+<div id="shopModal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:380px">
+    <div class="row between">
+      <div class="modal-title" style="margin:0">🛒 Yard Shop</div>
+      <div style="font-weight:900;color:#fbbf24;font-size:13px">🪙 <span id="shopCoins">0</span></div>
+    </div>
+    <div class="shop-grid" id="shopGrid"></div>
+    <button id="shopClose" class="red" style="margin-top:8px">Close</button>
+  </div>
+</div>
+
 <button id="chatFab" class="hidden">💬<span id="chatBadge" class="hidden">0</span></button>
 <div id="chatSheet" class="hidden">
   <div class="chat-head"><b>💬 Room Chat</b><button id="chatClose" style="padding:4px 12px">✕</button></div>
+  <div class="quick-pills" id="quickPills"></div>
   <div id="chatList"></div>
   <div class="chat-in"><input id="chatInput" maxlength="200" placeholder="Say something..."><button id="chatSend" class="green">Send</button></div>
 </div>
@@ -230,7 +265,7 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
   <div class="sp-card stack">
     <div class="row between"><h2 style="font-size:16px;color:#fbbf24">⚙️ Settings</h2><button id="setClose" class="red">✕ Close</button></div>
     <div class="panel stack">
-      <h2>👤 Profile</h2>
+      <h2>👤 Profile & Progression</h2>
       <input id="setNick" maxlength="15" placeholder="Nickname">
       <input id="setBio" maxlength="60" placeholder="Short bio (optional)" style="margin-top:6px">
       <input id="setLink" maxlength="120" placeholder="Instagram / TikTok link (optional, starting with https://)" style="margin-top:6px">
@@ -249,7 +284,7 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
     <div class="panel stack">
       <h2>👁️ Display</h2>
       <div class="opt"><span>Game size</span><button class="arcade-btn" id="sizeBtn">Normal</button></div>
-      <div class="lbl" style="text-align:left;margin:0">Makes the board and your tiles bigger. The menus stay the same. Pinch to zoom works too, and the High Contrast theme is in your theme list.</div>
+      <div class="lbl" style="text-align:left;margin:0">Makes the board and your tiles bigger. The menus stay the same. Pinch to zoom works too.</div>
       <button id="fullBtn" class="purple">⛶ Fullscreen</button>
     </div>
     <div class="panel stack">
@@ -275,7 +310,7 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
 <script>
 /* ---------- SUPABASE & LIVEKIT CONFIG ---------- */
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInRefiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
@@ -307,6 +342,8 @@ let scores = { S: 0, W: 0, N: 0, E: 0 };
 let botLevel = localStorage.getItem('xg_level') || 'medium';
 if (!['easy', 'medium', 'hard'].includes(botLevel)) botLevel = 'medium';
 
+let matchStartTime = 0, matchTimerInterval = null, currentMatchSeconds = 0;
+
 let myClientId = localStorage.getItem('xg_perm_client_id');
 if (!myClientId || !ID_RE.test(myClientId)) {
   myClientId = 'p_' + Math.random().toString(36).slice(2, 11);
@@ -320,7 +357,7 @@ const AVATARS = ['😎', '🔥', '🌴', '🥥', '🍹', '🎧', '👑', '🦁',
 let myAvatar = localStorage.getItem('xg_avatar');
 if (!AVATARS.includes(myAvatar)) myAvatar = '😎';
 
-/* ---------- REFRESH-PROOF SESSION ---------- */
+/* ---------- REFRESH-PROOF SESSION & PROGRESSION ---------- */
 const SESSION_KEY = 'xg_session_v1';
 const MAX_SESSION_AGE = 6 * 3600 * 1000;
 const store = {
@@ -330,6 +367,109 @@ const store = {
 };
 function saveSession() { store.set(SESSION_KEY, { roomCode, role: isHost ? 'host' : 'guest', savedAt: Date.now() }); }
 function clearSession() { store.del(SESSION_KEY); }
+
+/* --- PROGRESSION, LEVEL & SHOP STORE --- */
+function getProgression() {
+  const defaults = { xp: 0, level: 1, coins: 100, playtime: 0, inventory: ['emote_smoke', 'emote_fire', 'emote_pat_watch'] };
+  return Object.assign(defaults, store.get('xg_prog') || {});
+}
+function saveProgression(p) { store.set('xg_prog', p); renderProgressionUI(); }
+function getXpNeeded(lvl) { return Math.floor(120 * Math.pow(lvl, 1.4)); }
+
+function addXpAndCoins(xpAdd, coinAdd, reason) {
+  let p = getProgression();
+  p.xp += xpAdd;
+  p.coins += coinAdd;
+  let leveledUp = false;
+  let needed = getXpNeeded(p.level);
+  while (p.xp >= needed) {
+    p.xp -= needed;
+    p.level++;
+    leveledUp = true;
+    needed = getXpNeeded(p.level);
+  }
+  saveProgression(p);
+  if (leveledUp) {
+    fanfare();
+    toast(`🎉 LEVEL UP! You reached Level ${p.level}!`);
+  } else if (reason) {
+    toast(`+${xpAdd} XP | +${coinAdd} 🪙 (${reason})`);
+  }
+  return { leveledUp, newLevel: p.level };
+}
+
+/* ---------- SHOP DATA & EMOTES ---------- */
+const SHOP_ITEMS = [
+  { id: 'emote_smoke', name: 'Smoking Chill Vibe', type: 'emote', symbol: '🚬', price: 0 },
+  { id: 'emote_fire', name: 'Fire Heat', type: 'emote', symbol: '🔥', price: 0 },
+  { id: 'emote_crown', name: 'Crown Flex', type: 'emote', symbol: '👑', price: 150 },
+  { id: 'emote_pat_watch', name: 'Patois: "Watch dat!"', type: 'emote', symbol: '💬 "Watch dat!"', price: 0 },
+  { id: 'emote_pat_bredrin', name: 'Patois: "Bredrin!"', type: 'emote', symbol: '💬 "Bredrin!"', price: 100 },
+  { id: 'emote_pat_shut', name: 'Patois: "Shut dem down!"', type: 'emote', symbol: '💬 "Shut dem down!"', price: 200 },
+  { id: 'emote_pat_pose', name: 'Patois: "Who pose?"', type: 'emote', symbol: '💬 "Who pose?"', price: 100 }
+];
+
+function openShop() {
+  const p = getProgression();
+  $('shopCoins').textContent = p.coins;
+  const grid = $('shopGrid'); grid.innerHTML = '';
+  SHOP_ITEMS.forEach(item => {
+    const owned = p.inventory.includes(item.id);
+    const div = document.createElement('div');
+    div.className = 'shop-item' + (owned ? ' owned' : '');
+    div.innerHTML = `
+      <div class="icon">${item.symbol}</div>
+      <div class="title">${item.name}</div>
+      <div class="price">${owned ? '✅ Unlocked' : '🪙 ' + item.price}</div>
+    `;
+    if (!owned) {
+      div.style.cursor = 'pointer';
+      div.onclick = () => {
+        if (p.coins >= item.price) {
+          p.coins -= item.price;
+          p.inventory.push(item.id);
+          saveProgression(p);
+          toast('Unlocked ' + item.name + '!');
+          openShop();
+        } else {
+          toast('Not enough coins!');
+        }
+      };
+    }
+    grid.appendChild(div);
+  });
+  $('shopModal').classList.remove('hidden');
+}
+$('shopBtn').onclick = openShop;
+$('shopClose').onclick = () => $('shopModal').classList.add('hidden');
+
+function openEmoteMenu() {
+  const p = getProgression();
+  const ownedEmotes = SHOP_ITEMS.filter(item => p.inventory.includes(item.id));
+  openModal('Express Yourself', ownedEmotes.map(e => ({ value: e.symbol, label: e.symbol + ' ' + e.name })), null, symbol => {
+    sendEmoteReaction(symbol);
+  });
+}
+$('emoteMenuBtn').onclick = openEmoteMenu;
+
+function sendEmoteReaction(symbol) {
+  if (!mySeatPos) return;
+  triggerSeatEmote(mySeatPos, symbol);
+  if (roomSubscription) {
+    roomSubscription.send({ type: 'broadcast', event: 'TABLE_EMOTE', payload: { pos: mySeatPos, symbol } });
+  }
+}
+
+function triggerSeatEmote(pos, symbol) {
+  const card = document.querySelector(`.seat-card-out[data-pos="${pos}"]`);
+  if (!card) return;
+  const pop = document.createElement('div');
+  pop.className = 'emote-floating';
+  pop.textContent = symbol;
+  card.appendChild(pop);
+  clack();
+  setTimeout(() => pop.remove(), 2400);
+}
 
 /* ---------- THEMES ---------- */
 const THEMES = {
@@ -365,7 +505,12 @@ function openModal(title, items, currentVal, onSelect) {
 }
 $('modalClose').onclick = () => $('customModal').classList.add('hidden');
 
-const MODE_NAME = { cutthroat: 'Cut Throat (FFA)', partners: 'Partners (2v2)', boneyard: 'Boneyard (2-4 players)' };
+const MODE_NAME = { 
+  cutthroat: 'Cut Throat (FFA)', 
+  partners: 'Partners (2v2)', 
+  boneyard: 'Boneyard (2-4 players)',
+  chaos: '🔥 Chaos Mode (Yard Breaks & High Stakes)'
+};
 function renderSettingsButtons() {
   const modeText = MODE_NAME[gameMode] || 'Cut Throat (FFA)';
   const levelText = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
@@ -381,7 +526,12 @@ function renderSettingsButtons() {
   $('maxPc').textContent = currentGame === 'draughts' ? '8' : '4';
 }
 
-const MODE_ITEMS = [{ value: 'cutthroat', label: 'Cut Throat (FFA, 4 players)' }, { value: 'partners', label: 'Partners (2v2, 4 players)' }, { value: 'boneyard', label: 'Boneyard (2-4 players)' }];
+const MODE_ITEMS = [
+  { value: 'cutthroat', label: 'Cut Throat (FFA, 4 players)' }, 
+  { value: 'partners', label: 'Partners (2v2, 4 players)' }, 
+  { value: 'boneyard', label: 'Boneyard (2-4 players)' },
+  { value: 'chaos', label: '🔥 Chaos Mode (Yard Breaks & High Stakes)' }
+];
 const DRAUGHTS_RULE_ITEMS = [{ value: 'huff', label: 'Huffing Mode (allows human errors)' }, { value: 'strict', label: 'Strict Mode (compulsory jumps)' }];
 const LEVEL_ITEMS = [{ value: 'easy', label: 'Easy' }, { value: 'medium', label: 'Medium' }, { value: 'hard', label: 'Hard' }];
 
@@ -391,9 +541,6 @@ $('chipDraughts').onclick = () => { if (isHost) switchGame('draughts'); };
 function switchGame(g) {
   if (currentGame === g) return;
   currentGame = g;
-  if (g === 'draughts') {
-    // Trim lobby to 2 active seats if needed, or adjust positions
-  }
   renderSettingsButtons();
   if (isHost) syncRoomState();
 }
@@ -531,7 +678,7 @@ function shake() {
   setTimeout(() => w.classList.remove('shake'), 260);
 }
 
-/* ---------- HELPERS ---------- */
+/* ---------- HELPERS & TIMER ---------- */
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 const log = m => $('log').textContent = m;
 const pick = (v, cur) => (v === undefined ? cur : v);
@@ -547,6 +694,19 @@ function ask(msg, yesLabel, fn) {
   $('cNo').onclick = () => $('confirm').classList.add('hidden');
 }
 
+function startMatchTimer() {
+  clearInterval(matchTimerInterval);
+  matchStartTime = Date.now();
+  currentMatchSeconds = 0;
+  matchTimerInterval = setInterval(() => {
+    currentMatchSeconds = Math.floor((Date.now() - matchStartTime) / 1000);
+    const m = String(Math.floor(currentMatchSeconds / 60)).padStart(2, '0');
+    const s = String(currentMatchSeconds % 60).padStart(2, '0');
+    $('timerLbl').textContent = `${m}:${s}`;
+  }, 1000);
+}
+function stopMatchTimer() { clearInterval(matchTimerInterval); }
+
 /* ---------- STATE ---------- */
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 const MATE = { S: 'N', N: 'S', W: 'E', E: 'W' };
@@ -557,9 +717,9 @@ let passMiss = { S: new Set(), W: new Set(), N: new Set(), E: new Set() };
 const byPos = p => players.find(x => x.pos === p);
 
 /* Draughts Specific State */
-let dBoard = null; // 8x8 array or 64 array
-let dTurn = 'b'; // 'b' (Black/S) or 'w' (White/N)
-let huffable = null; // { pos, by, piecePos }
+let dBoard = null;
+let dTurn = 'b';
+let huffable = null;
 let huffSelecting = false;
 let dSelected = null;
 let spectatorQueue = [];
@@ -568,6 +728,7 @@ let spectatorQueue = [];
 function initProfile() {
   if (!myNickname) { $('homeBox').classList.add('hidden'); $('profileBox').classList.remove('hidden'); }
   else { $('myNickDisplay').textContent = myNickname; $('profileBox').classList.add('hidden'); $('homeBox').classList.remove('hidden'); }
+  renderProgressionUI();
 }
 $('saveProfileBtn').onclick = () => {
   const v = stripName($('profileNameIn').value);
@@ -576,6 +737,7 @@ $('saveProfileBtn').onclick = () => {
   $('myNickDisplay').textContent = v;
   $('profileBox').classList.add('hidden'); $('homeBox').classList.remove('hidden');
   toast('Profile saved!');
+  renderProgressionUI();
   const roomParam = new URLSearchParams(window.location.search).get('room');
   if (roomParam) joinRoomByCode(roomParam.toUpperCase());
 };
@@ -684,6 +846,7 @@ function listenToRoom() {
     .on('broadcast', { event: 'JOIN_EVENT' }, ({ payload }) => { if (isHost) handleJoin(payload); })
     .on('broadcast', { event: 'READY' }, ({ payload }) => { if (isHost) handleReady(payload); })
     .on('broadcast', { event: 'CHAT_MSG' }, ({ payload }) => handleChat(payload))
+    .on('broadcast', { event: 'TABLE_EMOTE' }, ({ payload }) => { if (payload && payload.pos) triggerSeatEmote(payload.pos, payload.symbol); })
     .on('broadcast', { event: 'JOIN_DENIED' }, ({ payload }) => {
       if (payload && payload.clientId === myClientId) leaveToHome(payload.reason || 'The host could not seat you.');
     })
@@ -713,7 +876,7 @@ function denyJoin(clientId, reason) {
   if (roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'JOIN_DENIED', payload: { clientId, reason } });
 }
 
-function getMaxRoom() { return currentGame === 'draughts' ? 8 : MAX_ROOM; }
+function getMaxRoom() { return currentGame === 'draughts' ? 8 : 4; }
 
 function handleJoin(g) {
   if (!g || typeof g.clientId !== 'string' || !ID_RE.test(g.clientId)) return;
@@ -763,7 +926,7 @@ function handleMove(mv) {
       drawFor(cur);
     }
   } else if (currentGame === 'draughts') {
-    const activeColor = dTurn; // 'b' or 'w'
+    const activeColor = dTurn;
     const curSeat = activeColor === 'b' ? 'S' : 'N';
     const curP = byPos(curSeat);
     if (!curP || curP.ai || curP.clientId !== mv.clientId) return;
@@ -829,7 +992,7 @@ async function joinRoomByCode(code) {
   isHost = (hostClientId === myClientId);
   joinConfirmed = false; lastApplied = { term: -1, version: -1 };
 
-  const max = data.state.game === 'draughts' ? 8 : MAX_ROOM;
+  const max = data.state.game === 'draughts' ? 8 : 4;
   if (!isHost && !(data.state.lobby || []).some(p => p.clientId === myClientId) && (data.state.lobby || []).length >= max) {
     roomCode = ''; return toast('That room is full');
   }
@@ -857,6 +1020,7 @@ $('shareBtn').onclick = () => {
 };
 
 async function leaveToHome(message) {
+  stopMatchTimer();
   clearSession(); stopAmbientLoop();
   epoch++; active = false;
   if (isHost && roomSubscription) {
@@ -890,6 +1054,7 @@ $('exitBtn').onclick = () => {
 };
 
 function backToRoom() {
+  stopMatchTimer();
   if (!isHost) return;
   if (!roomCode) return leaveToHome();
   epoch++; active = false; matchOver = false; roomStatus = 'waiting';
@@ -1074,7 +1239,18 @@ function playerMenu(p, inGame) {
   });
 }
 
-/* ---------- ROOM CHAT ---------- */
+/* ---------- ROOM CHAT & QUICK PILLS ---------- */
+const QUICK_PATois = ["Watch dat!", "Bredrin!", "Shut dem down!", "Who pose?", "Clean board!", "Nice play!"];
+function renderQuickPills() {
+  const container = $('quickPills'); container.innerHTML = '';
+  QUICK_PATois.forEach(txt => {
+    const p = document.createElement('div');
+    p.className = 'qpill'; p.textContent = txt;
+    p.onclick = () => { $('chatInput').value = txt; sendChat(); };
+    container.appendChild(p);
+  });
+}
+
 const stripText = t => String(t || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 200);
 function validMsg(m) {
   return !!m && typeof m.id === 'string' && m.id.length < 60 && typeof m.from === 'string' && typeof m.name === 'string' && typeof m.text === 'string' && Number.isFinite(m.ts);
@@ -1089,6 +1265,7 @@ function addMsg(m) {
 function updateChatBadge() { const b = $('chatBadge'); b.textContent = unread > 9 ? '9+' : String(unread); b.classList.toggle('hidden', unread === 0); }
 function onNewMsg(m) { if (!chatReady || chatOpen || m.from === myClientId) return; unread++; updateChatBadge(); }
 function renderChat() {
+  renderQuickPills();
   const list = $('chatList'); list.innerHTML = '';
   roomMessages.forEach(m => {
     const d = document.createElement('div'); d.className = 'msg' + (m.from === myClientId ? ' me' : '');
@@ -1146,14 +1323,45 @@ function didIWin() {
   if (gameMode === 'partners') return (sNS >= 6) === (mySeatPos === 'N' || mySeatPos === 'S');
   return lastWin === mySeatPos;
 }
-function renderStats() {
-  const st = getStats(), box = $('statsBox'); box.innerHTML = '';
-  [['🎮 Matches played', st.played], ['🏆 Matches won', st.won], ['📈 Win rate', st.played ? Math.round(100 * st.won / st.played) + '%' : '-'], ['🔥 Win streak', st.streak], ['⭐ Best streak', st.best]].forEach(([a, b]) => {
-    const row = document.createElement('div'); row.className = 'stat';
-    const l = document.createElement('span'); l.textContent = a; const r = document.createElement('b'); r.textContent = String(b);
-    row.appendChild(l); row.appendChild(r); box.appendChild(row);
-  });
+
+function renderProgressionUI() {
+  const p = getProgression();
+  const needed = getXpNeeded(p.level);
+  const pct = Math.min(100, Math.floor((p.xp / needed) * 100));
+  
+  const totalMins = Math.floor(p.playtime / 60);
+  const hrs = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
+  const timeStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} mins`;
+
+  const html = `
+    <div style="background:#0b0c12; border:1px solid #23273a; border-radius:12px; padding:10px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-weight:800; color:#fbbf24; font-size:13px;">⭐ Level ${p.level}</span>
+        <span style="font-size:11px; color:#94a3b8;">${p.xp} / ${needed} XP · 🪙 ${p.coins}</span>
+      </div>
+      <div style="width:100%; height:8px; background:#1e2433; border-radius:99px; overflow:hidden;">
+        <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #f59e0b, #ef4444); border-radius:99px;"></div>
+      </div>
+    </div>
+  `;
+  
+  if ($('homeProgBar')) $('homeProgBar').innerHTML = html;
+  
+  const box = $('statsBox');
+  if (box) {
+    const st = getStats();
+    box.innerHTML = html + `
+      <div class="stat"><span>🎮 Matches played</span><b>${st.played}</b></div>
+      <div class="stat"><span>🏆 Matches won</span><b>${st.won}</b></div>
+      <div class="stat"><span>📈 Win rate</span><b>${st.played ? Math.round(100 * st.won / st.played) + '%' : '-'}</b></div>
+      <div class="stat"><span>🔥 Win streak</span><b>${st.streak}</b></div>
+      <div class="stat"><span>⭐ Best streak</span><b>${st.best}</b></div>
+      <div class="stat"><span>⏱️ Total Playtime</span><b>${timeStr}</b></div>
+    `;
+  }
 }
+
 function buildAvatars() {
   const g = $('avGrid'); g.innerHTML = '';
   AVATARS.forEach(a => {
@@ -1173,13 +1381,13 @@ function openSettings() {
   $('setNick').value = myNickname;
   $('setBio').value = myBio;
   $('setLink').value = myLink;
-  buildAvatars(); renderStats(); syncSettingsUI(); $('settingsPage').classList.remove('hidden');
+  buildAvatars(); renderProgressionUI(); syncSettingsUI(); $('settingsPage').classList.remove('hidden');
 }
 $('setBtn').onclick = openSettings;
 $('sizeBtn').onclick = () => openModal('Game size', Object.keys(SIZES).map(k => ({ value: k, label: SIZES[k].n })), settings.size, setSize);
 $('sizeCycle').onclick = () => { const ks = Object.keys(SIZES); setSize(ks[(ks.indexOf(settings.size) + 1) % ks.length]); toast('Game size: ' + SIZES[settings.size].n); };
 $('fullBtn').onclick = () => {
-  if (!document.documentElement.requestFullscreen) return toast("Fullscreen isn't available on this device. Try pinch to zoom.");
+  if (!document.documentElement.requestFullscreen) return toast("Fullscreen isn't available on this device.");
   if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
   else if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
 };
@@ -1198,7 +1406,7 @@ $('setSave').onclick = () => {
   myBio = bio; localStorage.setItem('xg_bio', bio);
   myLink = link; localStorage.setItem('xg_link', link);
   $('myNickDisplay').textContent = v;
-  toast('Profile saved! Your name updates in the next room you join.');
+  toast('Profile saved!');
 };
 $('musicVol').oninput = () => { settings.music = +$('musicVol').value; saveSettings(); };
 $('sfxVol').oninput = () => { settings.sfx = +$('sfxVol').value; saveSettings(); };
@@ -1211,7 +1419,7 @@ $('speedBtn').onclick = () => openModal('Bot speed', [{ value: 'fast', label: 'F
 $('setLevelBtn').onclick = () => openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); syncSettingsUI(); if (isHost && roomCode) syncRoomState(); });
 $('setThemeBtn').onclick = () => openModal('Select Board Theme', Object.keys(THEMES).map(k => ({ value: k, label: THEMES[k].n })), themeKey, v => { setTheme(v); syncSettingsUI(); });
 
-/* ---------- RESUME AFTER REFRESH / SLEEP / SIGNAL DROP ---------- */
+/* ---------- RESUME AFTER REFRESH ---------- */
 async function resumeSession() {
   const s = store.get(SESSION_KEY);
   if (!s || !s.roomCode || !myNickname) return false;
@@ -1236,7 +1444,7 @@ window.addEventListener('load', async () => {
   else if (myNickname) await resumeSession();
 });
 
-/* ---------- GAME SWITCHING & MATCH ENGINE ---------- */
+/* ---------- GAME MATCH ENGINE ---------- */
 function fullSet() {
   const t = [];
   for (let i = 0; i <= 6; i++) for (let j = i; j <= 6; j++) t.push({ a: i, b: j, d: i === j });
@@ -1250,8 +1458,8 @@ function initDraughtsBoard() {
     for (let c = 0; c < 8; c++) {
       if ((r + c) % 2 === 1) {
         const idx = r * 8 + c;
-        if (r < 3) b[idx] = { color: 'w', king: false }; // White on top
-        else if (r > 4) b[idx] = { color: 'b', king: false }; // Black on bottom
+        if (r < 3) b[idx] = { color: 'w', king: false };
+        else if (r > 4) b[idx] = { color: 'b', king: false };
       }
     }
   }
@@ -1261,6 +1469,7 @@ function initDraughtsBoard() {
 function newMatch() {
   $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
   sNS = 0; sWE = 0; scores = { S: 0, W: 0, N: 0, E: 0, b: 0, w: 0 }; handNo = 1; lastWin = null; matchOver = false;
+  startMatchTimer();
   if (currentGame === 'dominoes') {
     newHand();
   } else if (currentGame === 'draughts') {
@@ -1289,7 +1498,7 @@ function newHand() {
     let best = null;
     players.forEach(p => p.hand.forEach(t => { const k = t.d ? 100 + t.a : t.a + t.b; if (!best || k > best.k) best = { k, pos: p.pos, a: t.a, b: t.b }; }));
     openTile = { a: best.a, b: best.b }; turn = best.pos;
-    log(byPos(turn).name + ' holds the highest tile and poses first [' + best.a + '|' + best.b + '].');
+    log(byPos(turn).name + ' holds highest double and poses first [' + best.a + '|' + best.b + '].');
   } else { openTile = null; turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.'); }
   refresh(); syncRoomState(); maybeAi();
 }
@@ -1297,7 +1506,7 @@ function newHand() {
 function newDraughtsMatch() {
   epoch++;
   dBoard = initDraughtsBoard();
-  dTurn = 'b'; // Black moves first
+  dTurn = 'b';
   huffable = null;
   dSelected = null;
   huffSelecting = false;
@@ -1401,15 +1610,12 @@ function getPieceSimples(board, idx) {
 
 function getPieceJumps(board, startIdx) {
   const results = [];
-  const piece = board[startIdx];
   
   function dfs(currIdx, currBoard, path, captured) {
     const r = Math.floor(currIdx / 8), c = currIdx % 8;
     const isKing = currBoard[currIdx].king;
     const color = currBoard[currIdx].color;
     let foundJump = false;
-    
-    // Men can capture in all 4 diagonal directions
     const dirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
     
     for (let [dr, dc] of dirs) {
@@ -1422,13 +1628,12 @@ function getPieceJumps(board, startIdx) {
           let target = currBoard[nIdx];
           if (target) {
             if (target.color !== color && !captured.includes(nIdx)) {
-              // Found enemy piece, check open landing squares beyond it
               let lStep = 1;
               while(true) {
                 let lr = nr + dr * lStep, lc = nc + dc * lStep;
                 if (lr < 0 || lr > 7 || lc < 0 || lc > 7) break;
                 let lIdx = lr * 8 + lc;
-                if (currBoard[lIdx] !== null) break; // Blocked
+                if (currBoard[lIdx] !== null) break;
                 
                 foundJump = true;
                 const nextBoard = [...currBoard];
@@ -1439,12 +1644,11 @@ function getPieceJumps(board, startIdx) {
                 lStep++;
               }
             }
-            break; // Stopped by piece
+            break;
           }
           step++;
         }
       } else {
-        // Man jump logic
         let nr = r + dr, nc = c + dc;
         let lr = r + dr * 2, lc = c + dc * 2;
         if (lr >= 0 && lr <= 7 && lc >= 0 && lc <= 7) {
@@ -1456,10 +1660,8 @@ function getPieceJumps(board, startIdx) {
             nextBoard[lIdx] = nextBoard[currIdx];
             nextBoard[currIdx] = null;
             
-            // Check mid-jump kinging
             const kingRow = color === 'b' ? 0 : 7;
             if (lr === kingRow) {
-              // Mid-jump promotion stops immediately on king row
               results.push({ from: startIdx, path: [...path, lIdx], captured: [...captured, nIdx], promote: true });
             } else {
               dfs(lIdx, nextBoard, [...path, lIdx], [...captured, nIdx]);
@@ -1478,7 +1680,7 @@ function getPieceJumps(board, startIdx) {
   return results;
 }
 
-function executeDraughtsMove(fromIdx, path, isHuffMove = false) {
+function executeDraughtsMove(fromIdx, path) {
   const p = dBoard[fromIdx];
   if (!p) return;
   
@@ -1489,14 +1691,10 @@ function executeDraughtsMove(fromIdx, path, isHuffMove = false) {
   const tookJump = jumps.some(j => j.from === fromIdx && j.path[0] === path[0]);
   const hadJumps = jumps.length > 0;
   
-  // Track missed jump for huffing
   let skippedJumpPiece = null;
-  if (!tookJump && hadJumps) {
-    skippedJumpPiece = fromIdx;
-  }
+  if (!tookJump && hadJumps) skippedJumpPiece = fromIdx;
   
   for (let destIdx of path) {
-    // Determine captures along step
     const r1 = Math.floor(currIdx / 8), c1 = currIdx % 8;
     const r2 = Math.floor(destIdx / 8), c2 = destIdx % 8;
     const dr = Math.sign(r2 - r1), dc = Math.sign(c2 - c1);
@@ -1504,9 +1702,7 @@ function executeDraughtsMove(fromIdx, path, isHuffMove = false) {
     let step = 1;
     while(r1 + dr * step !== r2) {
       let capIdx = (r1 + dr * step) * 8 + (c1 + dc * step);
-      if (dBoard[capIdx]) {
-        allCaptured.push(capIdx);
-      }
+      if (dBoard[capIdx]) allCaptured.push(capIdx);
       step++;
     }
     
@@ -1514,28 +1710,24 @@ function executeDraughtsMove(fromIdx, path, isHuffMove = false) {
     dBoard[currIdx] = null;
     currIdx = destIdx;
     
-    // Promotion check
     const kingRow = color === 'b' ? 0 : 7;
     if (Math.floor(currIdx / 8) === kingRow && !dBoard[currIdx].king) {
       dBoard[currIdx].king = true;
       crownSnd();
-      break; // Turn stops on promotion
+      break;
     }
   }
   
-  // Remove captured pieces after full sequence
   allCaptured.forEach(cIdx => { dBoard[cIdx] = null; });
   if (allCaptured.length) captureSnd();
   else clack();
   
-  // Update huffable
   if (skippedJumpPiece !== null && draughtsRule === 'huff') {
     huffable = { pos: currIdx, by: color, turnNo: handNo };
   } else {
     huffable = null;
   }
   
-  // Turn transition
   dTurn = dTurn === 'b' ? 'w' : 'b';
   dSelected = null;
   huffSelecting = false;
@@ -1548,10 +1740,17 @@ function executeDraughtsMove(fromIdx, path, isHuffMove = false) {
 
 function executeHuff(targetIdx) {
   if (!huffable) return;
+  const huffedPiece = dBoard[targetIdx];
   dBoard[targetIdx] = null;
   huffable = null;
   huffSelecting = false;
   captureSnd();
+  
+  const myColor = mySeatPos === 'S' ? 'b' : (mySeatPos === 'N' ? 'w' : null);
+  if (myColor && huffedPiece && huffedPiece.king) {
+    addXpAndCoins(25, 25, 'King Huff');
+  }
+  
   log('🔥 Piece HUFFED!');
   refresh();
   syncRoomState();
@@ -1570,27 +1769,22 @@ function checkDraughtsWin() {
 }
 
 function winDraughts(winnerColor) {
+  stopMatchTimer();
   fanfare();
   active = false;
   lastWin = winnerColor;
-  const winnerSeat = winnerColor === 'b' ? 'S' : 'N';
-  const winnerP = byPos(winnerSeat);
-  log('🏆 Match Over: ' + (winnerP ? winnerP.name : (winnerColor === 'b' ? 'Black' : 'White')) + ' wins!');
   matchOver = true;
   
-  // Spectator rotation
-  if (spectatorQueue.length > 0) {
-    const loserSeat = winnerColor === 'b' ? 'N' : 'S';
-    const loserIdx = lobby.findIndex(l => l.pos === loserSeat);
-    if (loserIdx !== -1) {
-      const loser = lobby[loserIdx];
-      loser.pos = null; // Move to spectator
-      spectatorQueue.push(loser.clientId);
-      const nextId = spectatorQueue.shift();
-      const nextPlayer = lobby.find(l => l.clientId === nextId);
-      if (nextPlayer) nextPlayer.pos = loserSeat;
-    }
-  }
+  const winnerSeat = winnerColor === 'b' ? 'S' : 'N';
+  const isWin = mySeatPos === winnerSeat;
+  
+  let xpBase = isWin ? 80 : 20, coinBase = isWin ? 100 : 20;
+  const res = addXpAndCoins(xpBase, coinBase, isWin ? 'Match Winner' : 'Match Completion');
+  
+  showSummaryModal(isWin ? '🏆 DRAUGHTS VICTORY' : 'Match Ended', currentMatchSeconds, [
+    { label: isWin ? 'Victory Reward' : 'Consolation Reward', xp: xpBase, coins: coinBase }
+  ]);
+  
   refresh(); syncRoomState();
 }
 
@@ -1655,8 +1849,6 @@ function hardPick(p, opts) {
 
 function aiDraughtsTurn() {
   const activeColor = dTurn;
-  
-  // Check if bot can Huff
   if (huffable && huffable.by !== activeColor) {
     if (botLevel === 'hard' || (botLevel === 'medium' && Math.random() < 0.5)) {
       executeHuff(huffable.pos);
@@ -1666,9 +1858,7 @@ function aiDraughtsTurn() {
   
   const moves = getDraughtsMoves(dBoard, activeColor);
   let choice = null;
-  
   if (moves.jumps.length > 0) {
-    // Must jump in strict, or preferred in huff
     if (botLevel === 'easy' && draughtsRule === 'huff' && Math.random() < 0.25 && moves.simples.length > 0) {
       choice = moves.simples[Math.floor(Math.random() * moves.simples.length)];
     } else {
@@ -1678,9 +1868,7 @@ function aiDraughtsTurn() {
     choice = moves.simples[Math.floor(Math.random() * moves.simples.length)];
   }
   
-  if (choice) {
-    executeDraughtsMove(choice.from, choice.path);
-  }
+  if (choice) executeDraughtsMove(choice.from, choice.path);
 }
 
 function blocked() {
@@ -1704,26 +1892,91 @@ function blocked() {
 
 function win(pos, why) {
   fanfare(); active = false; lastWin = pos;
-  if (gameMode === 'partners') {
-    const ns = pos === 'N' || pos === 'S';
-    if (ns) { if (sWE > 0 && sNS === 0) { toast('BREAK! Score reset to 0-0'); sWE = 0; } sNS++; }
-    else { if (sNS > 0 && sWE === 0) { toast('BREAK! Score reset to 0-0'); sNS = 0; } sWE++; }
-    log('🎉 ' + why);
-    if (sNS >= 6 || sWE >= 6) {
-      matchOver = true; log('🏆 Match over: Team ' + (sNS >= 6 ? 'N/S' : 'E/W') + ' wins six love!');
-      refresh(); syncRoomState(); return;
-    }
-  } else {
-    scores[pos] = (scores[pos] || 0) + 1;
-    log('🎉 ' + why);
-    if (scores[pos] >= 6) {
-      matchOver = true; log('🏆 Match over: ' + byPos(pos).name + ' wins six love!');
-      refresh(); syncRoomState(); return;
+  let isChaosBreak = false;
+
+  if (gameMode === 'chaos') {
+    if (players.length === 4) {
+      const ns = (pos === 'N' || pos === 'S');
+      if (ns && sWE >= 5 && sNS === 0) { sWE = 0; isChaosBreak = true; toast('💥 SHUTOUT BREAK! E/W wiped to 0!'); }
+      else if (!ns && sNS >= 5 && sWE === 0) { sNS = 0; isChaosBreak = true; toast('💥 SHUTOUT BREAK! N/S wiped to 0!'); }
     }
   }
+
+  if (gameMode === 'partners' || gameMode === 'chaos') {
+    const ns = pos === 'N' || pos === 'S';
+    if (ns) sNS++; else sWE++;
+  } else {
+    scores[pos] = (scores[pos] || 0) + 1;
+  }
+
+  if (pos === mySeatPos) {
+    let xp = 20, coins = 15;
+    if (isChaosBreak) { xp += 50; coins += 40; }
+    addXpAndCoins(xp, coins, 'Hand Victory');
+  }
+
+  log('🎉 ' + why);
+  
+  const targetScore = 6;
+  let matchWinner = null;
+  if (gameMode === 'partners' || gameMode === 'chaos') {
+    if (sNS >= targetScore) matchWinner = 'Team N/S';
+    else if (sWE >= targetScore) matchWinner = 'Team E/W';
+  } else {
+    if (scores[pos] >= targetScore) matchWinner = byPos(pos).name;
+  }
+
+  if (matchWinner) {
+    stopMatchTimer();
+    matchOver = true; 
+    log('🏆 Match over: ' + matchWinner + ' wins six love!');
+    
+    const isWin = (gameMode === 'partners' || gameMode === 'chaos')
+      ? ((sNS >= targetScore && (mySeatPos === 'N' || mySeatPos === 'S')) || (sWE >= targetScore && (mySeatPos === 'W' || mySeatPos === 'E')))
+      : (scores[mySeatPos] >= targetScore);
+      
+    const isShutout = (gameMode === 'partners' || gameMode === 'chaos')
+      ? (sNS === 6 && sWE === 0) || (sWE === 6 && sNS === 0)
+      : Object.keys(scores).some(p => scores[p] === 6 && Object.keys(scores).filter(x => x !== p).every(x => scores[x] === 0));
+
+    let baseXP = isWin ? 80 : 20, baseCoins = isWin ? 100 : 20;
+    const items = [{ label: isWin ? 'Match Champion' : 'Match Consolation', xp: baseXP, coins: baseCoins }];
+    if (isShutout) items.push({ label: 'Six Love Shutout Bonus', xp: 50, coins: 50 });
+    
+    addXpAndCoins(items.reduce((a,b)=>a+b.xp,0), items.reduce((a,b)=>a+b.coins,0));
+    showSummaryModal(isWin ? '🏆 MATCH VICTORY' : 'Match Completed', currentMatchSeconds, items);
+
+    refresh(); syncRoomState(); return;
+  }
+
   refresh(); syncRoomState(); const e = epoch;
   setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3500);
 }
+
+function showSummaryModal(title, durationSecs, breakdown) {
+  $('sumTitle').textContent = title;
+  const m = String(Math.floor(durationSecs / 60)).padStart(2, '0');
+  const s = String(durationSecs % 60).padStart(2, '0');
+  $('sumDuration').textContent = `Match Duration: ${m}:${s}`;
+  
+  const box = $('sumBreakdown'); box.innerHTML = '';
+  let totXp = 0, totCoins = 0;
+  breakdown.forEach(item => {
+    totXp += item.xp; totCoins += item.coins;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e2433';
+    row.innerHTML = `<span>${item.label}</span><b style="color:#fbbf24">+${item.xp} XP | +${item.coins} 🪙</b>`;
+    box.appendChild(row);
+  });
+  
+  const totalRow = document.createElement('div');
+  totalRow.style.cssText = 'display:flex;justify-content:space-between;padding-top:6px;font-weight:900';
+  totalRow.innerHTML = `<span style="color:#22c55e">Total Earned</span><b style="color:#22c55e">+${totXp} XP | +${totCoins} 🪙</b>`;
+  box.appendChild(totalRow);
+
+  $('summaryModal').classList.remove('hidden');
+}
+$('sumClose').onclick = () => $('summaryModal').classList.add('hidden');
 
 /* ---------- HAND UI ---------- */
 let selIdx = null;
@@ -1775,10 +2028,9 @@ function renderHand() {
   if (!(mine && selIdx !== null)) $('endBar').classList.add('hidden');
 }
 
-/* ---------- CANVAS BOARD & FIT HELPER ---------- */
+/* ---------- CANVAS BOARD ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
 let W = 400, H = 360, CY = 180;
-const MARGIN = 16;
 const SIZES = { normal: { n: 'Normal', k: 1, hand: [60, 34] }, large: { n: 'Large', k: 1.3, hand: [80, 46] }, xl: { n: 'Extra Large', k: 1.6, hand: [100, 57] } };
 
 function applySize() {
@@ -1860,6 +2112,7 @@ function renderOutsideSeats() {
     const p = byPos(pos); if (!p) return;
     const name = String(p.name || '?');
     const card = document.createElement('div');
+    card.setAttribute('data-pos', pos);
     
     let isMyTurn = false;
     if (currentGame === 'dominoes') isMyTurn = pos === turn && active;
@@ -1925,7 +2178,6 @@ function drawDominoBoard() {
   ctx.restore();
 }
 
-/* ---------- 3D DRAUGHTS BOARD RENDERING ---------- */
 let boardTouchCells = [];
 function drawDraughtsBoard() {
   if (!dBoard) return;
@@ -1934,20 +2186,17 @@ function drawDraughtsBoard() {
   const cell = side / 8;
   boardTouchCells = [];
 
-  // Draw 8x8 Board
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const isDark = (r + c) % 2 === 1;
       const x = bx + c * cell, y = by + r * cell;
       ctx.fillStyle = isDark ? TH().darkSq : TH().lightSq;
       ctx.fillRect(x, y, cell, cell);
-      
       const idx = r * 8 + c;
       if (isDark) boardTouchCells.push({ idx, r, c, x, y, w: cell, h: cell });
     }
   }
 
-  // Draw Selection & Move Destination Highlights
   const myColor = mySeatPos === 'S' ? 'b' : (mySeatPos === 'N' ? 'w' : null);
   const isMyTurn = (dTurn === 'b' && myColor === 'b') || (dTurn === 'w' && myColor === 'w');
   
@@ -1956,7 +2205,6 @@ function drawDraughtsBoard() {
     ctx.strokeStyle = '#facc15'; ctx.lineWidth = 3;
     ctx.strokeRect(bx + sc * cell + 2, by + sr * cell + 2, cell - 4, cell - 4);
 
-    // Get legal destinations
     if (isMyTurn) {
       const moves = getDraughtsMoves(dBoard, myColor);
       const valid = [...moves.jumps, ...moves.simples].filter(m => m.from === dSelected);
@@ -1971,7 +2219,6 @@ function drawDraughtsBoard() {
     }
   }
 
-  // Highlight Huffable Piece
   if (huffable) {
     const hr = Math.floor(huffable.pos / 8), hc = huffable.pos % 8;
     ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3;
@@ -1980,7 +2227,6 @@ function drawDraughtsBoard() {
     ctx.stroke();
   }
 
-  // Draw 3D Pieces
   for (let idx = 0; idx < 64; idx++) {
     const p = dBoard[idx];
     if (!p) continue;
@@ -1989,11 +2235,9 @@ function drawDraughtsBoard() {
     const rad = cell * 0.38;
 
     ctx.save();
-    // Drop Shadow
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
     ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
 
-    // Base Radial Gradient for 3D sphere look
     const grad = ctx.createRadialGradient(cx - rad*0.3, cy - rad*0.3, rad*0.1, cx, cy, rad);
     if (p.color === 'b') {
       grad.addColorStop(0, '#4b5563'); grad.addColorStop(0.8, '#111827'); grad.addColorStop(1, '#030712');
@@ -2003,13 +2247,11 @@ function drawDraughtsBoard() {
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 7); ctx.fill();
 
-    // Inner Bevel Ring
     ctx.shadowColor = 'transparent';
     ctx.strokeStyle = p.color === 'b' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(cx, cy, rad * 0.72, 0, 7); ctx.stroke();
 
-    // King Crown
     if (p.king) {
       ctx.fillStyle = '#f59e0b';
       ctx.strokeStyle = '#78350f';
@@ -2031,7 +2273,6 @@ function drawDraughtsBoard() {
   }
 }
 
-// Canvas Click Handler for Draughts
 cv.onclick = e => {
   if (currentGame !== 'draughts' || !active) return;
   const rect = cv.getBoundingClientRect();
@@ -2046,7 +2287,6 @@ cv.onclick = e => {
 
   const idx = clickedCell.idx;
 
-  // Huffing Selection
   if (huffSelecting) {
     if (huffable && idx === huffable.pos) {
       if (isHost) executeHuff(idx);
@@ -2099,19 +2339,17 @@ function refresh() {
   const lvl = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
   const myColor = mySeatPos === 'S' ? 'b' : (mySeatPos === 'N' ? 'w' : null);
 
-  // Huff Button Toggle
   const canHuff = huffable && huffable.by !== myColor && active;
   $('huffBtn').classList.toggle('hidden', !canHuff);
 
-  // Scoreboard rendering with Score Pills
   const boxL = $('scoreBoxL'), boxR = $('scoreBoxR');
   boxL.innerHTML = ''; boxR.innerHTML = '';
 
   if (currentGame === 'dominoes') {
-    if (gameMode === 'partners') {
+    if (gameMode === 'partners' || gameMode === 'chaos') {
       boxL.innerHTML = '<div class="score-pill"><span class="p-name">N/S</span><span class="p-score">' + sNS + '</span></div>';
       boxR.innerHTML = '<div class="score-pill"><span class="p-name">E/W</span><span class="p-score">' + sWE + '</span></div>';
-      $('modeLbl').textContent = 'Partners (2v2) · Bots: ' + lvl;
+      $('modeLbl').textContent = (gameMode === 'chaos' ? '🔥 Chaos Mode' : 'Partners (2v2)') + ' · Bots: ' + lvl;
     } else {
       const half = Math.ceil(players.length / 2);
       players.slice(0, half).forEach(p => {
