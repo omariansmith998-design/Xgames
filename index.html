@@ -53,8 +53,8 @@ canvas#board{display:block;width:100%;height:auto}
 .mic-dot.active{background:#22c55e;box-shadow:0 0 8px #22c55e;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .profile-card{background:#11131f;border:1px solid #282e42;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
-.gamechips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
-.chip{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8;cursor:pointer}
+.gamechips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0}
+.chip{border-radius:12px;padding:8px 4px;text-align:center;font-size:12px;background:#1e2433;border:2px solid #2a3045;color:#94a3b8;cursor:pointer}
 .chip.on{border-color:#fbbf24;color:#fff;background:#3a2a14}
 .chip small{display:block;font-size:9px;color:#64748b;margin-top:2px}
 .opt{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;align-items:center;margin-bottom:6px;font-size:12px;color:#a5b4fc;font-weight:700}
@@ -146,10 +146,28 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
         <button id="editProfileBtn" style="font-size:11px">✏️ Profile</button>
       </div>
       <div id="homeProgBar" class="panel" style="padding:8px 12px"></div>
+      
+      <div class="lbl" style="text-align:left;margin:0">Select Game</div>
+      <div class="gamechips">
+        <div class="chip on" id="chipDominoes"><svg width="26" height="26" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#fff"/><line x1="12" y1="7" x2="12" y2="17" stroke="#64748b"/><circle cx="7" cy="12" r="1.5" fill="#111"/><circle cx="16" cy="9.8" r="1.3" fill="#111"/><circle cx="18" cy="14" r="1.3" fill="#111"/></svg><br>Dominoes</div>
+        <div class="chip" id="chipDraughts"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#dc2626"/><circle cx="12" cy="12" r="6" fill="none" stroke="#fecaca" stroke-width="1.5"/></svg><br>Draughts</div>
+        <div class="chip" id="chipLudo" style="opacity:.5;cursor:not-allowed"><span style="font-size:22px">🎲</span><br>Ludo<small>coming soon</small></div>
+      </div>
+
       <button class="big" id="quickBtn">⚡ Quick Play</button>
       <div class="two">
-        <div><div class="lbl" style="text-align:left">Rules</div><button class="arcade-btn" id="qModeBtn">Cut Throat (FFA)</button></div>
-        <div><div class="lbl" style="text-align:left">Bots</div><button class="arcade-btn" id="qLevelBtn">Medium</button></div>
+        <div id="optRules">
+          <div class="lbl" style="text-align:left">Rules</div>
+          <button class="arcade-btn" id="qModeBtn">Cut Throat (FFA)</button>
+        </div>
+        <div id="optDraughtsRule" class="hidden">
+          <div class="lbl" style="text-align:left">Draughts Rule</div>
+          <button class="arcade-btn" id="qDraughtsRuleBtn">Huffing Mode</button>
+        </div>
+        <div>
+          <div class="lbl" style="text-align:left">Bots</div>
+          <button class="arcade-btn" id="qLevelBtn">Medium</button>
+        </div>
       </div>
       <div class="lbl" style="margin:0">Quick Play starts right away against bots. Nobody needs to join.</div>
       <div class="two" style="margin-top:4px">
@@ -165,15 +183,6 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
         <button class="blue" id="shareBtn">📲 Invite</button>
         <button class="purple" id="copyBtn">📋 Copy</button>
       </div>
-      <div class="lbl" style="text-align:left">Game</div>
-      <div class="gamechips">
-        <div class="chip on" id="chipDominoes"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#fff"/><line x1="12" y1="7" x2="12" y2="17" stroke="#64748b"/><circle cx="7" cy="12" r="1.5" fill="#111"/><circle cx="16" cy="9.8" r="1.3" fill="#111"/><circle cx="18" cy="14" r="1.3" fill="#111"/></svg><br>Dominoes</div>
-        <div class="chip" id="chipDraughts"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#dc2626"/><circle cx="12" cy="12" r="6" fill="none" stroke="#fecaca" stroke-width="1.5"/></svg><br>Draughts</div>
-        <div class="chip" id="chipLudo" style="opacity:.5;cursor:not-allowed"><span style="font-size:26px">🎲</span><br>Ludo<small>coming soon</small></div>
-      </div>
-      <div class="opt" id="optRules"><span>Rules</span><button class="arcade-btn" id="roomModeBtn">Cut Throat (FFA)</button></div>
-      <div class="opt" id="optDraughtsRule" class="hidden"><span>Draughts rule</span><button class="arcade-btn" id="roomDraughtsRuleBtn">Huffing Mode</button></div>
-      <div class="opt"><span>Bot difficulty</span><button class="arcade-btn" id="roomLevelBtn">Medium</button></div>
       <div class="opt"><span>Your theme</span><button class="arcade-btn" id="roomThemeBtn">Classic</button></div>
       <div class="row between" style="margin:8px 0 4px">
         <b style="color:#fbbf24;font-size:13px">Players (<span id="pc">1</span>/<span id="maxPc">4</span>)</b>
@@ -520,14 +529,13 @@ function renderSettingsButtons() {
   const modeText = MODE_NAME[gameMode] || 'Cut Throat (FFA)';
   const levelText = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
   $('qModeBtn').textContent = modeText; $('qLevelBtn').textContent = levelText;
-  $('roomModeBtn').textContent = modeText; $('roomLevelBtn').textContent = levelText;
+  $('qDraughtsRuleBtn').textContent = draughtsRule === 'huff' ? 'Huffing Mode' : 'Strict Jumps';
   $('roomThemeBtn').textContent = TH().n;
-  $('roomDraughtsRuleBtn').textContent = draughtsRule === 'huff' ? 'Huffing Mode' : 'Strict Jumps';
   
   $('chipDominoes').className = 'chip' + (currentGame === 'dominoes' ? ' on' : '');
   $('chipDraughts').className = 'chip' + (currentGame === 'draughts' ? ' on' : '');
-  $('optRules').style.display = currentGame === 'dominoes' ? 'grid' : 'none';
-  $('optDraughtsRule').style.display = currentGame === 'draughts' ? 'grid' : 'none';
+  $('optRules').style.display = currentGame === 'dominoes' ? 'block' : 'none';
+  $('optDraughtsRule').style.display = currentGame === 'draughts' ? 'block' : 'none';
   $('maxPc').textContent = currentGame === 'draughts' ? '8' : '4';
 }
 
@@ -550,20 +558,9 @@ function switchGame(g) {
   if (isHost && roomCode) syncRoomState();
 }
 
-$('qModeBtn').onclick = () => openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); });
-$('roomModeBtn').onclick = () => {
-  if (!isHost) return toast('Only the host can change the rules');
-  openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); syncRoomState(); });
-};
-$('roomDraughtsRuleBtn').onclick = () => {
-  if (!isHost) return toast('Only the host can change Draughts rule');
-  openModal('Select Draughts Rule', DRAUGHTS_RULE_ITEMS, draughtsRule, v => { draughtsRule = v; renderSettingsButtons(); syncRoomState(); });
-};
-$('qLevelBtn').onclick = () => openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); });
-$('roomLevelBtn').onclick = () => {
-  if (!isHost) return toast('Only the host can change bot difficulty');
-  openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); });
-};
+$('qModeBtn').onclick = () => openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); if (isHost && roomCode) syncRoomState(); });
+$('qDraughtsRuleBtn').onclick = () => openModal('Select Draughts Rule', DRAUGHTS_RULE_ITEMS, draughtsRule, v => { draughtsRule = v; renderSettingsButtons(); if (isHost && roomCode) syncRoomState(); });
+$('qLevelBtn').onclick = () => openModal('Select Bot Difficulty', LEVEL_ITEMS, botLevel, v => { botLevel = v; localStorage.setItem('xg_level', v); renderSettingsButtons(); if (isHost && roomCode) syncRoomState(); });
 $('roomThemeBtn').onclick = () => openModal('Select Board Theme', Object.keys(THEMES).map(k => ({ value: k, label: THEMES[k].n })), themeKey, v => setTheme(v));
 
 /* ---------- SOUND EFFECTS ---------- */
@@ -974,14 +971,22 @@ $('createBtn').onclick = async () => {
   const myEntry = { clientId: myClientId, name: myNickname, av: myAvatar, bio: myBio, link: myLink, isBot: false, pos: 'S', isHost: true, ready: true };
   scores = { S: 0, W: 0, N: 0, E: 0 };
 
-  const roomState = { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: currentGame, botLevel, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, draughtsRule, scores };
+  const roomState = { 
+    term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: currentGame, botLevel, 
+    lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, draughtsRule, scores 
+  };
 
   const { error } = await sb.from('game_rooms').insert([{
     room_code: code,
     status: 'waiting',
     state: roomState
   }]);
-  if (error) { console.error('Room create error', error); toast('Error creating room'); return; }
+
+  if (error) { 
+    console.error('Room create error:', error); 
+    toast('Error creating room'); 
+    return; 
+  }
 
   roomCode = code; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
   joinConfirmed = true; hostTerm = 0; stateVersion = 0; lastApplied = { term: -1, version: -1 };
@@ -1458,7 +1463,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('online', reconnect);
 
 window.addEventListener('load', async () => {
-  applyAudio(); applySize(); initProfile(); setTheme(themeKey);
+  applyAudio(); applySize(); initProfile(); setTheme(themeKey); renderSettingsButtons();
   const roomParam = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
   if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) { $('codeIn').value = roomParam; joinRoomByCode(roomParam); }
   else if (myNickname) await resumeSession();
@@ -2100,7 +2105,7 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   rr(c, -w / 2, -h / 2, w, h, 4 * s); c.fillStyle = th.tile; c.fill();
   c.shadowColor = 'transparent'; c.lineWidth = 1; c.strokeStyle = th.edge; c.stroke();
   c.strokeStyle = th.line; c.beginPath();
-  if (vert) { c.moveTo(-w / 2 + 2 * s); c.lineTo(w / 2 - 2 * s, 0); }
+  if (vert) { c.moveTo(-w / 2 + 2 * s, 0); c.lineTo(w / 2 - 2 * s, 0); }
   else { c.moveTo(0, -h / 2 + 2 * s); c.lineTo(0, h / 2 - 2 * s); }
   c.stroke();
   const first = flip ? b : a, second = flip ? a : b;
