@@ -655,7 +655,7 @@ $('createBtn').onclick = async () => {
     room_code: code, status: 'waiting',
     state: { term: 0, version: 0, status: 'waiting', hostClientId: myClientId, game: 'dominoes', botLevel, lobby: [myEntry], handNo: 1, sNS: 0, sWE: 0, gameMode, scores }
   }]);
-  if (error) { console.error(error); toast('Error creating room'); return; }
+  if (error) { console.error(error); bugAdd('create', (error.code ? error.code + ': ' : '') + error.message); toast('Create failed: ' + String(error.message).slice(0, 80)); return; }
 
   roomCode = code; isHost = true; hostClientId = myClientId; mySeatPos = 'S'; roomStatus = 'waiting';
   joinConfirmed = true; hostTerm = 0; stateVersion = 0; lastApplied = { term: -1, version: -1 };
