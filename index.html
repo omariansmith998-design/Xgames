@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Xgames Arcade</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js"></script>
@@ -37,7 +37,7 @@ canvas#board{display:block;width:100%;height:auto}
 @keyframes shake{20%,80%{transform:translate(-3px,-2px)}40%,60%{transform:translate(4px,3px)}50%{transform:translate(-4px,-3px)}}
 #log{min-height:34px;padding:8px 10px;background:#0b0c12;border-radius:99px;font-size:12px;color:#e2e8f0;text-align:center;display:flex;align-items:center;justify-content:center}
 .hand{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:44px;padding:4px 0}
-.hand canvas{width:var(--hw,60px);height:var(--hh,34px);cursor:pointer;transition:transform .12s,opacity .12s}
+.hand canvas{width:60px;height:34px;cursor:pointer;transition:transform .12s,opacity .12s}
 .hand canvas.sel{transform:translateY(-6px)}.hand canvas.dim{opacity:.4}
 .lbl{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:4px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -168,7 +168,6 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
   <div id="game" class="stack hidden">
     <div class="row between">
       <button id="exitBtn">🚪 Exit</button>
-      <button id="sizeCycle" class="blue">🔍 Size</button>
       <button id="themeBtn" class="purple">🎨 Classic</button>
     </div>
     <div class="score">
@@ -231,24 +230,10 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
       <div class="srow"><span>📳 Vibration</span><span></span><button id="vibeTog" class="ib blue">On</button></div>
     </div>
     <div class="panel stack">
-      <h2>👁️ Display</h2>
-      <div class="opt"><span>Game size</span><button class="arcade-btn" id="sizeBtn">Normal</button></div>
-      <div class="lbl" style="text-align:left;margin:0">Makes the board and your tiles bigger. The menus stay the same. Pinch to zoom works too, and the High Contrast theme is in your theme list.</div>
-      <button id="fullBtn" class="purple">⛶ Fullscreen</button>
-    </div>
-    <div class="panel stack">
       <h2>🎮 Game</h2>
       <div class="opt"><span>Bot speed</span><button class="arcade-btn" id="speedBtn">Normal</button></div>
       <div class="opt"><span>Bot difficulty</span><button class="arcade-btn" id="setLevelBtn">Medium</button></div>
       <div class="opt"><span>Your theme</span><button class="arcade-btn" id="setThemeBtn">Classic</button></div>
-    </div>
-    <div class="panel stack">
-      <h2>ℹ️ Credits</h2>
-      <div class="lbl" style="margin:0">Xgames Arcade · made by Tav</div>
-      <div class="two">
-        <a class="arcade-btn" href="https://instagram.com/That_one_nigga_tav" target="_blank" rel="noopener noreferrer" style="display:block;text-decoration:none;line-height:26px">📸 Instagram</a>
-        <a class="arcade-btn" href="https://www.tiktok.com/@That_one_n_gga_tav" target="_blank" rel="noopener noreferrer" style="display:block;text-decoration:none;line-height:26px">🎵 TikTok</a>
-      </div>
     </div>
   </div>
 </div>
@@ -308,7 +293,6 @@ function clearSession() { store.del(SESSION_KEY); }
 const THEMES = {
   classic: { n: 'Classic', tile: '#ffffff', edge: '#cbd5e1', line: '#94a3b8', pip: '#111827', top: '#155e2b', bot: '#0f441f', frame: '#3d2314' },
   neon: { n: 'Neon', tile: '#0f172a', edge: '#22d3ee', line: '#22d3ee', pip: '#f472b6', top: '#0b1020', bot: '#05060d', frame: '#312e81', glow: '#22d3ee' },
-  contrast: { n: 'High Contrast', tile: '#ffffff', edge: '#facc15', line: '#000000', pip: '#000000', top: '#000000', bot: '#000000', frame: '#facc15' },
   wood: { n: 'Yard Wood', tile: '#f5e6c8', edge: '#a16207', line: '#92400e', pip: '#3b1d0a', top: '#6b4423', bot: '#4a2c14', frame: '#2a1608' },
 };
 let themeKey = localStorage.getItem('xg_theme');
@@ -362,7 +346,7 @@ $('roomThemeBtn').onclick = () => openModal('Select Board Theme', Object.keys(TH
 
 /* ---------- SOUND EFFECTS ---------- */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
-const DEFAULTS = { musicOn: true, music: 70, sfxOn: true, sfx: 80, voice: 100, vibe: true, speed: 'normal', size: 'normal' };
+const DEFAULTS = { musicOn: true, music: 70, sfxOn: true, sfx: 80, voice: 100, vibe: true, speed: 'normal' };
 let settings = Object.assign({}, DEFAULTS, store.get('xg_settings') || {});
 const musicBus = AC.createGain(), sfxBus = AC.createGain();
 musicBus.connect(AC.destination); sfxBus.connect(AC.destination);
@@ -1001,17 +985,10 @@ function syncSettingsUI() {
   $('musicTog').textContent = settings.musicOn ? '🎵' : '🔕'; $('musicTog').className = 'ib ' + (settings.musicOn ? 'blue' : 'red');
   $('sfxTog').textContent = settings.sfxOn ? '🔊' : '🔇'; $('sfxTog').className = 'ib ' + (settings.sfxOn ? 'blue' : 'red');
   $('vibeTog').textContent = settings.vibe ? 'On' : 'Off'; $('vibeTog').className = 'ib ' + (settings.vibe ? 'blue' : 'red');
-  $('sizeBtn').textContent = (SIZES[settings.size] || SIZES.normal).n; $('speedBtn').textContent = cap(settings.speed); $('setLevelBtn').textContent = cap(botLevel); $('setThemeBtn').textContent = TH().n;
+  $('speedBtn').textContent = cap(settings.speed); $('setLevelBtn').textContent = cap(botLevel); $('setThemeBtn').textContent = TH().n;
 }
 function openSettings() { $('setNick').value = myNickname; buildAvatars(); renderStats(); syncSettingsUI(); $('settingsPage').classList.remove('hidden'); }
 $('setBtn').onclick = openSettings;
-$('sizeBtn').onclick = () => openModal('Game size', Object.keys(SIZES).map(k => ({ value: k, label: SIZES[k].n })), settings.size, setSize);
-$('sizeCycle').onclick = () => { const ks = Object.keys(SIZES); setSize(ks[(ks.indexOf(settings.size) + 1) % ks.length]); toast('Game size: ' + SIZES[settings.size].n); };
-$('fullBtn').onclick = () => {
-  if (!document.documentElement.requestFullscreen) return toast("Fullscreen isn't available on this device. Try pinch to zoom.");
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
-  else if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-};
 $('setClose').onclick = () => $('settingsPage').classList.add('hidden');
 $('setSave').onclick = () => {
   const v = stripName($('setNick').value);
@@ -1049,7 +1026,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('online', reconnect);
 
 window.addEventListener('load', async () => {
-  applyAudio(); applySize(); initProfile(); setTheme(themeKey);
+  applyAudio(); initProfile(); setTheme(themeKey);
   const roomParam = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
   if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) { $('codeIn').value = roomParam; joinRoomByCode(roomParam); }
   else if (myNickname) await resumeSession();
@@ -1258,10 +1235,9 @@ function renderHand() {
   if (!me || !me.hand) { $('passBtn').classList.add('hidden'); $('drawBtn').classList.add('hidden'); $('endBar').classList.add('hidden'); return; }
   const mine = active && turn === mySeatPos;
   me.hand.forEach((t, i) => {
-    const hs = (SIZES[settings.size] || SIZES.normal).hand;
-    const c = document.createElement('canvas'); c.width = hs[0] * 2; c.height = hs[1] * 2;
+    const c = document.createElement('canvas'); c.width = 120; c.height = 68;
     const x = c.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0);
-    drawTile(x, hs[0] / 2, hs[1] / 2, t.a, t.b, false, 1.3 * hs[0] / 60, false);
+    drawTile(x, 30, 17, t.a, t.b, false, 1.3, false);
     if (mine && center && !isValid(t)) c.className = 'dim';
     if (selIdx === i) c.className = 'sel';
     c.onclick = () => selectTile(i);
@@ -1276,19 +1252,7 @@ function renderHand() {
 
 /* ---------- CANVAS BOARD ---------- */
 const cv = $('board'), ctx = cv.getContext('2d');
-let W = 400, H = 360, CY = 180;
-const MARGIN = 30;
-const SIZES = { normal: { n: 'Normal', k: 1, hand: [60, 34] }, large: { n: 'Large', k: 1.3, hand: [80, 46] }, xl: { n: 'Extra Large', k: 1.6, hand: [100, 57] } };
-// bigger size = a smaller internal board, so the same screen space shows larger tiles
-function applySize() {
-  const z = SIZES[settings.size] || SIZES.normal;
-  W = Math.round(400 / z.k); H = Math.round(360 / z.k); CY = H / 2;
-  cv.width = W * 2; cv.height = H * 2;
-  document.documentElement.style.setProperty('--hw', z.hand[0] + 'px');
-  document.documentElement.style.setProperty('--hh', z.hand[1] + 'px');
-  if (!gameHidden()) refresh();
-}
-function setSize(v) { settings.size = v; saveSettings(); applySize(); syncSettingsUI(); }
+const W = 400, H = 360, MARGIN = 30, CY = 180;
 const PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 
 function rr(c, x, y, w, h, r) {
