@@ -260,7 +260,12 @@ input[type=range]{padding:0;min-height:32px;border:0;background:transparent;acce
 const SB_URL = 'https://vlrscrzwqjkresgvcygh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZscnNjcnp3cWprcmVzZ3ZjeWdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMDExMjMsImV4cCI6MjEwNzg3NzEyM30.8ttvi0_BkIrPa7KQ7L4zcxBPHNz-e_gsbcF1Bep4b90';
 const LIVEKIT_URL = 'wss://xgames-bjyx6237.livekit.cloud';
-const sb = supabase.createClient(SB_URL, SB_KEY);
+const sb = window.supabase ? supabase.createClient(SB_URL, SB_KEY) : (() => {
+  setTimeout(() => { try { bugAdd('library', 'Online library failed to load. Rooms are off, Quick Play still works.'); toast('Online features failed to load. Quick Play still works.'); } catch (e) {} }, 800);
+  const c = { on: () => c, subscribe: () => c, send() {}, track() {} };
+  const q = () => ({ select: q, eq: q, limit: q, insert: q, upsert: q, maybeSingle: q, then: r => r({ data: null, error: { message: 'offline' } }) });
+  return { from: q, channel: () => c, removeChannel() {}, functions: { invoke: () => Promise.resolve({ error: { message: 'offline' } }) } };
+})();
 
 const $ = id => document.getElementById(id);
 
@@ -1427,15 +1432,3 @@ function renderOutsideSeats() {
   });
 }
 
-function drawBoard() {
-  ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, W, H);
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, TH().top); g.addColorStop(1, TH().bot);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  renderOutsideSeats();
-  if (!center) {
-    ctx.fillStyle = '#fcd34d'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(needD6 && openTile ? 'Pose [' + openTile.a + '|' + openTile.b + '] to start the hand' : 'Table empty. Pose any tile', W / 2, CY);
-    return;
-  }
-  const cx = W / 2, cy = CY, cw = cente
