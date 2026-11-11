@@ -224,6 +224,9 @@ const fo = () => !$('gameFrame').classList.contains('hidden');
 const toFrame = m => { const w = $('gf').contentWindow; if (w) w.postMessage(m, '*'); };
 function openFrame(src) {
   frameReady = false;
+  const net = src.indexOf('net=1') > -1;
+  const gf = $('gf');
+  gf.srcdoc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;background:#07080c;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh}h2{color:#fbbf24}</style></head><body><h2>🎲 Ludo Game Loading...</h2></body></html>`;
   $('gameFrame').classList.remove('hidden');
 }
 function closeFrame() { $('gameFrame').classList.add('hidden'); $('gf').removeAttribute('srcdoc'); $('gf').src = 'about:blank'; frameReady = false; }
@@ -1077,9 +1080,10 @@ function drawTile(c, x, y, a, b, vert, s, flip) {
   c.restore();
 }
 
+/* Dynamically step out tile positions so corners turn without overlap */
 function layoutChain(tiles, startX, y0, dir, rowDir) {
   let x = startX, y = y0;
-  const out = [], limitR = W - MARGIN - 12, limitL = MARGIN + 12, verticalStep = 50;
+  const out = [], limitR = W - MARGIN - 12, limitL = MARGIN + 12, verticalStep = 56;
   tiles.forEach(t => {
     let isVert = t.d, tw = isVert ? 20 : 40, th = isVert ? 40 : 20;
     const stepX = isVert ? 20 : 40;
