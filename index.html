@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+window.onerror=function(m,u,l,c){var d=document.getElementById('xgErr');if(!d){d=document.createElement('div');d.id='xgErr';d.style.cssText='position:fixed;left:8px;right:8px;top:70px;z-index:99999;background:#7f1d1d;color:#fff;font:12px/1.4 monospace;padding:10px;border-radius:10px;white-space:pre-wrap';document.documentElement.appendChild(d)}d.textContent+='ERROR: '+m+' (line '+l+':'+c+')\n'};
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Xgames Arcade</title>
@@ -1424,11 +1427,4 @@ function renderOutsideSeats() {
     card.style.cssText = 'cursor:pointer;min-height:44px';
     const avatar = document.createElement('div'); avatar.className = 'p-avatar' + (p.ai ? ' bot' : ''); avatar.textContent = p.av || name.charAt(0).toUpperCase();
     const nameEl = document.createElement('div'); nameEl.className = 'p-name';
-    nameEl.textContent = (mutedPlayers.has(p.clientId) ? '🔇 ' : '') + name + (pos === mySeatPos ? ' ★' : '');
-    const tiles = document.createElement('div'); tiles.className = 'p-tiles'; tiles.textContent = (p.hand ? p.hand.length : 0) + ' tiles';
-    card.appendChild(avatar); card.appendChild(nameEl); card.appendChild(tiles);
-    card.addEventListener('click', () => playerMenu(lobby.find(x => x.clientId === p.clientId) || { clientId: p.clientId, name, isBot: !!p.ai }, true));
-    grid.appendChild(card);
-  });
-}
-
+    nameEl.textContent = (mutedPlayers.has(p.clientId) ? '🔇 ' : '') + name + (pos === mySeatPos ? ' ★'
