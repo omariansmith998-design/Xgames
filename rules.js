@@ -23,12 +23,16 @@
         'Knocks are public. Smart players notice which numbers you\'re missing.'] },
       { h: '🏁 Winning a hand', li: [
         'Play all your tiles first and you win the hand for **1 point**.',
-        '**Blocked** (everyone knocks in a row): lowest pip total wins. In Partners it\'s the team total. A tie replays the hand.'] },
+        '**Blocked** (everyone knocks in a row): lowest pip total wins. In Partners it\'s the team total. A tie is a **Darby** (see below).'] },
       { h: '🏆 Winning the match', li: [
         'First to **6** wins, a "six love".',
-        '**Cut Throat:** every player for themselves, one point per hand won.',
+        '**Cut Throat:** every player for themselves, one point per hand won. Points just add up, first to 6.',
+        '**Six Love (FFA, Break):** same, but six only counts as a six love while at least one player is still on **0**. When the last player on 0 scores, everyone has a point: that\'s a **Break** and all scores reset to 0 and the breaker doesn\'t keep the point.',
         '**Partners (2v2):** North/South vs East/West, partners sit across. Points go to the team.',
-        '**Break:** in Partners, if a team on 0 wins a hand while the other team has points, the other team\'s score is wiped back to 0.'] },
+        '**Break:** in Partners, if a team on 0 wins a hand while the other team has points, the board resets to 0-0 and that hand\'s point doesn\'t count.'] },
+      { h: '🎲 Darby', li: [
+        'If a **blocked** hand ends in a tie on pips (two players, or both teams, count the same), nobody scores. That\'s a **Darby**.',
+        'The next hand is dealt like a fresh game: the highest tile poses first. Its winner gets **2 points**, since no point was given last round. The hand label shows **DARBY x2**.'] },
       { h: '🤖 Bots', li: [
         '**Easy** plays randomly. **Medium** likes big tiles. **Hard** remembers what each player knocked on and tries to block them (but never blocks its own partner).'] }
     ]
@@ -54,7 +58,10 @@
       { h: '⚡ Auto-play', li: [
         'One token on the board and no 6 rolled: the **Total** plays itself.',
         'Only one possible move: it plays itself too.',
-        'Otherwise pick a die or Total, then tap a glowing token.'] }
+        'Otherwise pick a die or Total, then tap a glowing token.'] },
+      { h: '⋮ Menu', li: [
+        'The **⋮** button in the Ludo header holds Rules, Sound, Theme and **Main menu**. Leaving mid-game asks you to confirm first.',
+        'In a voice room the 🎙️ button sits next to it.'] }
     ]
   };
 
