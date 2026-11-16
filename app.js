@@ -93,7 +93,7 @@ function openModal(title, items, currentVal, onSelect) {
 }
 $('modalClose').onclick = () => $('customModal').classList.add('hidden');
 
-const MODE_NAME = { cutthroat: 'Cut Throat (FFA)', partners: 'Partners (2v2)', boneyard: 'Boneyard (2-4 players)' };
+const MODE_NAME = { cutthroat: 'Cut Throat (FFA)', sixlove: 'Six Love (FFA, Break)', partners: 'Partners (2v2)', boneyard: 'Boneyard (2-4 players)' };
 function renderSettingsButtons() {
   const modeText = gameId === 'ludo' ? (ludoMode === 'lock' ? 'Lock on the Stop' : 'Regular') : (MODE_NAME[gameMode] || 'Cut Throat (FFA)');
   const levelText = botLevel.charAt(0).toUpperCase() + botLevel.slice(1);
@@ -101,7 +101,7 @@ function renderSettingsButtons() {
   $('roomModeBtn').textContent = modeText; $('roomLevelBtn').textContent = levelText;
   $('roomThemeBtn').textContent = TH().n;
 }
-const MODE_ITEMS = [{ value: 'cutthroat', label: 'Cut Throat (FFA, 4 players)' }, { value: 'partners', label: 'Partners (2v2, 4 players)' }, { value: 'boneyard', label: 'Boneyard (2-4 players)' }];
+const MODE_ITEMS = [{ value: 'cutthroat', label: 'Cut Throat (FFA, 4 players)' }, { value: 'sixlove', label: 'Six Love (FFA, Break, 4 players)' }, { value: 'partners', label: 'Partners (2v2, 4 players)' }, { value: 'boneyard', label: 'Boneyard (2-4 players)' }];
 const LEVEL_ITEMS = [{ value: 'easy', label: 'Easy' }, { value: 'medium', label: 'Medium' }, { value: 'hard', label: 'Hard' }];
 $('qModeBtn').onclick = () => openModal('Select Game Rules', MODE_ITEMS, gameMode, v => { gameMode = v; renderSettingsButtons(); });
 $('roomModeBtn').onclick = () => {
@@ -205,6 +205,7 @@ function ask(msg, yesLabel, fn) {
 const NEXT = { N: 'W', W: 'S', S: 'E', E: 'N' };
 const MATE = { S: 'N', N: 'S', W: 'E', E: 'W' };
 let lobby = [], botN = 0, isHost = false, hostClientId = '', roomStatus = 'waiting';
+let darby = false; /* next hand is a Darby: fresh start after a tied block, worth 2 points */
 let handNo = 1, sNS = 0, sWE = 0, lastWin = null, needD6 = true, openTile = null, bone = [];
 let players = [], turn = 'S', L = null, R = null, center = null, lb = [], rb = [], passes = 0, active = false, epoch = 0, matchOver = false;
 let passMiss = { S: new Set(), W: new Set(), N: new Set(), E: new Set() };
@@ -245,7 +246,7 @@ $('qGameBtn').onclick = () => { qGame = qGame === 'ludo' ? 'dominoes' : 'ludo'; 
 
 /* ---------- ROOM SYNC ---------- */
 function snapshot() {
-  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, game: 'dominoes', botLevel, roomMessages, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, openTile, bone, players, turn, L, R, center, lb, rb, passes, active, matchOver, lobby, gameId, ludoMode, gs };
+  return { term: hostTerm, version: stateVersion, status: roomStatus, hostClientId, game: 'dominoes', botLevel, roomMessages, handNo, sNS, sWE, scores, gameMode, lastWin, needD6, openTile, bone, players, turn, L, R, center, lb, rb, passes, active, matchOver, darby, lobby, gameId, ludoMode, gs };
 }
 
 async function syncRoomState() {
@@ -280,7 +281,7 @@ function applyState(st, force) {
   roomStatus = pick(st.status, roomStatus);
   hostClientId = pick(st.hostClientId, hostClientId);
   if (['easy', 'medium', 'hard'].includes(st.botLevel)) botLevel = st.botLevel;
-  handNo = pick(st.handNo, handNo); sNS = pick(st.sNS, sNS); sWE = pick(st.sWE, sWE);
+  handNo = pick(st.handNo, handNo); sNS = pick(st.sNS, sNS); sWE = pick(st.sWE, sWE); darby = pick(st.darby, darby);
   if (MODE_NAME[st.gameMode]) gameMode = st.gameMode;
   if (st.gameId) gameId = st.gameId;
   if (st.ludoMode) ludoMode = st.ludoMode;
@@ -682,6 +683,7 @@ $('micBtn').onclick = async () => {
 function updateMicUI(on, silent) {
   const btn = $('micBtn'), dot = $('micDot');
   $('gfMic').textContent = on ? '🎙️ Live' : '🎙️';
+  toFrame({ t: 'mic', on: !!on });
   if (on) { btn.textContent = '🎙️ Live'; btn.className = 'red'; dot.classList.add('active'); if (!silent) toast('Microphone ON'); }
   else { btn.textContent = '🎙️ Off'; btn.className = 'blue'; dot.classList.remove('active'); if (!silent) toast('Microphone OFF'); }
 }
@@ -835,6 +837,7 @@ window.addEventListener('online', reconnect);
 
 window.addEventListener('load', async () => {
   applyAudio(); initProfile(); setTheme(themeKey);
+  $('gfMic').classList.add('hidden'); /* the mic now lives in the Ludo header (ludo.html) */
   const roomParam = (new URLSearchParams(window.location.search).get('room') || '').toUpperCase();
   if (roomParam && /^XG-[A-Z0-9]{3,8}$/.test(roomParam) && myNickname) { $('codeIn').value = roomParam; joinRoomByCode(roomParam); }
   else if (myNickname) await resumeSession();
@@ -850,7 +853,7 @@ function fullSet() {
 
 function newMatch() {
   $('lobby').classList.add('hidden'); $('game').classList.remove('hidden');
-  sNS = 0; sWE = 0; scores = { S: 0, W: 0, N: 0, E: 0 }; handNo = 1; lastWin = null; matchOver = false;
+  sNS = 0; sWE = 0; scores = { S: 0, W: 0, N: 0, E: 0 }; handNo = 1; lastWin = null; matchOver = false; darby = false;
   newHand();
 }
 
@@ -875,7 +878,7 @@ function newHand() {
     let best = null;
     players.forEach(p => p.hand.forEach(t => { const k = t.d ? 100 + t.a : t.a + t.b; if (!best || k > best.k) best = { k, pos: p.pos, a: t.a, b: t.b }; }));
     openTile = { a: best.a, b: best.b }; turn = best.pos;
-    log(byPos(turn).name + ' holds the highest tile and poses first [' + best.a + '|' + best.b + '].');
+    log((darby ? '🎲 DARBY (worth 2)! ' : '') + byPos(turn).name + ' holds the highest tile and poses first [' + best.a + '|' + best.b + '].');
   } else { openTile = null; turn = lastWin; log('Hand ' + handNo + ': ' + byPos(turn).name + ' poses first.'); }
   refresh(); syncRoomState(); maybeAi();
 }
@@ -973,7 +976,11 @@ function blocked() {
   const pScores = {};
   players.forEach(p => { pScores[p.pos] = p.hand.reduce((a, t) => a + t.a + t.b, 0); });
   const tie = () => {
-    active = false; log('🤝 Blocked and tied. Replaying hand.'); const e = epoch; syncRoomState();
+    /* DARBY: tied block. Nobody scores; the next hand is dealt like a fresh game
+       (highest tile poses first) and its winner gets 2 points. */
+    active = false; darby = true; lastWin = null;
+    log('🤝 DARBY! Blocked and tied. Fresh hand, winner gets 2 points.'); toast('DARBY! Next hand is worth 2 points');
+    const e = epoch; refresh(); syncRoomState();
     setTimeout(() => { if (e === epoch) { handNo++; newHand(); } }, 3000);
   };
   if (gameMode === 'partners') {
@@ -990,19 +997,29 @@ function blocked() {
 
 function win(pos, why) {
   fanfare(); active = false; lastWin = pos;
+  const pts = darby ? 2 : 1; darby = false;
+  if (pts > 1) why += ' (Darby: 2 points)';
   if (gameMode === 'partners') {
-    const ns = pos === 'N' || pos === 'S';
-    if (ns) { if (sWE > 0 && sNS === 0) { toast('BREAK! Score reset to 0-0'); sWE = 0; } sNS++; }
-    else { if (sNS > 0 && sWE === 0) { toast('BREAK! Score reset to 0-0'); sNS = 0; } sWE++; }
+    const ns = pos === 'N' || pos === 'S', mine = ns ? sNS : sWE, theirs = ns ? sWE : sNS;
+    if (mine === 0 && theirs > 0) {
+      /* BREAK: the team on 0 wins a hand while the other team has points. Board resets, no point for the breaker. */
+      toast('BREAK! Score reset to 0-0'); sNS = 0; sWE = 0;
+    } else if (ns) sNS += pts; else sWE += pts;
     log('🎉 ' + why);
     if (sNS >= 6 || sWE >= 6) {
       matchOver = true; log('🏆 Match over: Team ' + (sNS >= 6 ? 'N/S' : 'E/W') + ' wins six love!');
       refresh(); syncRoomState(); return;
     }
   } else {
-    scores[pos] = (scores[pos] || 0) + 1;
+    scores[pos] = (scores[pos] || 0) + pts;
     log('🎉 ' + why);
-    if (scores[pos] >= 6) {
+    if (gameMode === 'sixlove' && players.every(p => (scores[p.pos] || 0) > 0)) {
+      /* Six Love: a match only ends 6-love while at least one player is still on 0.
+         When the last scoreless player scores, everyone has a point: BREAK, board resets to 0. */
+      toast('BREAK! Everyone has a point. Scores reset to 0');
+      log('💥 BREAK! ' + byPos(pos).name + ' broke the board. Everyone starts again from 0.');
+      scores = { S: 0, W: 0, N: 0, E: 0 };
+    } else if (scores[pos] >= 6) {
       matchOver = true; log('🏆 Match over: ' + byPos(pos).name + ' wins six love!');
       refresh(); syncRoomState(); return;
     }
@@ -1018,7 +1035,7 @@ function selectTile(i) {
   const me = byPos(mySeatPos);
   if (!me || !me.hand) return;
   const t = me.hand[i];
-  if (!isValid(t)) return toast(!center && needD6 ? 'Hand 1 must start with [' + (openTile ? openTile.a + '|' + openTile.b : '6|6') + ']' : "That tile doesn't fit");
+  if (!isValid(t)) return toast(!center && needD6 ? 'You must start with [' + (openTile ? openTile.a + '|' + openTile.b : '6|6') + ']' : "That tile doesn't fit");
   if (!center) return play(i, 'first');
   const ml = t.a === L || t.b === L, mr = t.a === R || t.b === R;
   if (ml && mr) {
@@ -1163,7 +1180,7 @@ function refresh() {
   if (gameHidden()) return;
   renderOutsideSeats();
   renderScores();
-  $('handLbl').textContent = 'Hand ' + handNo;
+  $('handLbl').textContent = 'Hand ' + handNo + (darby ? ' · DARBY x2' : '');
   $('modeLbl').textContent = MODE_NAME[gameMode] || 'Cut Throat';
   const cur = byPos(turn);
   $('turnLbl').textContent = cur ? (cur.pos === mySeatPos ? 'Your hand' : cur.name + "'s turn") : '';
@@ -1207,11 +1224,13 @@ window.addEventListener('message', e => {
     frameReady = true;
     if ($('gf').src.indexOf('net=1') > -1) {
       toFrame({ t: 'init', seats: lobby.map(p => ({ id: p.clientId, name: p.name, bot: !!p.isBot })), mode: ludoMode, lv: botLevel, host: isHost, me: myClientId });
+      toFrame({ t: 'mic', on: micActive });
       if (!isHost && gs) toFrame({ t: 'state', g: gs });
     }
   } else if (d.t === 'state' && isHost) { gs = d.g; syncRoomState(); }
   else if (d.t === 'act' && !isHost && roomSubscription) roomSubscription.send({ type: 'broadcast', event: 'GAME_ACT', payload: { clientId: myClientId, a: d.a } });
   else if (d.t === 'kick' && isHost) { lobby = lobby.filter(p => p.clientId !== d.id); syncRoomState(); }
+  else if (d.t === 'mic') $('micBtn').click();
   else if (d.t === 'quit') { if (roomCode && isHost) backToRoom(); else if (roomCode) leaveToHome(); else closeFrame(); }
 });
 $('gfMic').onclick = () => $('micBtn').click();
