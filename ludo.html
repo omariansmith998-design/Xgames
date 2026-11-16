@@ -10,6 +10,17 @@ button{font:inherit;font-weight:700;font-size:14px;color:#fff;border:0;border-ra
 button.go{background:linear-gradient(135deg,#f59e0b,#ef4444);font-size:17px;width:100%}
 button.on{outline:3px solid #fbbf24;background:#3a2a14}
 button:disabled{opacity:.35}
+button.red{background:#dc2626}button.blue{background:#2563eb}
+#menu{position:absolute;right:8px;top:calc(100% + 4px);min-width:210px;background:#0b0c12;border:1px solid #334155;border-radius:14px;padding:6px;box-shadow:0 10px 26px rgba(0,0,0,.6);z-index:30;display:flex;flex-direction:column;gap:4px}
+#menu.hide{display:none!important}
+#menu button{background:transparent;text-align:left;border-radius:10px;min-height:44px;padding:6px 12px;font-size:14px}
+#menu button:active{background:#1e2433}
+#menu button.danger{color:#fca5a5}
+#menu hr{border:0;border-top:1px solid #23273a;margin:2px 4px;width:calc(100% - 8px)}
+#cf{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:40;padding:20px}
+.cbx{background:#141724;border:1px solid #334155;border-radius:16px;padding:18px;max-width:320px;width:100%;text-align:center}
+.cbx p{margin:0 0 14px;font-size:14px;line-height:1.4}
+.cbx .row{gap:10px}.cbx button{flex:1}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hide{display:none!important}
 .opt{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;align-items:center;margin-top:8px;color:#a5b4fc;font-weight:700;font-size:13px}
 canvas{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.55)}
@@ -23,15 +34,32 @@ canvas{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 8px 
 .pl.turn{border-color:#fbbf24}
 #msg{min-height:34px;text-align:center;font-size:13px;color:#e2e8f0;padding:6px}
 .how{font-size:12px;color:#94a3b8;line-height:1.5;margin-top:10px}
+#rules{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:460px;max-height:62vh;display:flex;flex-direction:column;background:rgba(20,23,36,.97);border:1px solid #334155;border-bottom:0;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.5);z-index:20;transform:translateY(0);transition:transform .2s}
+#rules.hide{display:flex!important;transform:translateY(105%);pointer-events:none}
+.rh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #23273a;font-weight:800;font-size:14px;color:#fbbf24}
+.rh button{min-height:36px;padding:2px 14px;font-size:13px}
+#rb{overflow-y:auto;padding:6px 12px 16px;-webkit-user-select:text;user-select:text}
+#rb details{border-bottom:1px solid #1e2433;padding:6px 0}
+#rb summary{font-weight:800;font-size:13px;color:#a5b4fc;cursor:pointer;min-height:32px;display:flex;align-items:center}
+#rb ul{margin:4px 0 6px;padding-left:18px;font-size:12.5px;line-height:1.55;color:#cbd5e1}
+#rb b{color:#fff}
 </style></head><body>
-<div class="card row" style="justify-content:space-between"><b style="color:#818cf8">XGAMES <span style="color:#f43f5e">LUDO</span> <small style="color:#94a3b8">test build</small></b><button id="snd" style="min-height:44px;padding:4px 14px">🔊</button></div>
+<div class="card row" style="justify-content:space-between;position:relative;flex-wrap:nowrap"><b style="color:#818cf8">XGAMES <span style="color:#f43f5e">LUDO</span> <small style="color:#94a3b8">test build</small></b>
+  <span class="row" style="gap:6px;flex-wrap:nowrap"><button id="mic" class="blue hide" aria-label="Microphone" style="min-height:44px;min-width:44px;padding:0 12px">🎙️</button><button id="menuBtn" aria-label="Menu" aria-expanded="false" style="min-height:44px;width:44px;padding:0;font-size:24px;line-height:1">⋮</button></span>
+  <div id="menu" class="hide" role="menu">
+    <button id="mRules">📖 Rules</button>
+    <button id="mSnd">🔊 Sound: On</button>
+    <button id="mThm">🎨 Theme: Classic</button>
+    <hr><button id="mQuit" class="danger">⬅ Main menu</button>
+  </div>
+</div>
 
 <div id="setup" class="card">
   <div class="opt"><span>Opponents</span><button id="oN"></button></div>
   <div class="opt"><span>Bot difficulty</span><button id="oL"></button></div>
   <div class="opt"><span>Rules</span><button id="oM"></button></div>
   <button class="go" id="start" style="margin-top:14px">▶ Play</button>
-  <div class="how">Roll two dice. Tap a die or the total, then tap a glowing token. If only one move is possible, it plays automatically. A die showing 6 brings a token out and earns another throw. Land on an enemy token to send it home (safe stars are protected). When you use the total and a die's landing square holds an enemy, your token stops there and captures. Two of your tokens on a square make a block nobody can pass. Lock on the Stop: get two tokens onto your gold-ringed Stop square before anyone enters home.</div>
+  <div class="how">Tap ⋮ any time for Rules, sound and theme; the game keeps running. <span style="display:none">Roll two dice. Tap a die or the total, then tap a glowing token. If only one move is possible, it plays automatically. A die showing 6 brings a token out and earns another throw. Land on an enemy token to send it home (safe stars are protected). When you use the total and a die's landing square holds an enemy, your token stops there and captures. Two of your tokens on a square make a block nobody can pass. Lock on the Stop: get two tokens onto your gold-ringed Stop square before anyone enters home.</span></div>
 </div>
 
 <div id="game" class="card hide">
@@ -39,7 +67,37 @@ canvas{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 8px 
   <div class="cw"><canvas id="cv" width="720" height="720"></canvas><div id="dice"></div></div>
   <div id="msg"></div>
   <div class="row" id="ctl" style="justify-content:center"></div>
-  <div class="row" style="margin-top:8px"><button id="quit" style="flex:1">⬅ Menu</button><button id="thm" style="flex:1"></button></div>
+</div>
+
+<div id="cf" class="hide"><div class="cbx"><p id="cfMsg"></p><div class="row"><button id="cfNo">Stay</button><button id="cfYes" class="red">Leave</button></div></div></div>
+
+<div id="rules" class="hide" role="dialog" aria-label="Ludo rules">
+  <div class="rh"><span>📖 Ludo Rules</span><button id="rulesX">✕ Close</button></div>
+  <div id="rb">
+    <details open><summary>🎯 Goal &amp; dice</summary><ul>
+      <li>Get all <b>4 tokens home</b> first. No exact roll needed to finish.</li>
+      <li>Each turn you roll <b>two dice</b>. Use each die on any token, or tap <b>Total</b> to move one token both dice at once.</li>
+      <li>Split dice freely: with a 3 and a 2, token A can take the 3 and token B the 2.</li>
+      <li>A <b>6</b> on a die brings a token out of the yard (single die only, not the Total) and earns <b>another throw</b>.</li>
+    </ul></details>
+    <details><summary>⚔️ Captures</summary><ul>
+      <li>Land on an enemy token to <b>send it home</b>. Tokens on a ★ are safe.</li>
+      <li>A capture <b>stops that token dead</b>. It can't use the other die in the same roll; the leftover die can only move a <b>different</b> token.</li>
+      <li>Using the Total, your token stops at the first square where one die alone would land on an enemy, captures there, and the other die stays free for another token.</li>
+    </ul></details>
+    <details><summary>🧱 Blocks &amp; safe stars</summary><ul>
+      <li><b>Two of your tokens</b> on one square make a block. Nobody can pass it.</li>
+      <li>★ squares (including each start square) can't be captured on.</li>
+    </ul></details>
+    <details><summary>🔒 Lock on the Stop</summary><ul>
+      <li>Get <b>two tokens</b> onto your gold-ringed Stop square before anyone can enter home. Until you make the lock, home stays closed to you.</li>
+    </ul></details>
+    <details><summary>⚡ Auto-play</summary><ul>
+      <li>One token on the board and no 6 rolled: the <b>Total</b> plays itself.</li>
+      <li>Only one possible move: it plays itself too.</li>
+      <li>Otherwise pick a die or Total, then tap a glowing token.</li>
+    </ul></details>
+  </div>
 </div>
 
 <script>
@@ -100,7 +158,7 @@ function blockAt(k,s){const by={};at(k).forEach(([s2])=>{if(s2!==s)by[s2]=(by[s2
 const avail=d=>d<2?!G.used[d]:(!G.used[0]&&!G.used[1]);
 
 function tryMove(s,i,ch){
-  const c=G.seats[s],p=G.tok[s][i],v=ch.v;let np;
+  const c=G.seats[s],p=G.tok[s][i],v=ch.v;let np,via;
   if(p===0){if(ch.d>1||v!==6)return null;np=1}
   else{
     if(p===57)return null;
@@ -109,22 +167,25 @@ function tryMove(s,i,ch){
        die alone would land holds a capturable enemy, the token stops and hits it
        there instead of walking on with the leftover steps. Nearest hit wins. */
     if(ch.d===2){
-      const hits=[G.dice[0],G.dice[1]].map(x=>p+x).filter(q=>q<np&&q<=51&&!SAFE.has(tidx(c,q))&&at(tidx(c,q)).some(([s2])=>s2!==s));
-      if(hits.length)np=Math.min(...hits);
+      const hits=[0,1].map(x=>({x,q:p+G.dice[x]})).filter(o=>o.q<np&&o.q<=51&&!SAFE.has(tidx(c,o.q))&&at(tidx(c,o.q)).some(([s2])=>s2!==s));
+      if(hits.length){hits.sort((a,b)=>a.q-b.q);np=hits[0].q;via=hits[0].x}
     }
     if(S.mode==='lock'&&!G.unl[s]&&np>51)return null;
   }
   for(let q=p+1;q<=Math.min(np,51);q++)if(blockAt(tidx(c,q),s))return null;
   let cap=[];
   if(np<=51){const k=tidx(c,np);if(!SAFE.has(k))cap=at(k).filter(([s2])=>s2!==s)}
-  return{np,cap};
+  return{np,cap,via};
 }
 function moves(s){
   const o=[];
   for(let d=0;d<3;d++){
     if(!avail(d))continue;
     const ch={d,v:d<2?G.dice[d]:G.dice[0]+G.dice[1]};
-    G.tok[s].forEach((p,i)=>{const m=tryMove(s,i,ch);if(m)o.push({i,ch,...m})});
+    G.tok[s].forEach((p,i)=>{
+      if(G.lock&&G.lock.s===s&&G.lock.i===i)return;/* a token that just captured is done for this roll */
+      const m=tryMove(s,i,ch);if(m)o.push({i,ch,...m});
+    });
   }
   return o;
 }
@@ -132,18 +193,19 @@ function moves(s){
 function doMove(s,i,ch,cb){
   const m=tryMove(s,i,ch);if(!m)return;
   G.busy=true;G.mv={s,i};
-  if(ch.d===2)G.used=[1,1];else G.used[ch.d]=1;
+  if(ch.d===2){if(m.via!==undefined)G.used[m.via]=1;/* capture cut the Total short: only that die is spent */else G.used=[1,1]}
+  else G.used[ch.d]=1;
   let cur=G.tok[s][i];
   const hop=()=>{
     cur++;G.tok[s][i]=cur;sfx(520,.04);render();
-    if(cur<m.np)later(hop,150);else later(()=>land(s,m,cb),220);
+    if(cur<m.np)later(hop,150);else later(()=>land(s,i,m,cb),220);
   };
   hop();
 }
-function land(s,m,cb){
+function land(s,i,m,cb){
   G.mv=null;
   m.cap.forEach(([s2,j])=>G.tok[s2][j]=0);
-  if(m.cap.length){msg(who(s)+' sent a token home!');sfx(160,.2,'square')}
+  if(m.cap.length){G.lock={s,i};msg(who(s)+' sent a token home!');sfx(160,.2,'square')}
   if(S.mode==='lock'&&!G.unl[s]&&G.tok[s].filter(p=>p===51).length>=2){G.unl[s]=true;msg(who(s)+' made the lock. Home is open!');sfx(660,.25)}
   if(G.tok[s].every(p=>p===57))G.over=s;
   G.busy=false;cb();
@@ -152,7 +214,7 @@ function land(s,m,cb){
 function roll(){
   if(G.over>=0||G.dice)return;
   const r=()=>1+Math.floor(Math.random()*6);
-  G.dice=[r(),r()];G.used=[0,0];G.chip=-1;G.six=G.dice.includes(6);G.rn=(G.rn||0)+1;
+  G.dice=[r(),r()];G.used=[0,0];G.chip=-1;G.lock=null;G.six=G.dice.includes(6);G.rn=(G.rn||0)+1;
   G.busy=true;showDice();
   [0,90,180,270].forEach(t=>later(()=>sfx(220+t/3,.05,'square'),t));
   msg(who(G.turn)+' is rolling…');
@@ -162,7 +224,7 @@ function roll(){
 function endTurn(){
   if(G.over>=0)return;
   const again=G.six;
-  G.dice=null;G.chip=-1;G.used=[0,0];
+  G.dice=null;G.chip=-1;G.used=[0,0];G.lock=null;
   if(again)msg(who(G.turn)+' rolled a 6 and throws again');
   else G.turn=(G.turn+1)%G.seats.length;
   render();
@@ -174,6 +236,13 @@ function chipMsg(){
   const t=G.dice[0]+G.dice[1],b='Rolled '+G.dice[0]+' + '+G.dice[1]+' · ';
   msg(G.chip<0?b+'pick a die or Total':G.chip===2?'Using Total '+t+' (both dice) · tap a glowing token':'Using '+G.dice[G.chip]+' · tap a glowing token');
 }
+function pickAuto(ms){
+  const s=G.turn;
+  const active=G.tok[s].filter(p=>p>0&&p<57).length;
+  if(active===1&&!G.dice.includes(6)&&!G.used[0]&&!G.used[1]){const t=ms.find(m=>m.ch.d===2);if(t)return t}
+  const key=m=>m.ch.d+':'+G.tok[s][m.i];/* tokens sitting together (e.g. all in the yard) are one choice */
+  return new Set(ms.map(key)).size===1?ms[0]:null;
+}
 function after(){
   if(G.over>=0){sfx(523,.2);sfx(784,.3);render();return}
   const ms=moves(G.turn);
@@ -182,18 +251,17 @@ function after(){
     render();if(HOST)later(endTurn,1100);return;
   }
   if(!G.bot[G.turn]){
-    /* Only one legal move: skip the die/Total prompt and play it automatically. */
-    const key=m=>m.ch.d+':'+G.tok[G.turn][m.i];/* tokens sitting together (e.g. all in the yard) count as one choice */
-    if(new Set(ms.map(key)).size===1){
-      const m=ms[0],s=G.turn,k0=key(m);
-      G.chip=m.ch.d;G.busy=true;
-      msg(who(s)+' · only one move, playing it');
+    /* Auto-play: (a) one token on the board and no 6 -> take the Total;
+       (b) otherwise, if every legal move is the same choice, play it. */
+    const s=G.turn,pm=pickAuto(ms);
+    if(pm){
+      G.chip=pm.ch.d;G.busy=true;
+      msg(who(s)+(pm.ch.d===2?' · one token, using the Total':' · only one move, playing it'));
       render();
       if(HOST)later(()=>{
         G.busy=false;
-        const now=moves(s);
-        if(G.turn===s&&G.dice&&G.over<0&&now.length&&now.every(x=>key(x)===k0))doMove(s,now[0].i,now[0].ch,after);
-        else after();
+        const m2=G.turn===s&&G.dice&&G.over<0?pickAuto(moves(s)):null;
+        if(m2)doMove(s,m2.i,m2.ch,after);else after();
       },700);
       return;
     }
@@ -283,7 +351,7 @@ function draw(){
     if(o.s===ME&&legal.some(m=>m.i===o.i)){cx.save();cx.shadowColor='#fde047';cx.shadowBlur=14;cx.strokeStyle='#fde047';cx.lineWidth=5;cx.beginPath();cx.arc(x,y,U*.47,0,7);cx.stroke();cx.restore()}
   }));
 }
-function render(){ui();draw();sizeDice();$('thm').textContent='🎨 '+TH[S.th].n;if(NET&&HOST&&G)parent.postMessage({t:'state',g:snap()},'*')}
+function render(){ui();draw();sizeDice();syncMenu();if(NET&&HOST&&G)parent.postMessage({t:'state',g:snap()},'*')}
 
 $('cv').onclick=e=>{
   if(!G||G.turn!==ME||G.bot[ME]||!G.dice||G.over>=0||G.busy)return;
@@ -294,7 +362,7 @@ $('cv').onclick=e=>{
   if(best)act({k:'tap',i:best.i});
 };
 
-const snap=()=>({seats:G.seats,tok:G.tok,turn:G.turn,dice:G.dice,used:G.used,chip:G.chip,unl:G.unl,over:G.over,six:G.six,bot:G.bot,names:G.names,rn:G.rn,mv:G.mv,busy:G.busy,m:$('msg').textContent});
+const snap=()=>({seats:G.seats,tok:G.tok,turn:G.turn,dice:G.dice,used:G.used,chip:G.chip,unl:G.unl,over:G.over,six:G.six,bot:G.bot,names:G.names,rn:G.rn,mv:G.mv,busy:G.busy,lock:G.lock,m:$('msg').textContent});
 function act(a){if(NET&&!HOST)parent.postMessage({t:'act',a},'*');else handleAct(ME,a)}
 function handleAct(s,a){
   if(!G||s<0||s!==G.turn||G.bot[s]||G.busy||G.over>=0)return;
@@ -324,6 +392,7 @@ addEventListener('message',e=>{
   const m=e.data||{};
   if(m.t==='init'){netGame(m);$('game').classList.remove('hide');msg('');render();if(HOST&&G.bot[G.turn])later(roll,900)}
   else if(m.t==='state')loadState(m.g);
+  else if(m.t==='mic')setMic(!!m.on);
   else if(m.t==='act'&&HOST&&G)handleAct(SEATIDS.findIndex(x=>x.id===m.id),m.a);
   else if(m.t==='bot'&&HOST&&G){const s=SEATIDS.findIndex(x=>x.id===m.id);if(s<0)return;G.bot[s]=m.on;render();if(m.on&&G.turn===s&&!G.busy)later(G.dice?botMove:roll,700)}
 });
@@ -333,7 +402,36 @@ cyc('oN','n',[1,2,3],v=>v+(v>1?' bots':' bot'));
 cyc('oL','lv',['easy','medium','hard'],v=>v[0].toUpperCase()+v.slice(1));
 cyc('oM','mode',['regular','lock'],v=>v==='lock'?'Lock on the Stop':'Regular');
 $('start').onclick=()=>{$('setup').classList.add('hide');$('game').classList.remove('hide');newGame();msg('Your throw');render()};
-$('quit').onclick=()=>{if(EMB){parent.postMessage({t:'quit'},'*');return}G=null;$('game').classList.add('hide');$('setup').classList.remove('hide')};
-$('thm').onclick=()=>{S.th=(S.th+1)%3;render()};
-$('snd').onclick=()=>{S.snd=!S.snd;$('snd').textContent=S.snd?'🔊':'🔇'};
+const menu=$('menu'),menuOpen=()=>!menu.classList.contains('hide');
+const closeMenu=()=>{menu.classList.add('hide');$('menuBtn').setAttribute('aria-expanded','false')};
+function syncMenu(){
+  $('mSnd').textContent=S.snd?'🔊 Sound: On':'🔇 Sound: Off';
+  $('mThm').textContent='🎨 Theme: '+TH[S.th].n;
+  $('mQuit').classList.toggle('hide',!(EMB||G));
+}
+$('menuBtn').onclick=e=>{e.stopPropagation();if(menuOpen())closeMenu();else{syncMenu();menu.classList.remove('hide');$('menuBtn').setAttribute('aria-expanded','true')}};
+addEventListener('click',e=>{if(menuOpen()&&!menu.contains(e.target))closeMenu()});
+addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();$('rules').classList.add('hide');$('cf').classList.add('hide')}});
+$('mRules').onclick=()=>{closeMenu();$('rules').classList.toggle('hide')};
+$('rulesX').onclick=()=>$('rules').classList.add('hide');
+$('mSnd').onclick=()=>{S.snd=!S.snd;syncMenu()};
+$('mThm').onclick=()=>{S.th=(S.th+1)%3;if(G)render();else syncMenu()};
+
+function confirmBox(text,yes,fn){
+  $('cfMsg').textContent=text;$('cfYes').textContent=yes;$('cf').classList.remove('hide');
+  $('cfYes').onclick=()=>{$('cf').classList.add('hide');fn()};
+  $('cfNo').onclick=()=>$('cf').classList.add('hide');
+}
+function leaveGame(){
+  const go=()=>{if(EMB){parent.postMessage({t:'quit'},'*');return}G=null;$('game').classList.add('hide');$('setup').classList.remove('hide')};
+  if(!G||G.over>=0){go();return}/* nothing to lose in setup or after the game ends */
+  if(NET)confirmBox(HOST?'Send everyone back to the room? This match will end.':'Leave the room?',HOST?'Back to room':'Leave',go);
+  else confirmBox('Leave this game and go back to the main menu?','Leave',go);
+}
+$('mQuit').onclick=()=>{closeMenu();leaveGame()};
+
+/* voice: the mic lives in the voice-enabled room, so it only shows when net=1 */
+if(NET)$('mic').classList.remove('hide');
+$('mic').onclick=()=>parent.postMessage({t:'mic'},'*');
+function setMic(on){const b=$('mic');b.textContent=on?'🎙️ Live':'🎙️';b.className=on?'red':'blue'}
 </script></body></html>
