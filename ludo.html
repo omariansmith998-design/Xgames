@@ -31,7 +31,7 @@ canvas{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 8px 
   <div class="opt"><span>Bot difficulty</span><button id="oL"></button></div>
   <div class="opt"><span>Rules</span><button id="oM"></button></div>
   <button class="go" id="start" style="margin-top:14px">▶ Play</button>
-  <div class="how">Roll two dice. Tap a die or the total, then tap a glowing token. A die showing 6 brings a token out and earns another throw. Land on an enemy token to send it home (safe stars are protected). Two of your tokens on a square make a block nobody can pass. Lock on the Stop: get two tokens onto your gold-ringed Stop square before anyone enters home.</div>
+  <div class="how">Roll two dice. Tap a die or the total, then tap a glowing token. If only one move is possible, it plays automatically. A die showing 6 brings a token out and earns another throw. Land on an enemy token to send it home (safe stars are protected). When you use the total and a die's landing square holds an enemy, your token stops there and captures. Two of your tokens on a square make a block nobody can pass. Lock on the Stop: get two tokens onto your gold-ringed Stop square before anyone enters home.</div>
 </div>
 
 <div id="game" class="card hide">
@@ -105,6 +105,13 @@ function tryMove(s,i,ch){
   else{
     if(p===57)return null;
     np=Math.min(57,p+v);
+    /* Capture stops the walk: when using the Total, if the square where either
+       die alone would land holds a capturable enemy, the token stops and hits it
+       there instead of walking on with the leftover steps. Nearest hit wins. */
+    if(ch.d===2){
+      const hits=[G.dice[0],G.dice[1]].map(x=>p+x).filter(q=>q<np&&q<=51&&!SAFE.has(tidx(c,q))&&at(tidx(c,q)).some(([s2])=>s2!==s));
+      if(hits.length)np=Math.min(...hits);
+    }
     if(S.mode==='lock'&&!G.unl[s]&&np>51)return null;
   }
   for(let q=p+1;q<=Math.min(np,51);q++)if(blockAt(tidx(c,q),s))return null;
@@ -175,6 +182,21 @@ function after(){
     render();if(HOST)later(endTurn,1100);return;
   }
   if(!G.bot[G.turn]){
+    /* Only one legal move: skip the die/Total prompt and play it automatically. */
+    const key=m=>m.ch.d+':'+G.tok[G.turn][m.i];/* tokens sitting together (e.g. all in the yard) count as one choice */
+    if(new Set(ms.map(key)).size===1){
+      const m=ms[0],s=G.turn,k0=key(m);
+      G.chip=m.ch.d;G.busy=true;
+      msg(who(s)+' · only one move, playing it');
+      render();
+      if(HOST)later(()=>{
+        G.busy=false;
+        const now=moves(s);
+        if(G.turn===s&&G.dice&&G.over<0&&now.length&&now.every(x=>key(x)===k0))doMove(s,now[0].i,now[0].ch,after);
+        else after();
+      },700);
+      return;
+    }
     const ds=[...new Set(ms.map(m=>m.ch.d))];
     if(!ds.includes(G.chip))G.chip=ds.length===1?ds[0]:-1;
     chipMsg();render();
